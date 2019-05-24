@@ -1,4 +1,0 @@
-enum PaymentTypes {
-	CHECK
-	CREDIT
-}
