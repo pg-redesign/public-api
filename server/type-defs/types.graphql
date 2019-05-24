@@ -1,0 +1,35 @@
+type Course {
+	id: ID!
+	price: Int!
+	location: Location!
+	students(paid: Boolean): [Student!]!
+	name(short: Boolean = false): String!
+	payments(type: PaymentTypes, paid: Boolean): [Payment!]!
+}
+
+type Student {
+	id: ID!
+	name: String!
+	email: EmailAddress!
+	company: String!
+	location: Location!
+	courses: [Course!]!
+	payments: [Payment!]!
+}
+
+type Location {
+	mapURL: URL
+	city: String!
+	state: String!
+	country: String!
+}
+
+type Payment {
+	id: ID!
+	amount: Int!
+	course: Course!
+	student: Student!
+	type: PaymentTypes!
+	invoiceDate: DateTime!
+	paymentDate: DateTime
+}
