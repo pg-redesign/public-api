@@ -1,5 +1,5 @@
 {
-  "name": "apollo-server-boilerplate",
+  "name": "pg-public-api",
   "version": "1.0.0",
   "description": "fully wirted apollo server boilerplate",
   "main": "src",
@@ -11,7 +11,7 @@
     "test": "npm run test:lint && npm run test:jest"
   },
   "author": "vampiire",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "dependencies": {
     "@okgrow/graphql-scalars": "^0.4.5",
     "@vampiire/node-logger": "^0.1.4",
@@ -52,5 +52,13 @@
   },
   "nodemonConfig": {
     "ext": "graphql, js"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pg-redesign/public-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pg-redesign/public-api/issues"
+  },
+  "homepage": "https://github.com/pg-redesign/public-api#readme"
 }
