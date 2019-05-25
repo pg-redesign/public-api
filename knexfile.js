@@ -4,6 +4,7 @@ const config = {
   migrations: {
     tableName: "knex_migrations",
     directory: "./src/db/migrations",
+    // stub: "./migration.stub", // custom migration template
   },
 
   connection: {
@@ -13,7 +14,10 @@ const config = {
     password: process.env.DB_PASSWORD,
   },
 
-  pool: {},
+  pool: {
+    // min: 2,
+    // max: 10,
+  },
 };
 
 module.exports = {
