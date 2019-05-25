@@ -5,6 +5,7 @@ exports.up = function (knex) {
     table.increments();
     table.string("first_name", 24);
     table.string("last_name", 24);
+    table.string("email", 64);
     table.string("company", 24);
     table
       .jsonb("location")
