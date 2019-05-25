@@ -1,3 +1,4 @@
 type Query {
-	getCourses(upcoming: Boolean = true): [Course!]!
+  getFormSchema(form: FormTypes!): JSON!
+  getCourses(upcoming: Boolean = true): [Course!]!
 }
