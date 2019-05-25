@@ -1,25 +1,24 @@
 const Model = require("../connection");
 
-class Course extends Model {
+class Student extends Model {
   static get tableName() {
-    return "courses";
+    return "students";
   }
 
   static get jsonSchema() {
     return {
       type: "object",
-      required: ["name", "price", "start_date", "end_date", "location"],
+      required: ["first_name", "last_name", "email", "company", "location"],
       properties: {
-        name: { type: "string" },
-        price: { type: "integer" },
-        start_date: { type: "string", format: "date-time" },
-        end_date: { type: "string", format: "date-time" },
+        first_name: { type: "string" },
+        last_name: { type: "string" },
+        email: { type: "string", format: "email" },
+        company: { type: "string" },
         location: {
-          required: ["city", "state", "country", "map_url"],
+          required: ["city", "state", "country"],
           city: { type: "string" },
           state: { type: "string" },
           country: { type: "string" },
-          map_url: { type: "string" },
         },
       },
     };
@@ -30,13 +29,13 @@ class Course extends Model {
       students: {
         relation: Model.ManyToManyRelation,
         /* eslint global-require:0 */
-        modelClass: require("./student"),
+        modelClass: require("./course"),
         join: {
-          from: "courses.id",
-          to: "students.id",
+          to: "courses.id",
+          from: "students.id",
           through: {
-            from: "courses.id",
-            to: "payments.course_id",
+            from: "students.id",
+            to: "payments.student_id",
             extra: ["type", "invoice_date", "payment_date"],
           },
         },
@@ -45,4 +44,4 @@ class Course extends Model {
   }
 }
 
-module.exports = Course;
+module.exports = Student;
