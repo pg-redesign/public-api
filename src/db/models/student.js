@@ -1,6 +1,6 @@
-const Model = require("../connection");
+const TimestampsBase = require("./timestamps-base");
 
-class Student extends Model {
+class Student extends TimestampsBase {
   static get tableName() {
     return "students";
   }
