@@ -1,4 +1,9 @@
 enum PaymentTypes {
-	CHECK
-	CREDIT
+  CHECK
+  CREDIT
+}
+
+enum FormTypes {
+  REGISTRATION
+  STRIPE_PAYMENT
 }
