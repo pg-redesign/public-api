@@ -1,3 +1,5 @@
+const Model = require("../connection");
+const { paymentSchema } = require("../schemas");
 const TimestampsBase = require("./timestamps-base");
 
 class Payment extends TimestampsBase {
@@ -6,18 +8,7 @@ class Payment extends TimestampsBase {
   }
 
   static get jsonSchema() {
-    return {
-      type: "object",
-      required: ["type", "amount", "invoice_date", "course_id", "student_id"],
-      properties: {
-        amount: { type: "integer" },
-        course_id: { type: "integer" },
-        student_id: { type: "integer" },
-        type: { enum: ["credit", "check"] },
-        invoice_date: { type: "string", format: "date-time" },
-        payment_date: { type: "string", format: "date-time" },
-      },
-    };
+    return paymentSchema;
   }
 
   static get relationMappings() {

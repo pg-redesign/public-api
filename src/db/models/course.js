@@ -1,3 +1,5 @@
+const Model = require("../connection");
+const { courseSchema } = require("../schemas");
 const TimestampsBase = require("./timestamps-base");
 
 class Course extends TimestampsBase {
@@ -6,23 +8,7 @@ class Course extends TimestampsBase {
   }
 
   static get jsonSchema() {
-    return {
-      type: "object",
-      required: ["name", "price", "start_date", "end_date", "location"],
-      properties: {
-        name: { type: "string" },
-        price: { type: "integer" },
-        start_date: { type: "string", format: "date-time" },
-        end_date: { type: "string", format: "date-time" },
-        location: {
-          required: ["city", "state", "country", "map_url"],
-          city: { type: "string" },
-          state: { type: "string" },
-          country: { type: "string" },
-          map_url: { type: "string" },
-        },
-      },
-    };
+    return courseSchema;
   }
 
   static get relationMappings() {
