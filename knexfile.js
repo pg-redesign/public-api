@@ -21,6 +21,7 @@ const config = {
 };
 
 module.exports = {
+  test: config,
   staging: config,
   production: config,
   development: config,

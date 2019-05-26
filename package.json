@@ -7,8 +7,8 @@
     "start": "node src",
     "dev": "env $(cat .env) nodemon",
     "test:lint": "eslint .",
-    "test:jest": "jest",
-    "test": "npm run test:lint && npm run test:jest"
+    "jest": "env $(cat .test.env) jest",
+    "test": "npm run test:lint && npm run jest"
   },
   "author": "vampiire",
   "license": "UNLICENSED",
