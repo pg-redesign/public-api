@@ -1,14 +1,17 @@
 {
   "name": "pg-public-api",
   "version": "1.0.0",
-  "description": "fully wirted apollo server boilerplate",
+  "description": "pg redesign public GraphQL API",
   "main": "src",
   "scripts": {
     "start": "node src",
-    "dev": "env $(cat .env) nodemon",
-    "test:lint": "eslint .",
-    "jest": "env $(cat .test.env) jest",
-    "test": "npm run test:lint && npm run jest"
+    "dev": "npm run env:dev nodemon",
+    "test": "npm run lint && npm run jest",
+    "env:dev": "env $(< .env)",
+    "env:test": "env $(< .test.env)",
+    "lint": "eslint .",
+    "jest": "npm run env:test jest",
+    "jest:verbose": "npm run jest -- --verbose"
   },
   "author": "vampiire",
   "license": "UNLICENSED",
