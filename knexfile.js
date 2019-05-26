@@ -21,7 +21,7 @@ const config = {
 };
 
 module.exports = {
-  test: config,
+  test: { ...config, seeds: { directory: "./src/db/test-seeds" } },
   staging: config,
   production: config,
   development: config,
