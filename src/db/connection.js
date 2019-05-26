@@ -1,5 +1,5 @@
 const { Model } = require("objection");
-const knex = require("knex")({
+const connection = require("knex")({
   client: "pg",
   connection: {
     host: process.env.DB_HOST,
@@ -9,9 +9,9 @@ const knex = require("knex")({
   },
 });
 
-Model.knex(knex);
+Model.knex(connection);
 
 module.exports = {
-  knex,
+  connection,
   Model,
 };
