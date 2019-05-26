@@ -11,4 +11,7 @@ const knex = require("knex")({
 
 Model.knex(knex);
 
-module.exports = Model;
+module.exports = {
+  knex,
+  Model,
+};
