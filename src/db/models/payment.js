@@ -1,5 +1,5 @@
-const Model = require("../connection");
-const { paymentSchema } = require("../schemas");
+const { Model } = require("../connection");
+const schemas = require("../../schemas");
 const TimestampsBase = require("./timestamps-base");
 
 class Payment extends TimestampsBase {
@@ -8,7 +8,7 @@ class Payment extends TimestampsBase {
   }
 
   static get jsonSchema() {
-    return paymentSchema;
+    return schemas.types.payment;
   }
 
   static get relationMappings() {

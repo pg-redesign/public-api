@@ -1,5 +1,5 @@
-const Model = require("../connection");
-const { studentSchema } = require("../schemas");
+const { Model } = require("../connection");
+const schemas = require("../../schemas");
 const TimestampsBase = require("./timestamps-base");
 
 class Student extends TimestampsBase {
@@ -8,7 +8,7 @@ class Student extends TimestampsBase {
   }
 
   static get jsonSchema() {
-    return studentSchema;
+    return schemas.types.student;
   }
 
   static get relationMappings() {

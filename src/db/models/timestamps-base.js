@@ -1,4 +1,4 @@
-const Model = require("../connection");
+const { Model } = require("../connection");
 
 /**
  * Base class that sets created_at and updated_at
@@ -9,11 +9,11 @@ const Model = require("../connection");
  */
 class TimestampsBase extends Model {
   $beforeInsert() {
-    this.created_at = new Date().toUTCString();
+    this.created_at = new Date().toISOString();
   }
 
   $beforeUpdate() {
-    this.updated_at = new Date().toUTCString();
+    this.updated_at = new Date().toISOString();
   }
 }
 
