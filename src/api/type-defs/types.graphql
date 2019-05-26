@@ -16,12 +16,12 @@ type Course {
   """
   location: Location!
   """
-  Course date range
-  - default: "Month DD-DD, YYYY"
+  Course date range in ENGLISH format "Month DD-DD, YYYY"
+  - portuguese format: "DD a DD de month de YYYY"
   - start: only start date as UTC Date string
   - end: only end date as UTC Date string
   """
-  date(start: Boolean, end: Boolean): String!
+  date(start: Boolean, end: Boolean, language: LanguageTypes = ENGLISH): String!
   """
   List of course description items
   """
