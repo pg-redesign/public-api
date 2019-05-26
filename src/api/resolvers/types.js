@@ -1,5 +1,11 @@
 module.exports = {
   Course: {
+    name: (course, args, context) => {
+      const { courseNames } = context.utils.constants;
+
+      return args.short ? course.name : courseNames[course.name];
+    },
+
     date: (course, args, { utils: { format } }) => {
       const { start, end, language } = args;
       const { startDate, endDate } = course;
@@ -12,5 +18,7 @@ module.exports = {
       // if there are args give precedence to start
       return start ? startDate.toUTCString() : endDate.toUTCString();
     },
+
+    // TODO: description (where to store?)
   },
 };

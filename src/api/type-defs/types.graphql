@@ -2,7 +2,7 @@ type Course {
   id: ID!
   """
   Full Course name
-  - short: single word Course name
+  - short: shorthand internal Course name
   """
   name(short: Boolean = false): String!
   """

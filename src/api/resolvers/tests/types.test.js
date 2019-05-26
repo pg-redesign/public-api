@@ -16,20 +16,12 @@ describe("Course Type resolvers", () => {
 
     test("default: returns english date range format", () => {
       Course.date(course, args, context);
-      expect(courseDateRange).toHaveBeenCalledWith(
-        course.startDate,
-        course.endDate,
-        args.language,
-      );
+      expect(courseDateRange).toHaveBeenCalledWith(course.startDate, course.endDate, args.language);
     });
 
     test("args.language = portuguese: returns portuguese date range format", () => {
       Course.date(course, { language: "portuguese" }, context);
-      expect(courseDateRange).toHaveBeenCalledWith(
-        course.startDate,
-        course.endDate,
-        "portuguese",
-      );
+      expect(courseDateRange).toHaveBeenCalledWith(course.startDate, course.endDate, "portuguese");
     });
 
     test("args.start = true: returns start date as UTC string", () => {
@@ -44,9 +36,24 @@ describe("Course Type resolvers", () => {
 
     test("args.start and args.end: returns start date as UTC string", () => {
       const expected = startDate.toUTCString();
-      expect(Course.date(course, { start: true, end: true }, context)).toBe(
-        expected,
-      );
+      expect(Course.date(course, { start: true, end: true }, context)).toBe(expected);
+    });
+  });
+
+  describe("Course.name", () => {
+    const course = { name: "pollution" };
+    const courseNames = {
+      pollution: "pollution course name",
+      remediation: "remediation course name",
+    };
+    const context = { utils: { constants: { courseNames } } };
+
+    test("default: returns formatted full course name", () => {
+      expect(Course.name(course, {}, context)).toBe(courseNames.pollution);
+    });
+
+    test("args.short = true: returns shorthand internal name", () => {
+      expect(Course.name(course, { short: true }, context)).toBe(course.name);
     });
   });
 });
