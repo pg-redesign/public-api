@@ -1,4 +1,5 @@
 module.exports = {
+  /* eslint max-len:0 */
   /**
    * node -e 'console.log(JSON.stringify(Array(12).fill().reduce((months, _, num) => ({...months,[num]:{english:"", portuguese:""}}), {})))' | python -m json.tool
    */
