@@ -1,14 +1,16 @@
+const { enums } = require("../../schemas");
+
 module.exports = {
   PaymentTypes: {
-    CHECK: "check",
-    CREDIT: "credit",
+    CHECK: enums.PaymentTypes.check,
+    CREDIT: enums.PaymentTypes.credit,
   },
   FormTypes: {
-    REGISTRATION: "registration",
-    STRIPE_PAYMENT: "stripe_payment",
+    REGISTRATION: enums.FormTypes.registration,
+    STRIPE_PAYMENT: enums.FormTypes.stripePayment,
   },
   LanguageTypes: {
-    ENGLISH: "english",
-    PORTUGUESE: "portuguese",
+    ENGLISH: enums.LanguageTypes.english,
+    PORTUGUESE: enums.LanguageTypes.portuguese,
   },
 };
