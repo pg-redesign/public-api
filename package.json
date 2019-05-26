@@ -24,21 +24,28 @@
     "pg": "^7.11.0"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.13",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^4.3.0",
     "eslint-plugin-import": "^2.17.2",
+    "eslint-plugin-jest": "^22.6.4",
     "jest": "^24.8.0",
     "nodemon": "^1.19.0"
   },
   "eslintConfig": {
     "env": {
       "es6": true,
-      "commonjs": true
+      "commonjs": true,
+      "jest/globals": true
     },
     "extends": [
       "prettier",
-      "airbnb-base"
+      "airbnb-base",
+      "plugin:jest/recommended"
+    ],
+    "plugins": [
+      "jest"
     ],
     "globals": {
       "Atomics": "readonly",
