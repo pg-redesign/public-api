@@ -1,9 +1,6 @@
 language: node_js
 cache: npm
-node_js:
-  - "10.15.3"
-  - "lts/*"
-  - "node"
+node_js: "10.15.3"
 services: postgresql
 before_install: npm i
 jobs:
