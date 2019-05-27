@@ -7,7 +7,7 @@
     "start": "node src",
     "dev": "npm run env:dev -- nodemon",
     "test": "eslint . && jest",
-    "test:local": "npm run env:test -- jest",
+    "test:local": "npm run env:test -- npm run knex:seed && npm run env:test jest",
     "test:travis": "npm test -- --coverage --coverageReporters=text-lcov | coveralls",
     "knex:migrate": "knex migrate:latest",
     "knex:seed": "knex seed:run",
