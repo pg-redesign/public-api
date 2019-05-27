@@ -1,7 +1,9 @@
-console.log(process.env.NODE_ENV);
+const { Course } = require("../models");
+
 exports.seed = knex => knex("courses")
   .del()
-  .then(() => knex("courses").insert(
+// use Course model to ensure consistency with schema
+  .then(() => Course.query().insert(
     JSON.parse(
       JSON.stringify([
         {
