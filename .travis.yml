@@ -1,8 +1,10 @@
 language: node_js
 cache: npm
 node_js: "10.15.3"
-services: postgresql
 before_install: npm i
+services: postgresql
+addons:
+  postgresql: "11"
 jobs:
   include:
     - stage: test
