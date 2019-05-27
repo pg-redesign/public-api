@@ -8,7 +8,7 @@ enum FormTypes {
   STRIPE_PAYMENT
 }
 
-enum LanguageType {
+enum LanguageTypes {
   ENGLISH
   PORTUGUESE
 }
