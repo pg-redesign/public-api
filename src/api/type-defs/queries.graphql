@@ -1,4 +1,13 @@
 type Query {
+  """
+  Retrieve Form validation schemas
+  """
   getFormSchema(form: FormTypes!): JSON!
+
+  """
+  Retrieve Courses data
+  - sorted by start date descending
+  - upcoming: returns the two
+  """
   getCourses(upcoming: Boolean = true): [Course!]!
 }
