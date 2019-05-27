@@ -4,11 +4,17 @@ node_js: "10.15.3"
 before_install:
   - npm i
 before_script:
+  - sudo apt uninstall postgres
+  -
   - export NODE_ENV=test DB_NAME=test
   - psql -c "create database $DB_NAME;" -U postgres
 services: postgresql
 addons:
-  postgresql: "9.4"
+  postgresql: "11.3"
+apt:
+  packages:
+    - postgresql-11
+    - postgresql-client-11
 jobs:
   include:
     - stage: test
