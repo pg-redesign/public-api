@@ -10,7 +10,7 @@ jobs:
         - NODE_ENV=test
         - DB_NAME=test
       script:
-        - psql -c 'create database ${$DB_NAME};' -U postgres
+        - psql -c 'create database ${DB_NAME};' -U postgres
         - npm run knex:migrate
         - npm run knex:seed
         - npm run test:travis
