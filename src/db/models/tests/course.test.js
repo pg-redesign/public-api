@@ -1,3 +1,5 @@
+const { NotFoundError, ValidationError } = require("objection");
+
 const Course = require("../course");
 const { connection } = require("../../connection");
 
@@ -45,5 +47,36 @@ describe("Course methods", () => {
     test(`courses are sorted by DEFAULT_SORT: [${Course.DEFAULT_SORT.toString()}]`, () => expect(results).toEqual(results, Course.DEFAULT_SORT));
 
     test("filters courses older than the current date", () => expect(results.every(course => course.startDate >= new Date())).toBe(true));
+  });
+
+  describe("static validateCourseID", () => {
+    let pastCourse;
+    let upcomingCourse;
+    beforeAll(async () => {
+      const date = new Date();
+      [pastCourse, upcomingCourse] = await Promise.all(
+        ["<", ">"].map(equalityClause => Course.query().findOne("start_date", equalityClause, date)),
+      );
+    });
+
+    test("course is valid for registration: void", () => {
+      Course.validateCourseID(upcomingCourse.id).catch(error => expect(error).not.toBeDefined());
+    });
+
+    test("course not found: throws NotFoundError", async () => {
+      try {
+        await Course.validateCourseID(0);
+      } catch (error) {
+        expect(error instanceof NotFoundError).toBe(true);
+      }
+    });
+
+    test("course is older than current date: throws ValidationError", async () => {
+      try {
+        await Course.validateCourseID(pastCourse.id);
+      } catch (error) {
+        expect(error instanceof ValidationError).toBe(true);
+      }
+    });
   });
 });
