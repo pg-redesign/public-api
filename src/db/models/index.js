@@ -1,9 +1,9 @@
-const course = require("./course");
-const student = require("./student");
-const payment = require("./payment");
+const Course = require("./course");
+const Student = require("./student");
+const Payment = require("./payment");
 
 module.exports = {
-  course,
-  student,
-  payment,
+  Course,
+  Student,
+  Payment,
 };
