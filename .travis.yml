@@ -1,0 +1,19 @@
+language: node_js
+cache: npm
+node_js:
+  - "10.15.3"
+  - "lts/*"
+  - "node"
+services: postgresql
+before_install: npm i
+jobs:
+  include:
+    - stage: test
+      env:
+        - NODE_ENV=test
+        - DB_NAME=test
+      script:
+        - psql -c 'create database ${$DB_NAME};' -U postgres
+        - npm run knex:migrate
+        - npm run knex:seed
+        - npm run test:travis
