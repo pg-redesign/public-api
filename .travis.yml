@@ -3,6 +3,10 @@ language: node_js
 cache: npm
 node_js: "10.15.3"
 before_install:
+  - sudo apt-get --yes remove postgresql\*
+  - sudo apt-get install -y postgresql-11 postgresql-client-11
+  - sudo cp /etc/postgresql/{9.6,11}/main/pg_hba.conf
+  - sudo service postgresql restart 11
   - npm i
 before_script:
   - export NODE_ENV=test DB_NAME=test
@@ -10,10 +14,6 @@ before_script:
 services: postgresql
 addons:
   postgresql: "11.3"
-apt:
-  packages:
-    - postgresql-11
-    - postgresql-client-11
 jobs:
   include:
     - stage: test
