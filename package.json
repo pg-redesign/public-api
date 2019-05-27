@@ -5,13 +5,14 @@
   "main": "src",
   "scripts": {
     "start": "node src",
-    "dev": "npm run env:dev nodemon",
-    "test": "npm run lint && npm run jest",
+    "dev": "npm run env:dev -- nodemon",
+    "test": "eslint . && jest",
+    "test:local": "npm run env:test -- jest",
+    "test:travis": "npm test -- --coverage --coverageReporters=text-lcov | coveralls",
+    "knex:migrate": "knex migrate:latest",
+    "knex:seed": "knex seed:run",
     "env:dev": "env $(< .env)",
-    "env:test": "env $(< .test.env)",
-    "lint": "eslint .",
-    "jest": "npm run env:test jest",
-    "jest:verbose": "npm run jest -- --verbose"
+    "env:test": "env $(< .test.env)"
   },
   "author": "vampiire",
   "license": "UNLICENSED",
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "@types/jest": "^24.0.13",
+    "coveralls": "^3.0.3",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^4.3.0",
