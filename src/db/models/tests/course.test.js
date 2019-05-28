@@ -1,6 +1,8 @@
 const { NotFoundError, ValidationError } = require("objection");
 
 const Course = require("../course");
+const Student = require("../student");
+const { enums } = require("../../../schemas");
 const { connection } = require("../../connection");
 
 // move to test utils?
@@ -49,7 +51,7 @@ describe("Course methods", () => {
     test("filters courses older than the current date", () => expect(results.every(course => course.startDate >= new Date())).toBe(true));
   });
 
-  describe("static validateCourseID", () => {
+  describe("static validateCourseId", () => {
     let pastCourse;
     let upcomingCourse;
     beforeAll(async () => {
@@ -59,13 +61,14 @@ describe("Course methods", () => {
       );
     });
 
-    test("course is valid for registration: void", () => {
-      Course.validateCourseID(upcomingCourse.id).catch(error => expect(error).not.toBeDefined());
+    test("course is valid for registration: void", async () => {
+      const output = await Course.validateCourseId(upcomingCourse.id);
+      expect(output.id).toBe(upcomingCourse.id);
     });
 
     test("course not found: throws NotFoundError", async () => {
       try {
-        await Course.validateCourseID(0);
+        await Course.validateCourseId(0);
       } catch (error) {
         expect(error instanceof NotFoundError).toBe(true);
       }
@@ -73,10 +76,44 @@ describe("Course methods", () => {
 
     test("course is older than current date: throws ValidationError", async () => {
       try {
-        await Course.validateCourseID(pastCourse.id);
+        await Course.validateCourseId(pastCourse.id);
       } catch (error) {
         expect(error instanceof ValidationError).toBe(true);
       }
+    });
+  });
+
+  describe("static registerStudent", () => {
+    let course;
+    let student;
+    let registrationData;
+    beforeAll(async () => {
+      course = await Course.query().first();
+
+      registrationData = {
+        courseId: course.id,
+        firstName: "Vamp",
+        lastName: "Hallow",
+        email: "vamp@hallow.com",
+        company: "Vampiire Codes",
+        city: "Salem",
+        state: "MA",
+        country: "USA",
+        paymentType: enums.PaymentTypes.credit,
+      };
+    });
+
+    afterAll(() => Student.query().del());
+
+    test("creates and returns a student", async () => {
+      student = await Course.registerStudent(registrationData);
+      expect(student.constructor.name).toBe("Student");
+    });
+
+    test("creates a payment association between the student and the course", async () => {
+      await course.$loadRelated({ payments: true, students: true });
+      expect(course.payments[0].courseId).toBe(course.id);
+      expect(course.students[0].id).toBe(student.id);
     });
   });
 });
