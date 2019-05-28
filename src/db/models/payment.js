@@ -14,7 +14,7 @@ class Payment extends TimestampsBase {
   static get relationMappings() {
     return {
       course: {
-        modelClass: "Course",
+        modelClass: "course",
         relation: Model.BelongsToOneRelation,
         join: {
           from: "payments.course_id",
@@ -22,7 +22,7 @@ class Payment extends TimestampsBase {
         },
       },
       student: {
-        modelClass: "Student",
+        modelClass: "student",
         relation: Model.BelongsToOneRelation,
         join: {
           from: "payments.student_id",

@@ -19,7 +19,7 @@ class Course extends TimestampsBase {
   static get relationMappings() {
     return {
       payments: {
-        modelClass: "Payment",
+        modelClass: "payment",
         relation: Model.HasManyRelation,
         join: {
           from: "courses.id",
@@ -27,7 +27,7 @@ class Course extends TimestampsBase {
         },
       },
       students: {
-        modelClass: "Student",
+        modelClass: "student",
         relation: Model.ManyToManyRelation,
         join: {
           from: "courses.id",
@@ -80,7 +80,6 @@ class Course extends TimestampsBase {
     return course;
   }
 
-  // TODO: update tests
   static async registerStudent(registrationData) {
     const {
       city,

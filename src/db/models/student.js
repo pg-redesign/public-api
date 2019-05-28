@@ -14,7 +14,7 @@ class Student extends TimestampsBase {
   static get relationMappings() {
     return {
       payments: {
-        modelClass: "Payment",
+        modelClass: "payment",
         relation: Model.HasManyRelation,
         join: {
           from: "students.id",
@@ -22,7 +22,7 @@ class Student extends TimestampsBase {
         },
       },
       courses: {
-        modelClass: "Course",
+        modelClass: "course",
         relation: Model.ManyToManyRelation,
         join: {
           from: "students.id",
