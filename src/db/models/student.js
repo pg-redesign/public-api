@@ -13,17 +13,23 @@ class Student extends TimestampsBase {
 
   static get relationMappings() {
     return {
-      students: {
-        relation: Model.ManyToManyRelation,
-        /* eslint global-require:0 */
-        modelClass: require("./course"),
+      payments: {
+        modelClass: "Payment",
+        relation: Model.HasManyRelation,
         join: {
-          to: "courses.id",
           from: "students.id",
+          to: "payments.student_id",
+        },
+      },
+      courses: {
+        modelClass: "Course",
+        relation: Model.ManyToManyRelation,
+        join: {
+          from: "students.id",
+          to: "courses.id",
           through: {
-            from: "students.id",
-            to: "payments.student_id",
-            extra: ["type", "invoice_date", "payment_date"],
+            from: "payments.student_id",
+            to: "payments.course_id",
           },
         },
       },
