@@ -1,13 +1,22 @@
+"""
+Payment types for Course registration
+"""
 enum PaymentTypes {
   CHECK
   CREDIT
 }
 
+"""
+Form schema types for client-side validation
+"""
 enum FormTypes {
   REGISTRATION
   STRIPE_PAYMENT
 }
 
+"""
+Language options for translated outputs
+"""
 enum LanguageTypes {
   ENGLISH
   PORTUGUESE

@@ -1,6 +1,7 @@
 type Query {
   """
   Retrieve Form validation schemas
+  - JSON schemas used for client-side form creation and validation
   """
   getFormSchema(form: FormTypes!): JSON!
 
