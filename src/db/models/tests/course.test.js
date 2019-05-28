@@ -23,6 +23,7 @@ describe("Course methods", () => {
   // destroy connection
   afterAll(() => connection.destroy());
 
+  // -- STATIC METHODS -- //
   describe("static getAll", () => {
     let results;
     beforeAll(async () => {
@@ -85,22 +86,35 @@ describe("Course methods", () => {
     });
   });
 
-  describe("static registerStudent", () => {
-    let course;
-    let student;
-    let registrationData;
-    beforeAll(async () => {
-      course = await Course.query().first();
+  // TODO: complete tests
+  describe("static registerStudent", () => {});
 
-      registrationData = {
-        courseId: course.id,
-        firstName: "Vamp",
-        lastName: "Hallow",
-        email: "vamp@hallow.com",
-        company: "Vampiire Codes",
+  // -- INSTANCE METHODS -- //
+
+  describe("instance registerNewStudent", () => {
+    const studentData = {
+      firstName: "Vamp",
+      lastName: "Hallow",
+      email: "vamp@hallow.com",
+      company: "Vampiire Codes",
+      location: {
         city: "Salem",
         state: "MA",
         country: "USA",
+      },
+    };
+
+    let course;
+    let student;
+    let paymentData;
+    beforeAll(async () => {
+      course = await Course.query()
+        .where("start_date", ">", new Date())
+        .first();
+
+      paymentData = {
+        amount: course.price,
+        invoiceDate: new Date().toISOString(),
         paymentType: enums.PaymentTypes.credit,
       };
     });
@@ -108,14 +122,123 @@ describe("Course methods", () => {
     afterAll(() => Student.query().del());
 
     test("creates and returns a student", async () => {
-      student = await Course.registerStudent(registrationData);
+      student = await course.registerNewStudent(studentData, paymentData);
       expect(student.constructor.name).toBe("Student");
     });
 
     test("creates a payment association between the student and the course", async () => {
       await course.$loadRelated({ payments: true, students: true });
-      expect(course.payments[0].courseId).toBe(course.id);
-      expect(course.students[0].id).toBe(student.id);
+      expect(course.payments.length).toBe(1);
+      expect(course.payments[0].studentId).toBe(student.id);
+    });
+  });
+
+  describe("instance hasStudent", () => {
+    const studentData = {
+      firstName: "Vamp",
+      lastName: "Hallow",
+      email: "vamp@hallow.com",
+      company: "Vampiire Codes",
+      location: {
+        city: "Salem",
+        state: "MA",
+        country: "USA",
+      },
+    };
+
+    let course;
+    let paymentData;
+    beforeAll(async () => {
+      course = await Course.query()
+        .where("start_date", ">", new Date())
+        .first();
+
+      paymentData = {
+        amount: course.price,
+        invoiceDate: new Date().toISOString(),
+        paymentType: enums.PaymentTypes.credit,
+      };
+    });
+
+    afterAll(() => Student.query().del());
+
+    test("student is not registered for course: returns false", async () => {
+      const result = await course.hasStudent(1);
+      expect(result).toBe(false);
+    });
+    test("student is registered for course: returns true", async () => {
+      const student = await course.registerNewStudent(studentData, paymentData);
+      expect(await course.hasStudent(student.id)).toBe(true);
+    });
+  });
+
+  describe("instance registerExistingStudent", () => {
+    const initialStudentData = {
+      firstName: "Vamp",
+      lastName: "Hallow",
+      email: "vamp@hallow.com",
+      company: "Vampiire Codes",
+      location: {
+        city: "Tampa",
+        state: "FL",
+        country: "USA",
+      },
+    };
+
+    let course;
+    let result;
+    let paymentData;
+    let existingStudent;
+    beforeAll(async () => {
+      course = await Course.query()
+        .where("start_date", ">", new Date())
+        .first();
+
+      existingStudent = await Student.query().insert(initialStudentData);
+
+      paymentData = {
+        amount: course.price,
+        invoiceDate: new Date().toISOString(),
+        paymentType: enums.PaymentTypes.credit,
+      };
+
+      result = await course.registerExistingStudent(
+        existingStudent,
+        {
+          ...initialStudentData,
+          // change location info to confirm update
+          location: {
+            city: "Salem",
+            state: "MA",
+            country: "USA",
+          },
+        },
+        paymentData,
+      );
+    });
+
+    afterAll(() => Student.query().del());
+
+    test("returns a student with updated data", () => {
+      expect(result.location).not.toEqual(initialStudentData.location);
+    });
+
+    test("creates a payment association between the existing student and the course", async () => {
+      await course.$loadRelated({ payments: true, students: true });
+      expect(course.payments.length).toBe(1);
+      expect(course.payments[0].studentId).toBe(existingStudent.id);
+    });
+
+    test("student already registered: throws ValidationError", async () => {
+      try {
+        await course.registerExistingStudent(
+          existingStudent,
+          initialStudentData,
+          paymentData,
+        );
+      } catch (error) {
+        expect(error instanceof ValidationError).toBe(true);
+      }
     });
   });
 });
