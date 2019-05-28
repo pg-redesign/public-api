@@ -70,9 +70,9 @@ class Course extends TimestampsBase {
       .throwIfNotFound();
 
     if (course.startDate < new Date()) {
-      // TODO: replace with objection-db-errors plugin
       throw new ValidationError({
-        type: "ExistingRelation",
+        // TODO: replace with objection-db-errors plugin
+        type: "InvalidRelation",
         data: { courseId: "Course is past registration deadline" },
       });
     }
