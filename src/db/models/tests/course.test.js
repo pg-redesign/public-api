@@ -48,7 +48,9 @@ describe("Course methods", () => {
 
     test(`courses are sorted by DEFAULT_SORT: [${Course.DEFAULT_SORT.toString()}]`, () => expect(results).toEqual(results, Course.DEFAULT_SORT));
 
-    test("filters courses older than the current date", () => expect(results.every(course => course.startDate >= new Date())).toBe(true));
+    test("filters courses older than the current date", () => expect(results.every(course => course.startDate >= new Date())).toBe(
+      true,
+    ));
   });
 
   describe("static validateCourseId", () => {
