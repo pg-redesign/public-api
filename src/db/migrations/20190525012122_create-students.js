@@ -18,6 +18,7 @@ exports.up = function (knex) {
       )
       .notNullable();
 
+    table.unique("email");
     table.timestamps(true, true);
   });
 };
