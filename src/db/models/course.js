@@ -1,6 +1,5 @@
 const { NotFoundError, ValidationError } = require("objection");
 
-const Student = require("./student");
 const schemas = require("../../schemas");
 const { Model } = require("../connection");
 const TimestampsBase = require("./timestamps-base");
@@ -26,8 +25,10 @@ class Course extends TimestampsBase {
     );
   }
 
-  static async validateCourseID(courseID) {
-    const course = await this.query().findById(courseID);
+  static async validateCourseId(courseId) {
+    const course = await this.query()
+      .findById(courseId)
+      .select(["id", "start_date", "price"]);
 
     if (!course) {
       throw new NotFoundError("Course not found");
@@ -35,20 +36,34 @@ class Course extends TimestampsBase {
 
     if (course.startDate > new Date().toUTCString()) {
       throw new ValidationError({
-        courseID: "Course is past registration deadline",
+        courseId: "Course is past registration deadline",
       });
     }
+
+    return course;
   }
 
   static async registerStudent(registrationData) {
-    const { paymentType, courseID, ...studentData } = registrationData;
+    const {
+      city,
+      state,
+      country,
+      courseId,
+      paymentType,
+      ...partialStudent
+    } = registrationData;
 
     // ensures the course is valid for registration
-    await this.validateCourseID(courseID);
+    const course = await this.validateCourseId(courseId);
 
-    return Student.query().insert({
-      ...studentData,
-      type: paymentType,
+    return course.$relatedQuery("students").insert({
+      // student registration data without city, state, country
+      ...partialStudent,
+      // shape into student location object
+      location: { city, state, country },
+      // (extra) payment fields
+      amount: course.price,
+      paymentType,
       invoiceDate: new Date().toISOString(),
     });
   }
@@ -59,17 +74,29 @@ class Course extends TimestampsBase {
 
   static get relationMappings() {
     return {
+      payments: {
+        modelClass: "Payment",
+        relation: Model.HasManyRelation,
+        join: {
+          from: "courses.id",
+          to: "payments.course_id",
+        },
+      },
       students: {
+        modelClass: "Student",
         relation: Model.ManyToManyRelation,
-        /* eslint global-require:0 */
-        modelClass: require("./student"),
         join: {
           from: "courses.id",
           to: "students.id",
           through: {
-            from: "courses.id",
-            to: "payments.course_id",
-            extra: ["type", "invoice_date", "payment_date"],
+            from: "payments.course_id",
+            to: "payments.student_id",
+            extra: {
+              amount: "amount",
+              paymentType: "payment_type",
+              invoiceDate: "invoice_date",
+              paymentDate: "payment_date",
+            },
           },
         },
       },
