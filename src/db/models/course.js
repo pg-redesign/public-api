@@ -1,5 +1,6 @@
-const { NotFoundError, ValidationError } = require("objection");
+const { ValidationError } = require("objection");
 
+const Student = require("./student");
 const schemas = require("../../schemas");
 const { Model } = require("../connection");
 const TimestampsBase = require("./timestamps-base");
@@ -9,63 +10,6 @@ const DEFAULT_SORT = ["start_date", "desc"];
 class Course extends TimestampsBase {
   static get tableName() {
     return "courses";
-  }
-
-  static getAll() {
-    return this.query().orderBy(...DEFAULT_SORT);
-  }
-
-  static getUpcoming() {
-    return (
-      this.query()
-        .orderBy(...DEFAULT_SORT)
-        // only return courses that are upcoming (beyond current date)
-        .where("start_date", ">", new Date().toUTCString())
-        .limit(2)
-    );
-  }
-
-  static async validateCourseId(courseId) {
-    const course = await this.query()
-      .findById(courseId)
-      .select(["id", "start_date", "price"]);
-
-    if (!course) {
-      throw new NotFoundError("Course not found");
-    }
-
-    if (course.startDate > new Date().toUTCString()) {
-      throw new ValidationError({
-        courseId: "Course is past registration deadline",
-      });
-    }
-
-    return course;
-  }
-
-  static async registerStudent(registrationData) {
-    const {
-      city,
-      state,
-      country,
-      courseId,
-      paymentType,
-      ...partialStudent
-    } = registrationData;
-
-    // ensures the course is valid for registration
-    const course = await this.validateCourseId(courseId);
-
-    return course.$relatedQuery("students").insert({
-      // student registration data without city, state, country
-      ...partialStudent,
-      // shape into student location object
-      location: { city, state, country },
-      // (extra) payment fields
-      amount: course.price,
-      paymentType,
-      invoiceDate: new Date().toISOString(),
-    });
   }
 
   static get jsonSchema() {
@@ -101,6 +45,119 @@ class Course extends TimestampsBase {
         },
       },
     };
+  }
+
+  // -- STATIC METHODS -- //
+
+  static getAll() {
+    return this.query().orderBy(...DEFAULT_SORT);
+  }
+
+  static getUpcoming() {
+    return (
+      this.query()
+        .orderBy(...DEFAULT_SORT)
+        // only return courses that are upcoming (beyond current date)
+        .where("start_date", ">", new Date().toUTCString())
+        .limit(2)
+    );
+  }
+
+  static async validateCourseId(courseId) {
+    const course = await this.query()
+      .findById(courseId)
+      .select(["id", "start_date", "price"])
+      .throwIfNotFound();
+
+    if (course.startDate < new Date()) {
+      // TODO: replace with objection-db-errors plugin
+      throw new ValidationError({
+        type: "ExistingRelation",
+        data: { courseId: "Course is past registration deadline" },
+      });
+    }
+
+    return course;
+  }
+
+  // TODO: update tests
+  static async registerStudent(registrationData) {
+    const {
+      city,
+      state,
+      country,
+      courseId,
+      paymentType,
+      ...partialStudent
+    } = registrationData;
+
+    // ensures the course is valid for registration
+    const course = await this.validateCourseId(courseId);
+
+    // shape location property
+    const studentData = {
+      ...partialStudent,
+      location: { city, state, country },
+    };
+
+    const paymentData = {
+      paymentType,
+      amount: course.price,
+      invoiceDate: new Date().toISOString(),
+    };
+
+    // check for an existing student with the given email
+    const existingStudent = await Student.query()
+      .findOne("email", partialStudent.email)
+      .select("id");
+
+    return existingStudent
+      ? course.registerExistingStudent(
+        existingStudent,
+        studentData,
+        paymentData,
+      )
+      : course.registerNewStudent(studentData, paymentData);
+  }
+
+  // -- INSTANCE METHODS -- //
+
+  async hasStudent(studentId) {
+    const result = await this.$relatedQuery("payments")
+      .select("payments.student_id")
+      .where("student_id", studentId);
+
+    return Boolean(result.length);
+  }
+
+  registerNewStudent(studentData, paymentData) {
+    return this.$relatedQuery("students").insert({
+      ...studentData,
+      ...paymentData,
+    });
+  }
+
+  async registerExistingStudent(student, studentData, paymentData) {
+    if (await this.hasStudent(student.id)) {
+      throw new ValidationError({
+        type: "ExistingRelation",
+        data: { message: "Student already registered" },
+      });
+    }
+
+    // update student info
+    const updatedStudent = await Student.query().updateAndFetchById(
+      student.id,
+      studentData,
+    );
+
+    // create payment association
+    await this.$relatedQuery("payments").insert({
+      student_id: student.id,
+      ...paymentData,
+    });
+
+    return updatedStudent;
   }
 }
 
