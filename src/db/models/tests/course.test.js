@@ -69,7 +69,7 @@ describe("Course methods", () => {
       expect(output.id).toBe(upcomingCourse.id);
     });
 
-    test("course not found: throws NotFoundError", async () => {
+    test("course does not exist: throws NotFoundError", async () => {
       try {
         await Course.validateCourseId(0);
       } catch (error) {
@@ -87,11 +87,107 @@ describe("Course methods", () => {
   });
 
   // TODO: complete tests
-  describe("static registerStudent", () => {});
+  describe("static registerStudent", () => {
+    // capture originals to reset after tests
+    const { validateCourseId } = Course;
+    const { registerNewStudent, registerExistingStudent } = Course.prototype;
+
+    // return values of mocked proto methods
+    const newStudent = "im new here";
+    const updatedStudent = "updated student";
+
+    let course;
+    let registrationData;
+    beforeAll(async () => {
+      course = await Course.query().findOne("start_date", ">", new Date());
+
+      registrationData = {
+        courseId: course.id,
+        firstName: "Vamp",
+        lastName: "Hallow",
+        email: "vamp@hallow.com",
+        company: "Vampiire Codes",
+        city: "Salem",
+        state: "MA",
+        country: "USA",
+        paymentType: enums.PaymentTypes.check,
+      };
+
+      // mock internally used methods
+      Course.validateCourseId = jest.fn(() => course);
+      Course.prototype.registerNewStudent = jest.fn(() => newStudent);
+      Course.prototype.registerExistingStudent = jest.fn(() => updatedStudent);
+    });
+
+    afterAll(() => {
+      // reset mocks to original methods
+      Course.validateCourseId = validateCourseId;
+      Course.prototype.registerNewStudent = registerNewStudent;
+      Course.prototype.registerExistingStudent = registerExistingStudent;
+    });
+
+    afterEach(() => jest.clearAllMocks());
+
+    describe("auxiliary behavior", () => {
+      let studentData;
+      let paymentData;
+      beforeAll(async () => {
+        await Course.registerStudent(registrationData);
+        // extract the args given to the mocked function to check their shape
+        const [mockCall] = Course.prototype.registerNewStudent.mock.calls;
+        [studentData, paymentData] = mockCall;
+      });
+
+      test("validates the course ID", () => {
+        expect(Course.validateCourseId).toHaveBeenCalledWith(
+          registrationData.courseId,
+        );
+      });
+
+      test("creates student data object with a location {city, state, country} property", () => {
+        const { city, state, country } = registrationData;
+        expect(studentData.location).toEqual({ city, state, country });
+      });
+
+      test("creates payment data object {paymentType, invoiceDate, and amount} (course price)", () => {
+        ["amount", "invoiceDate", "paymentType"].forEach(property => expect(paymentData).toHaveProperty(property));
+      });
+    });
+
+    test("student not in db: registers and returns a new student", async () => {
+      await Course.registerStudent(registrationData);
+      expect(Course.prototype.registerNewStudent).toHaveBeenCalled();
+    });
+
+    test("student exists in db: registers and returns updated student", async () => {
+      const {
+        firstName,
+        lastName,
+        email,
+        company,
+        city,
+        state,
+        country,
+      } = registrationData;
+      const student = await Student.query().insert({
+        firstName,
+        lastName,
+        email,
+        company,
+        location: { city, state, country },
+      });
+
+      await Course.registerStudent(registrationData);
+      expect(Course.prototype.registerExistingStudent).toHaveBeenCalled();
+
+      // delete student
+      await Student.query().deleteById(student.id);
+    });
+  });
 
   // -- INSTANCE METHODS -- //
 
-  describe("instance registerNewStudent", () => {
+  describe("instance methods", () => {
     const studentData = {
       firstName: "Vamp",
       lastName: "Hallow",
@@ -104,141 +200,120 @@ describe("Course methods", () => {
       },
     };
 
-    let course;
-    let student;
-    let paymentData;
-    beforeAll(async () => {
-      course = await Course.query()
-        .where("start_date", ">", new Date())
-        .first();
+    describe("registerNewStudent", () => {
+      let course;
+      let student;
+      let paymentData;
+      beforeAll(async () => {
+        course = await Course.query().findOne("start_date", ">", new Date());
 
-      paymentData = {
-        amount: course.price,
-        invoiceDate: new Date().toISOString(),
-        paymentType: enums.PaymentTypes.credit,
-      };
+        paymentData = {
+          amount: course.price,
+          invoiceDate: new Date().toISOString(),
+          paymentType: enums.PaymentTypes.credit,
+        };
+      });
+
+      afterAll(() => Student.query().del());
+
+      test("creates and returns a student", async () => {
+        student = await course.registerNewStudent(studentData, paymentData);
+        expect(student.constructor.name).toBe("Student");
+      });
+
+      test("creates a payment association between the student and the course", async () => {
+        await course.$loadRelated({ payments: true, students: true });
+        expect(course.payments.length).toBe(1);
+        expect(course.payments[0].studentId).toBe(student.id);
+      });
     });
 
-    afterAll(() => Student.query().del());
+    describe("hasStudent", () => {
+      let course;
+      let paymentData;
+      beforeAll(async () => {
+        course = await Course.query()
+          .where("start_date", ">", new Date())
+          .first();
 
-    test("creates and returns a student", async () => {
-      student = await course.registerNewStudent(studentData, paymentData);
-      expect(student.constructor.name).toBe("Student");
-    });
+        paymentData = {
+          amount: course.price,
+          invoiceDate: new Date().toISOString(),
+          paymentType: enums.PaymentTypes.credit,
+        };
+      });
 
-    test("creates a payment association between the student and the course", async () => {
-      await course.$loadRelated({ payments: true, students: true });
-      expect(course.payments.length).toBe(1);
-      expect(course.payments[0].studentId).toBe(student.id);
-    });
-  });
+      afterAll(() => Student.query().del());
 
-  describe("instance hasStudent", () => {
-    const studentData = {
-      firstName: "Vamp",
-      lastName: "Hallow",
-      email: "vamp@hallow.com",
-      company: "Vampiire Codes",
-      location: {
-        city: "Salem",
-        state: "MA",
-        country: "USA",
-      },
-    };
-
-    let course;
-    let paymentData;
-    beforeAll(async () => {
-      course = await Course.query()
-        .where("start_date", ">", new Date())
-        .first();
-
-      paymentData = {
-        amount: course.price,
-        invoiceDate: new Date().toISOString(),
-        paymentType: enums.PaymentTypes.credit,
-      };
-    });
-
-    afterAll(() => Student.query().del());
-
-    test("student is not registered for course: returns false", async () => {
-      const result = await course.hasStudent(1);
-      expect(result).toBe(false);
-    });
-    test("student is registered for course: returns true", async () => {
-      const student = await course.registerNewStudent(studentData, paymentData);
-      expect(await course.hasStudent(student.id)).toBe(true);
-    });
-  });
-
-  describe("instance registerExistingStudent", () => {
-    const initialStudentData = {
-      firstName: "Vamp",
-      lastName: "Hallow",
-      email: "vamp@hallow.com",
-      company: "Vampiire Codes",
-      location: {
-        city: "Tampa",
-        state: "FL",
-        country: "USA",
-      },
-    };
-
-    let course;
-    let result;
-    let paymentData;
-    let existingStudent;
-    beforeAll(async () => {
-      course = await Course.query()
-        .where("start_date", ">", new Date())
-        .first();
-
-      existingStudent = await Student.query().insert(initialStudentData);
-
-      paymentData = {
-        amount: course.price,
-        invoiceDate: new Date().toISOString(),
-        paymentType: enums.PaymentTypes.credit,
-      };
-
-      result = await course.registerExistingStudent(
-        existingStudent,
-        {
-          ...initialStudentData,
-          // change location info to confirm update
-          location: {
-            city: "Salem",
-            state: "MA",
-            country: "USA",
-          },
-        },
-        paymentData,
-      );
-    });
-
-    afterAll(() => Student.query().del());
-
-    test("returns a student with updated data", () => {
-      expect(result.location).not.toEqual(initialStudentData.location);
-    });
-
-    test("creates a payment association between the existing student and the course", async () => {
-      await course.$loadRelated({ payments: true, students: true });
-      expect(course.payments.length).toBe(1);
-      expect(course.payments[0].studentId).toBe(existingStudent.id);
-    });
-
-    test("student already registered: throws ValidationError", async () => {
-      try {
-        await course.registerExistingStudent(
-          existingStudent,
-          initialStudentData,
+      test("student is not registered for course: returns false", async () => {
+        const result = await course.hasStudent(1);
+        expect(result).toBe(false);
+      });
+      test("student is registered for course: returns true", async () => {
+        const student = await course.registerNewStudent(
+          studentData,
           paymentData,
         );
-      } catch (error) {
-        expect(error instanceof ValidationError).toBe(true);
-      }
+        expect(await course.hasStudent(student.id)).toBe(true);
+      });
+    });
+
+    describe("registerExistingStudent", () => {
+      let course;
+      let result;
+      let paymentData;
+      let existingStudent;
+      beforeAll(async () => {
+        course = await Course.query()
+          .where("start_date", ">", new Date())
+          .first();
+
+        existingStudent = await Student.query().insert(studentData);
+
+        paymentData = {
+          amount: course.price,
+          invoiceDate: new Date().toISOString(),
+          paymentType: enums.PaymentTypes.credit,
+        };
+
+        result = await course.registerExistingStudent(
+          existingStudent,
+          {
+            ...studentData,
+            // change location info to confirm update
+            location: {
+              city: "Tampa",
+              state: "FL",
+              country: "USA",
+            },
+          },
+          paymentData,
+        );
+      });
+
+      afterAll(() => Student.query().del());
+
+      test("returns a student with updated data", () => {
+        expect(result.location).not.toEqual(studentData.location);
+      });
+
+      test("creates a payment association between the existing student and the course", async () => {
+        await course.$loadRelated({ payments: true, students: true });
+        expect(course.payments.length).toBe(1);
+        expect(course.payments[0].studentId).toBe(existingStudent.id);
+      });
+
+      test("student already registered: throws ValidationError", async () => {
+        try {
+          await course.registerExistingStudent(
+            existingStudent,
+            studentData,
+            paymentData,
+          );
+        } catch (error) {
+          expect(error instanceof ValidationError).toBe(true);
+        }
+      });
     });
   });
 });
