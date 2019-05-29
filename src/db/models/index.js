@@ -1,3 +1,9 @@
+const Course = require("./course");
+const Student = require("./student");
+const Payment = require("./payment");
+
 module.exports = {
-  // export your models here
+  Course,
+  Student,
+  Payment,
 };

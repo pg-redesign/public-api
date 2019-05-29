@@ -1,20 +1,25 @@
 {
   "name": "pg-public-api",
   "version": "1.0.0",
-  "description": "fully wirted apollo server boilerplate",
+  "description": "pg redesign public GraphQL API",
   "main": "src",
   "scripts": {
     "start": "node src",
-    "dev": "env $(cat .env) nodemon",
-    "test:lint": "eslint .",
-    "test:jest": "jest",
-    "test": "npm run test:lint && npm run test:jest"
+    "dev": "npm run env:dev -- nodemon",
+    "test": "jest",
+    "lint": "eslint .",
+    "test:local": "npm run env:test -- npm run knex:seed && npm run env:test jest",
+    "test:travis": "jest --coverage && cat ./coverage/lcov.info | coveralls",
+    "knex:migrate": "knex migrate:latest",
+    "knex:seed": "knex seed:run",
+    "env:dev": "env $(< .env)",
+    "env:test": "env $(< .test.env)"
   },
   "author": "vampiire",
   "license": "UNLICENSED",
   "dependencies": {
     "@okgrow/graphql-scalars": "^0.4.5",
-    "@vampiire/node-logger": "^0.1.4",
+    "@vampiire/node-logger": "^0.2.0",
     "apollo-server": "^2.5.0",
     "graphql": "^14.3.1",
     "graphql-import": "^0.7.1",
@@ -24,21 +29,29 @@
     "pg": "^7.11.0"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.13",
+    "coveralls": "^3.0.3",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^4.3.0",
     "eslint-plugin-import": "^2.17.2",
+    "eslint-plugin-jest": "^22.6.4",
     "jest": "^24.8.0",
     "nodemon": "^1.19.0"
   },
   "eslintConfig": {
     "env": {
       "es6": true,
-      "commonjs": true
+      "commonjs": true,
+      "jest/globals": true
     },
     "extends": [
       "prettier",
-      "airbnb-base"
+      "airbnb-base",
+      "plugin:jest/recommended"
+    ],
+    "plugins": [
+      "jest"
     ],
     "globals": {
       "Atomics": "readonly",
@@ -51,6 +64,10 @@
       "quotes": [
         "error",
         "double"
+      ],
+      "max-len": [
+        0,
+        100
       ]
     }
   },

@@ -1,5 +1,5 @@
-const Model = require("../connection");
-const { studentSchema } = require("../schemas");
+const { Model } = require("../connection");
+const schemas = require("../../schemas");
 const TimestampsBase = require("./timestamps-base");
 
 class Student extends TimestampsBase {
@@ -8,22 +8,28 @@ class Student extends TimestampsBase {
   }
 
   static get jsonSchema() {
-    return studentSchema;
+    return schemas.types.student;
   }
 
   static get relationMappings() {
     return {
-      students: {
-        relation: Model.ManyToManyRelation,
-        /* eslint global-require:0 */
-        modelClass: require("./course"),
+      payments: {
+        modelClass: "payment",
+        relation: Model.HasManyRelation,
         join: {
-          to: "courses.id",
           from: "students.id",
+          to: "payments.student_id",
+        },
+      },
+      courses: {
+        modelClass: "course",
+        relation: Model.ManyToManyRelation,
+        join: {
+          from: "students.id",
+          to: "courses.id",
           through: {
-            from: "students.id",
-            to: "payments.student_id",
-            extra: ["type", "invoice_date", "payment_date"],
+            from: "payments.student_id",
+            to: "payments.course_id",
           },
         },
       },

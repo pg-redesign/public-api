@@ -1,5 +1,5 @@
-const Model = require("../connection");
-const { paymentSchema } = require("../schemas");
+const { Model } = require("../connection");
+const schemas = require("../../schemas");
 const TimestampsBase = require("./timestamps-base");
 
 class Payment extends TimestampsBase {
@@ -8,25 +8,24 @@ class Payment extends TimestampsBase {
   }
 
   static get jsonSchema() {
-    return paymentSchema;
+    return schemas.types.payment;
   }
 
   static get relationMappings() {
     return {
       course: {
+        modelClass: "course",
         relation: Model.BelongsToOneRelation,
-        /* eslint global-require:0 */
-        modelClass: require("./course"),
         join: {
-          from: "course_id",
+          from: "payments.course_id",
           to: "courses.id",
         },
       },
       student: {
+        modelClass: "student",
         relation: Model.BelongsToOneRelation,
-        modelClass: require("./student"),
         join: {
-          from: "student_id",
+          from: "payments.student_id",
           to: "students.id",
         },
       },

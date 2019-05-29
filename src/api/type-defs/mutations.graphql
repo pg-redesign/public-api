@@ -1,5 +1,9 @@
 type Mutation {
-	payWithStripe(paymentToken: String!): Boolean!
-	subscribeToMailingList(email: EmailAddress!): Boolean!
-	registerStudent(registration: RegistrationInput!): Boolean!
+  """
+  Registers a Student for a Course
+  - if the Student exists in the database their information is updated
+  """
+  registerForCourse(registrationData: RegistrationInput!): Student!
+  payWithStripe(paymentToken: String!): Boolean!
+  subscribeToMailingList(email: EmailAddress!): Boolean!
 }

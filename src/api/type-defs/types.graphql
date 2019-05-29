@@ -1,16 +1,50 @@
 type Course {
   id: ID!
-  price: Int!
-  location: Location!
-  date(start: Boolean, end: Boolean): String!
-  description: [String!]!
+
+  """
+  Full Course name
+  - short: shorthand internal Course name
+  """
   name(short: Boolean = false): String!
+
+  """
+  Registration price
+  - may vary by date of access if early registration discount is active
+  """
+  price: Int!
+
+  """
+  Location details
+  - location.mapURL: GoogleMaps URL of hotel / conference center
+  """
+  location: Location!
+
+  """
+  Course date range in ENGLISH format "Month DD-DD, YYYY"
+  - portuguese format: "DD a DD de month de YYYY"
+  - start: only start date as UTC Date string
+  - end: only end date as UTC Date string
+  """
+  date(start: Boolean, end: Boolean, language: LanguageTypes = ENGLISH): String!
+
+  """
+  List of course description items
+  """
+  description: [String!]!
 }
 
+"""
+Location information
+"""
 type Location {
+  "Course Type: GoogleMaps URL of hotel / conference center"
   mapURL: URL
   city: String!
   state: String!
   country: String!
+
+  """
+  Formatted as "city, state, country"
+  """
   concatenated: String!
 }

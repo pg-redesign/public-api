@@ -16,11 +16,14 @@ exports.up = function (knex) {
       .references("students.id")
       .onDelete("CASCADE");
     table
-      .enu("type", ["credit", "check"], { useNative: true, enumName: "payment_type" })
+      .enu("payment_type", ["credit", "check"], { useNative: true, enumName: "payment_type" })
       .notNullable();
     table.integer("amount").notNullable();
     table.datetime("invoice_date").notNullable();
     table.datetime("payment_date").nullable();
+
+    // only allow one student-course registration
+    table.unique(["course_id", "student_id"]);
     table.timestamps(true, true);
   });
 };
