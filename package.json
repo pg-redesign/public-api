@@ -6,9 +6,10 @@
   "scripts": {
     "start": "node src",
     "dev": "npm run env:dev -- nodemon",
-    "test": "eslint . && jest",
+    "test": "jest",
+    "lint": "eslint .",
     "test:local": "npm run env:test -- npm run knex:seed && npm run env:test jest",
-    "test:travis": "npm test -- --coverage --coverageReporters=text-lcov | coveralls",
+    "test:travis": "jest --coverage && cat ./coverage/lcov.info | coveralls",
     "knex:migrate": "knex migrate:latest",
     "knex:seed": "knex seed:run",
     "env:dev": "env $(< .env)",
