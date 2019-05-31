@@ -9,6 +9,7 @@ type Course {
 
   """
   Registration price
+
   - may vary by date of access if early registration discount is active
   """
   price: Int!
@@ -21,7 +22,7 @@ type Course {
 
   """
   Course date range in ENGLISH format "Month DD-DD, YYYY"
-  - portuguese format: "DD a DD de month de YYYY"
+  - PORTUGUESE format: "DD a DD de month de YYYY"
   - start: only start date as UTC Date string
   - end: only end date as UTC Date string
   """
@@ -37,7 +38,9 @@ type Course {
 Location information
 """
 type Location {
-  "Course Type: GoogleMaps URL of hotel / conference center"
+  """
+  For Course Type: GoogleMaps URL of hotel / conference center
+  """
   mapURL: URL
   city: String!
   state: String!
@@ -47,4 +50,16 @@ type Location {
   Formatted as "city, state, country"
   """
   concatenated: String!
+}
+
+"""
+A registered Course student
+"""
+type Student {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: EmailAddress!
+  company: String!
+  location: Location!
 }
