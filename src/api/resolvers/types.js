@@ -19,6 +19,17 @@ module.exports = {
       return start ? startDate.toUTCString() : endDate.toUTCString();
     },
 
-    // TODO: description (where to store?)
+    description: (course, _, context) => {
+      // TODO: reimplement as a db fetch for admin editing
+      const { courseDescriptions } = context.utils.constants;
+      return courseDescriptions[course.name];
+    },
+  },
+
+  Location: {
+    concatenated: (location) => {
+      const { city, state, country } = location;
+      return `${city}, ${state}, ${country}`;
+    },
   },
 };

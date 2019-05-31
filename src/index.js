@@ -7,12 +7,13 @@ const schemas = require("./schemas");
 const typeDefs = require("./api/type-defs");
 const resolvers = require("./api/resolvers");
 
+// TODO: CORS config
 const server = new ApolloServer({
-  resolvers,
   typeDefs,
+  resolvers,
   context: (options) => {
     const { req } = options;
-
+    // TODO: log requests, logger.request() config in node-logger
     return {
       req,
       utils,

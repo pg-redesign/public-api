@@ -1,4 +1,5 @@
 /* eslint func-names:0 */
+const { enums } = require("../../schemas");
 
 exports.up = function (knex) {
   return knex.schema.createTable("payments", (table) => {
@@ -16,7 +17,10 @@ exports.up = function (knex) {
       .references("students.id")
       .onDelete("CASCADE");
     table
-      .enu("payment_type", ["credit", "check"], { useNative: true, enumName: "payment_type" })
+      .enu("payment_type", Object.values(enums.PaymentTypes), {
+        useNative: true,
+        enumName: "payment_type",
+      })
       .notNullable();
     table.integer("amount").notNullable();
     table.datetime("invoice_date").notNullable();

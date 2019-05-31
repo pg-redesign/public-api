@@ -1,14 +1,14 @@
 module.exports = {
   PaymentTypes: {
-    check: "check",
-    credit: "credit",
+    check: "CHECK",
+    credit: "CREDIT",
   },
   FormTypes: {
-    registration: "registration",
-    stripePayment: "stripePayment",
+    registration: "REGISTRATION",
+    stripePayment: "STRIPE_PAYMENT",
   },
   LanguageTypes: {
-    english: "english",
-    portuguese: "portuguese",
+    english: "ENGLISH",
+    portuguese: "PORTUGUESE",
   },
 };

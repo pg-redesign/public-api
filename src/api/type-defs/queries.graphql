@@ -1,14 +1,14 @@
 type Query {
   """
   Retrieve Form validation schemas
-  - JSON schemas used for client-side form creation and validation
+  - JSON schemas used for client-side form validation with AJV
   """
   getFormSchema(form: FormTypes!): JSON!
 
   """
   Retrieve Courses data
-  - sorted by start date descending
-  - upcoming: returns the two
+    - sorted by start date descending
+    - upcoming: returns up to two upcoming Courses
   """
   getCourses(upcoming: Boolean = true): [Course!]!
 }

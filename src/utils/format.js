@@ -19,7 +19,7 @@ const courseDateRange = (() => {
   };
 
   return (startDate, endDate, language) => {
-    const formatter = language === "english" ? formatEnglish : formatPortuguese;
+    const formatter = language === "ENGLISH" ? formatEnglish : formatPortuguese;
 
     const month = months[startDate.getUTCMonth()][language];
     const days = [startDate, endDate].map(date => date.getUTCDate());

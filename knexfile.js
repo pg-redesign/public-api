@@ -1,3 +1,5 @@
+const seeds = { directory: "./src/db/test-seeds" };
+
 const config = {
   client: "postgresql",
 
@@ -21,8 +23,8 @@ const config = {
 };
 
 module.exports = {
-  test: { ...config, seeds: { directory: "./src/db/test-seeds" } },
   staging: config,
   production: config,
-  development: config,
+  test: { ...config, seeds },
+  development: { ...config, seeds },
 };
