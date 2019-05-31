@@ -58,7 +58,7 @@ describe("Course Type resolvers", () => {
     const context = { utils: { constants: { courseNames } } };
 
     test("default: returns formatted full course name", () => {
-      expect(Course.name(course, {}, context)).toBe(courseNames.pollution);
+      expect(Course.name(course, {}, context)).toBe(courseNames.POLLUTION);
     });
 
     test("args.short = true: returns shorthand internal name", () => {
