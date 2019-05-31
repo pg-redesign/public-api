@@ -58,7 +58,7 @@ class Course extends TimestampsBase {
       this.query()
         .orderBy(...DEFAULT_SORT)
         // only return courses that are upcoming (beyond current date)
-        .where("start_date", ">", new Date().toUTCString())
+        .where("start_date", ">", new Date())
         .limit(2)
     );
   }
@@ -140,7 +140,7 @@ class Course extends TimestampsBase {
     if (await this.hasStudent(student.id)) {
       throw new ValidationError({
         type: "ExistingRelation",
-        data: { message: "Student already registered" },
+        message: "Student already registered",
       });
     }
 
