@@ -1,4 +1,5 @@
 /* eslint func-names:0 */
+const { courseShortNames } = require("../../utils/constants");
 
 exports.up = function (knex) {
   return knex.schema.createTable("courses", (table) => {
@@ -9,7 +10,10 @@ exports.up = function (knex) {
     // holds location, default price, discount, etc?
 
     table
-      .enu("name", ["pollution", "remediation"], { useNative: true, enumName: "course_type" })
+      .enu("name", Object.values(courseShortNames), {
+        useNative: true,
+        enumName: "course_type",
+      })
       .notNullable();
 
     table.date("start_date").notNullable();
