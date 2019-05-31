@@ -9,19 +9,27 @@ describe("Course Type resolvers", () => {
     const startDate = new Date("October 31, 1989");
 
     const course = { startDate, endDate };
-    const args = { language: "english" };
+    const args = { language: "ENGLISH" };
     const context = {
       utils: { format: { courseDateRange } },
     };
 
     test("default: returns english date range format", () => {
       Course.date(course, args, context);
-      expect(courseDateRange).toHaveBeenCalledWith(course.startDate, course.endDate, args.language);
+      expect(courseDateRange).toHaveBeenCalledWith(
+        course.startDate,
+        course.endDate,
+        args.language,
+      );
     });
 
-    test("args.language = portuguese: returns portuguese date range format", () => {
-      Course.date(course, { language: "portuguese" }, context);
-      expect(courseDateRange).toHaveBeenCalledWith(course.startDate, course.endDate, "portuguese");
+    test("args.language = PORTUGUESE: returns portuguese date range format", () => {
+      Course.date(course, { language: "PORTUGUESE" }, context);
+      expect(courseDateRange).toHaveBeenCalledWith(
+        course.startDate,
+        course.endDate,
+        "PORTUGUESE",
+      );
     });
 
     test("args.start = true: returns start date as UTC string", () => {
@@ -36,15 +44,16 @@ describe("Course Type resolvers", () => {
 
     test("args.start and args.end: returns start date as UTC string", () => {
       const expected = startDate.toUTCString();
-      expect(Course.date(course, { start: true, end: true }, context)).toBe(expected);
+      const result = Course.date(course, { start: true, end: true }, context);
+      expect(result).toBe(expected);
     });
   });
 
   describe("Course.name", () => {
-    const course = { name: "pollution" };
+    const course = { name: "POLLUTION" };
     const courseNames = {
-      pollution: "pollution course name",
-      remediation: "remediation course name",
+      POLLUTION: "pollution course name",
+      REMEDIATION: "remediation course name",
     };
     const context = { utils: { constants: { courseNames } } };
 
