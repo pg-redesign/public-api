@@ -1,9 +1,13 @@
+const AJV = require("ajv");
 const { NotFoundError, ValidationError } = require("objection");
-
 const Course = require("../course");
-const Student = require("../student");
-const { enums } = require("../../../schemas");
+const schemas = require("../../../schemas");
 const { connection } = require("../../connection");
+const studentMock = require("./__mocks__/student");
+
+const schemaValidator = new AJV();
+schemaValidator.addSchema(schemas.types.student, "studentSchema");
+schemaValidator.addSchema(schemas.types.payment, "paymentSchema");
 
 // move to test utils?
 const expectedOrder = (list, sortOrder) => {
@@ -86,7 +90,6 @@ describe("Course static methods", () => {
     });
   });
 
-  // TODO: complete tests
   describe("registerStudent", () => {
     // capture originals to reset after tests
     const { validateCourseId } = Course;
@@ -103,14 +106,8 @@ describe("Course static methods", () => {
 
       registrationData = {
         courseId: course.id,
-        firstName: "Vamp",
-        lastName: "Hallow",
-        email: "vamp@hallow.com",
-        company: "Vampiire Codes",
-        city: "Salem",
-        state: "MA",
-        country: "USA",
-        paymentType: enums.PaymentTypes.check,
+        paymentType: schemas.enums.PaymentTypes.check,
+        ...studentMock.studentRegistrationData,
       };
 
       // mock internally used methods
@@ -144,13 +141,16 @@ describe("Course static methods", () => {
         );
       });
 
-      test("creates student data object with a location {city, state, country} property", () => {
-        const { city, state, country } = registrationData;
-        expect(studentData.location).toEqual({ city, state, country });
+      test("creates student data object with correct shape (schema validated)", () => {
+        expect(schemaValidator.validate("studentSchema", studentData)).toBe(
+          true,
+        );
       });
 
-      test("creates payment data object {paymentType, invoiceDate, and amount} (course price)", () => {
-        ["amount", "invoiceDate", "paymentType"].forEach(property => expect(paymentData).toHaveProperty(property));
+      test("creates payment data object with correct shape (schema validated)", () => {
+        expect(schemaValidator.validate("paymentSchema", paymentData)).toBe(
+          true,
+        );
       });
     });
 
@@ -160,28 +160,13 @@ describe("Course static methods", () => {
     });
 
     test("student exists in db: registers and returns updated student", async () => {
-      const {
-        firstName,
-        lastName,
-        email,
-        company,
-        city,
-        state,
-        country,
-      } = registrationData;
-      const student = await Student.query().insert({
-        firstName,
-        lastName,
-        email,
-        company,
-        location: { city, state, country },
-      });
+      const student = await studentMock.createStudent();
 
-      await Course.registerStudent(registrationData);
+      await Course.registerStudent({ email: studentMock.studentData.email });
       expect(Course.prototype.registerExistingStudent).toHaveBeenCalled();
 
       // delete student
-      await Student.query().deleteById(student.id);
+      await studentMock.destroyStudent(student.id);
     });
   });
 });
