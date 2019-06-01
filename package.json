@@ -6,10 +6,10 @@
   "scripts": {
     "start": "node src",
     "dev": "npm run env:dev -- nodemon",
-    "test": "jest",
+    "test": "jest --runInBand --no-cache",
     "lint": "eslint .",
-    "test:local": "npm run env:test -- npm run knex:seed && npm run env:test jest",
-    "test:travis": "jest --coverage && cat ./coverage/lcov.info | coveralls",
+    "test:local": "npm run env:test -- npm run knex:seed && npm run env:test -- jest --runInBand",
+    "test:travis": "npm run test -- --coverage && cat ./coverage/lcov.info | coveralls",
     "knex:migrate": "knex migrate:latest",
     "knex:seed": "knex seed:run",
     "env:dev": "env $(< .env)",
@@ -21,6 +21,7 @@
     "@okgrow/graphql-scalars": "^0.4.5",
     "@types/stripe": "^6.26.5",
     "@vampiire/node-logger": "^0.2.0",
+    "ajv": "^6.10.0",
     "apollo-error-converter": "^0.1.0",
     "apollo-server": "^2.5.0",
     "graphql": "^14.3.1",
@@ -40,7 +41,8 @@
     "eslint-plugin-import": "^2.17.2",
     "eslint-plugin-jest": "^22.6.4",
     "jest": "^24.8.0",
-    "nodemon": "^1.19.0"
+    "nodemon": "^1.19.0",
+    "sonarqube-scanner": "^2.4.1"
   },
   "eslintConfig": {
     "env": {
