@@ -1,5 +1,5 @@
 const { Course } = require("../models");
-const { courseShortNames } = require("../../utils/constants");
+const { courseInternalNames } = require("../../utils/constants");
 
 exports.seed = knex => knex("courses")
   .del()
@@ -8,7 +8,7 @@ exports.seed = knex => knex("courses")
     JSON.parse(
       JSON.stringify([
         {
-          name: courseShortNames.pollution,
+          name: courseInternalNames.pollution,
           price: 1695,
           startDate: new Date("October 24, 2020"),
           endDate: new Date("October 31, 2020"),
@@ -20,7 +20,7 @@ exports.seed = knex => knex("courses")
           },
         },
         {
-          name: courseShortNames.remediation,
+          name: courseInternalNames.remediation,
           price: 300,
           startDate: new Date("October 24, 1974"),
           endDate: new Date("October 31, 1974"),

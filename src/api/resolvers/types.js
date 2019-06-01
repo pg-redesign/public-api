@@ -1,9 +1,9 @@
 module.exports = {
   Course: {
     name: (course, args, context) => {
-      const { courseNames } = context.utils.constants;
+      const { fullCourseNames } = context.utils.constants;
 
-      return args.short ? course.name : courseNames[course.name];
+      return args.short ? course.name : fullCourseNames[course.name];
     },
 
     date: (course, args, { utils: { format } }) => {

@@ -51,14 +51,14 @@ describe("Course Type resolvers", () => {
 
   describe("Course.name", () => {
     const course = { name: "POLLUTION" };
-    const courseNames = {
+    const fullCourseNames = {
       POLLUTION: "pollution course name",
       REMEDIATION: "remediation course name",
     };
-    const context = { utils: { constants: { courseNames } } };
+    const context = { utils: { constants: { fullCourseNames } } };
 
     test("default: returns formatted full course name", () => {
-      expect(Course.name(course, {}, context)).toBe(courseNames.POLLUTION);
+      expect(Course.name(course, {}, context)).toBe(fullCourseNames.POLLUTION);
     });
 
     test("args.short = true: returns shorthand internal name", () => {

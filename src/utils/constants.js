@@ -1,11 +1,13 @@
-const courseShortNames = {
+// internal (DB, API) single word names
+const courseInternalNames = {
   pollution: "POLLUTION",
   remediation: "REMEDIATION",
 };
 
-const courseNames = {
-  [courseShortNames.pollution]: "Pollution & Hydrology Course",
-  [courseShortNames.remediation]: "Remediation Course",
+// full course name
+const fullCourseNames = {
+  [courseInternalNames.pollution]: "Pollution & Hydrology Course",
+  [courseInternalNames.remediation]: "Remediation Course",
 };
 
 const courseDescriptions = {
@@ -19,6 +21,11 @@ const courseDescriptions = {
   REMEDIATION: [
     // TODO: complete description
   ],
+};
+
+const stripeService = {
+  // NOTE: adjust message based on fullCourseNames
+  paymentDescription: course => `Princeton Groundwater ${fullCourseNames[course.name]} payment`,
 };
 
 /* eslint max-len:0 */
@@ -78,7 +85,8 @@ const months = {
 
 module.exports = {
   months,
-  courseNames,
-  courseShortNames,
+  fullCourseNames,
+  stripeService,
+  courseInternalNames,
   courseDescriptions,
 };
