@@ -119,7 +119,52 @@ class Course extends TimestampsBase {
       : course.registerNewStudent(studentData, paymentData);
   }
 
+  static async completeStripePayment(paymentData, stripeService) {
+    const { courseId, studentId } = paymentData;
+
+    const course = await this.query()
+      .findById(courseId)
+      .select(["id", "price", "name"])
+      .throwIfNotFound();
+
+    // throws if not found (student not registered)
+    const student = await course.getRegisteredStudent(studentId, [
+      "id",
+      "paymentDate",
+    ]);
+
+    if (student.paymentDate) {
+      // student has already paid, exit early
+      return student;
+    }
+
+    const paymentId = await stripeService.handleCharge(course, paymentData);
+
+    await course.updatePaymentStatus(studentId, paymentId);
+
+    return student;
+  }
+
   // -- INSTANCE METHODS -- //
+
+  updatePaymentStatus(studentId, paymentId) {
+    // sets paymentDate and paymentId on student-course associated payment
+    return this.$relatedQuery("payments")
+      .where("payments.student_id", studentId)
+      .patch({ paymentDate: new Date().toISOString(), paymentId });
+  }
+
+  getRegisteredStudent(studentId, columns) {
+    // throws if not registered
+    const query = this.$relatedQuery("students")
+      .where("student_id", studentId)
+      .first()
+      .throwIfNotFound();
+
+    if (columns.length) query.select(columns);
+
+    return query;
+  }
 
   async hasStudent(studentId) {
     const result = await this.$relatedQuery("payments")
