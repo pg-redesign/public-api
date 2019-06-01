@@ -16,16 +16,16 @@ describe("Stripe service", () => {
     test("creates a Stripe charge and returns the charge.id", () => {
       const chargeId = "charge.id";
       const stripe = stripeService(stripeInstanceMock);
-      charges.create.mockImplementationOnce(() => chargeId);
+      charges.create.mockImplementationOnce(() => ({ id: chargeId }));
 
-      expect(stripe.handleCharge({}, {})).resolves.toBe(chargeId);
+      return expect(stripe.handleCharge({}, {})).resolves.toBe(chargeId);
     });
 
     test("Stripe charge fails: throws StripeCardError", () => {
       const stripe = stripeService(stripeInstanceMock);
       charges.create.mockImplementationOnce(() => ({ id: undefined }));
 
-      expect(stripe.handleCharge({}, {})).rejects.toBeInstanceOf(
+      return expect(stripe.handleCharge({}, {})).rejects.toBeInstanceOf(
         StripeCardError,
       );
     });

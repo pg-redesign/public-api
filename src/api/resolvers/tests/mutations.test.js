@@ -5,9 +5,9 @@ describe("Mutation resolvers", () => {
     const Course = { registerStudent: jest.fn() };
     const addToMailingList = jest.fn(() => Promise.resolve());
     const context = {
-      logger: { error: jest.fn() },
       models: { Course },
-      emailService: { addToMailingList },
+      logger: { error: jest.fn() },
+      services: { email: { addToMailingList } },
     };
 
     test("returns the registered student", async () => {
