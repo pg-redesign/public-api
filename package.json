@@ -19,14 +19,17 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@okgrow/graphql-scalars": "^0.4.5",
+    "@types/stripe": "^6.26.5",
     "@vampiire/node-logger": "^0.2.0",
+    "apollo-error-converter": "^0.1.0",
     "apollo-server": "^2.5.0",
     "graphql": "^14.3.1",
     "graphql-import": "^0.7.1",
     "graphql-type-json": "^0.3.0",
     "knex": "^0.16.5",
     "objection": "^1.6.9",
-    "pg": "^7.11.0"
+    "pg": "^7.11.0",
+    "stripe": "^7.1.0"
   },
   "devDependencies": {
     "@types/jest": "^24.0.13",
