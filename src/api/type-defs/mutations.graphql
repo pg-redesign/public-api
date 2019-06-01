@@ -4,6 +4,13 @@ type Mutation {
   - if the Student exists in the database their information is updated
   """
   registerForCourse(registrationData: RegistrationInput!): Student!
-  payWithStripe(paymentToken: String!): Boolean!
+
+  """
+  Processes a Stripe credit card Course payment
+  - sends receipt email
+  - updates Student's payment status on success
+  """
+  payForCourseWithStripe(paymentData: StripePaymentInput!): Student!
+
   subscribeToMailingList(email: EmailAddress!): Boolean!
 }
