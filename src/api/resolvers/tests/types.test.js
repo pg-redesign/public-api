@@ -1,4 +1,6 @@
+const utils = require("../../../utils");
 const typeResolvers = require("../types");
+const schemas = require("../../../schemas");
 
 describe("Course Type resolvers", () => {
   const { Course } = typeResolvers;
@@ -9,7 +11,7 @@ describe("Course Type resolvers", () => {
     const startDate = new Date("October 31, 1989");
 
     const course = { startDate, endDate };
-    const args = { language: "ENGLISH" };
+    const args = { language: schemas.enums.LanguageTypes.english };
     const context = {
       utils: { format: { courseDateRange } },
     };
@@ -24,11 +26,15 @@ describe("Course Type resolvers", () => {
     });
 
     test("args.language = PORTUGUESE: returns portuguese date range format", () => {
-      Course.date(course, { language: "PORTUGUESE" }, context);
+      Course.date(
+        course,
+        { language: schemas.enums.LanguageTypes.portuguese },
+        context,
+      );
       expect(courseDateRange).toHaveBeenCalledWith(
         course.startDate,
         course.endDate,
-        "PORTUGUESE",
+        schemas.enums.LanguageTypes.portuguese,
       );
     });
 
@@ -50,19 +56,37 @@ describe("Course Type resolvers", () => {
   });
 
   describe("Course.name", () => {
-    const course = { name: "POLLUTION" };
-    const fullCourseNames = {
-      POLLUTION: "pollution course name",
-      REMEDIATION: "remediation course name",
-    };
-    const context = { utils: { constants: { fullCourseNames } } };
+    const course = { name: utils.constants.courseInternalNames.pollution };
+    const context = { utils };
 
     test("default: returns formatted full course name", () => {
-      expect(Course.name(course, {}, context)).toBe(fullCourseNames.POLLUTION);
+      expect(Course.name(course, {}, context)).toBe(
+        utils.constants.fullCourseNames.POLLUTION,
+      );
     });
 
     test("args.short = true: returns shorthand internal name", () => {
       expect(Course.name(course, { short: true }, context)).toBe(course.name);
     });
+  });
+
+  test("Course.description: returns description for the course type (name)", () => {
+    const course = { name: utils.constants.courseInternalNames.pollution };
+    const context = { utils };
+
+    expect(typeResolvers.Course.description(course, null, context)).toEqual(
+      utils.constants.courseDescriptions[
+        utils.constants.courseInternalNames.pollution
+      ],
+    );
+  });
+});
+
+describe("Location Type resolvers", () => {
+  test("concatenated: returns \"city, state, country\" format", () => {
+    const location = { city: "city", state: "state", country: "country" };
+    expect(typeResolvers.Location.concatenated(location)).toBe(
+      "city, state, country",
+    );
   });
 });
