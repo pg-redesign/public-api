@@ -1,9 +1,10 @@
 const AJV = require("ajv");
 const { NotFoundError, ValidationError } = require("objection");
+
 const Course = require("../course");
 const schemas = require("../../../schemas");
-const { connection } = require("../../connection");
 const studentMock = require("./__mocks__/student");
+const { connection } = require("../../connection");
 
 const schemaValidator = new AJV();
 schemaValidator.addSchema(schemas.types.student, "studentSchema");
@@ -14,12 +15,10 @@ const expectedOrder = (list, sortOrder) => {
   const sorted = [...list];
   const [property, direction] = sortOrder;
 
-  sorted.sort((a, b) => {
+  return sorted.sort((a, b) => {
     const [aValue, bValue] = [a, b].map(obj => obj[property]);
     return direction === "asc" ? aValue > bValue : aValue < bValue;
   });
-
-  return sorted;
 };
 
 /* seeded by "db/test-seeds/make-courses" */
@@ -167,6 +166,82 @@ describe("Course static methods", () => {
 
       // delete student
       await studentMock.destroyStudent(student.id);
+    });
+  });
+
+  describe("completeStripePayment", () => {
+    const stripeService = { handleCharge: jest.fn() };
+
+    const student = {
+      id: 1,
+      ...studentMock.studentData,
+    };
+
+    let course;
+    let paymentData;
+    const { getRegisteredStudent, updatePaymentStatus } = Course.prototype;
+    beforeAll(async () => {
+      course = await Course.query().findOne("start_date", ">", new Date());
+
+      paymentData = {
+        courseId: course.id,
+        studentId: student.id,
+      };
+
+      // mock proto methods
+      Course.prototype.updatePaymentStatus = jest.fn();
+      Course.prototype.getRegisteredStudent = jest.fn();
+    });
+    afterAll(() => {
+      // reset proto methods
+      Course.prototype.updatePaymentStatus = updatePaymentStatus;
+      Course.prototype.getRegisteredStudent = getRegisteredStudent;
+    });
+
+    describe("success", () => {
+      let result;
+      beforeAll(async () => {
+        Course.prototype.getRegisteredStudent.mockImplementationOnce(
+          () => student,
+        );
+
+        result = await Course.completeStripePayment(paymentData, stripeService);
+      });
+      afterAll(() => jest.clearAllMocks());
+
+      test("confirms student existence and registration", () => {
+        expect(Course.prototype.getRegisteredStudent).toHaveBeenCalled();
+      });
+
+      test("calls stripe service to create a charge", () => {
+        expect(stripeService.handleCharge).toHaveBeenCalled();
+      });
+
+      test("updates the payment status of the student", () => {
+        expect(Course.prototype.updatePaymentStatus).toHaveBeenCalled();
+      });
+
+      test("returns the student", () => expect(result).toBe(student));
+    });
+
+    describe("failure", () => {
+      test("course does not exist: throws NotFoundError", () => expect(
+        Course.completeStripePayment({ courseId: 0 }),
+      ).rejects.toBeInstanceOf(NotFoundError));
+
+      test("student has already paid: does not call stripe service or update payment status", async () => {
+        Course.prototype.getRegisteredStudent.mockImplementationOnce(() => ({
+          ...student,
+          paymentDate: "some date",
+        }));
+        const notCalled = [
+          stripeService.handleCharge,
+          Course.prototype.updatePaymentStatus,
+        ];
+
+        await Course.completeStripePayment(paymentData);
+        notCalled.forEach(action => expect(action).not.toHaveBeenCalled());
+      });
     });
   });
 });
