@@ -179,7 +179,7 @@ describe("Course static methods", () => {
 
     let course;
     let paymentData;
-    const { getRegisteredStudent, updatePaymentStatus } = Course.prototype;
+    const { getRegisteredStudent, updateStudentPayment } = Course.prototype;
     beforeAll(async () => {
       course = await Course.query().findOne("start_date", ">", new Date());
 
@@ -189,12 +189,12 @@ describe("Course static methods", () => {
       };
 
       // mock proto methods
-      Course.prototype.updatePaymentStatus = jest.fn();
+      Course.prototype.updateStudentPayment = jest.fn();
       Course.prototype.getRegisteredStudent = jest.fn();
     });
     afterAll(() => {
       // reset proto methods
-      Course.prototype.updatePaymentStatus = updatePaymentStatus;
+      Course.prototype.updateStudentPayment = updateStudentPayment;
       Course.prototype.getRegisteredStudent = getRegisteredStudent;
     });
 
@@ -218,7 +218,7 @@ describe("Course static methods", () => {
       });
 
       test("updates the payment status of the student", () => {
-        expect(Course.prototype.updatePaymentStatus).toHaveBeenCalled();
+        expect(Course.prototype.updateStudentPayment).toHaveBeenCalled();
       });
 
       test("returns the student", () => expect(result).toBe(student));
@@ -236,7 +236,7 @@ describe("Course static methods", () => {
         }));
         const notCalled = [
           stripeService.handleCharge,
-          Course.prototype.updatePaymentStatus,
+          Course.prototype.updateStudentPayment,
         ];
 
         await Course.completeStripePayment(paymentData);
