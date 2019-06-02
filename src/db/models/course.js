@@ -40,6 +40,7 @@ class Course extends TimestampsBase {
               paymentType: "payment_type",
               invoiceDate: "invoice_date",
               paymentDate: "payment_date",
+              confirmationId: "confirmation_id",
             },
           },
         },
@@ -129,8 +130,7 @@ class Course extends TimestampsBase {
 
     // throws if not found (student not registered)
     const student = await course.getRegisteredStudent(studentId, [
-      "id",
-      "paymentDate",
+      "payment_date",
     ]);
 
     if (student.paymentDate) {
@@ -138,23 +138,31 @@ class Course extends TimestampsBase {
       return student;
     }
 
-    const paymentId = await stripeService.handleCharge(course, paymentData);
+    const confirmationId = await stripeService.handleCharge(
+      course,
+      paymentData,
+    );
 
-    await course.updatePaymentStatus(studentId, paymentId);
+    await course.updateStudentPayment(studentId, confirmationId);
 
     return student;
   }
 
   // -- INSTANCE METHODS -- //
 
-  updatePaymentStatus(studentId, paymentId) {
-    // sets paymentDate and paymentId on student-course associated payment
-    return this.$relatedQuery("payments")
+  updateStudentPayment(studentId, confirmationId, returnPayment = false) {
+    const query = this.$relatedQuery("payments")
       .where("payments.student_id", studentId)
-      .patch({ paymentDate: new Date().toISOString(), paymentId });
+      .patch({ paymentDate: new Date().toISOString(), confirmationId });
+
+    if (returnPayment) {
+      query.returning("*").first();
+    }
+
+    return query;
   }
 
-  getRegisteredStudent(studentId, columns) {
+  getRegisteredStudent(studentId, columns = []) {
     // throws if not registered
     const query = this.$relatedQuery("students")
       .where("student_id", studentId)
