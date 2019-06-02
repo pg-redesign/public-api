@@ -11,14 +11,14 @@ const fullCourseNames = {
 };
 
 const courseDescriptions = {
-  POLLUTION: [
+  [courseInternalNames.pollution]: [
     "Basic to Advanced Principles in Groundwater Pollution and Hydrology",
     "Basic to Advanced Concepts and Principles of Groundwater Flow, Fate and Transport and Natural Attenuation",
     "Groundwater Monitoring And Sampling Technology",
     "Conceptual Site Models (CSM) & Remediation Strategies",
     "Practical Applications of Modern Modeling Software",
   ],
-  REMEDIATION: [
+  [courseInternalNames.remediation]: [
     // TODO: complete description
   ],
 };
