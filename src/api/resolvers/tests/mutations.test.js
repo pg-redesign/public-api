@@ -48,4 +48,16 @@ describe("Mutation resolvers", () => {
       });
     });
   });
+
+  test("payForCourseWithStripe: issues Stripe charge and returns the paid student", () => {
+    const args = { paymentData: {} };
+    const Course = { completeStripePayment: jest.fn() };
+    const context = { models: { Course }, services: { stripe: {} } };
+
+    Mutation.payForCourseWithStripe(null, args, context);
+    expect(Course.completeStripePayment).toHaveBeenCalledWith(
+      args.paymentData,
+      context.services.stripe,
+    );
+  });
 });
