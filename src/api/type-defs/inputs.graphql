@@ -23,3 +23,19 @@ input RegistrationInput {
   """
   paymentType: PaymentTypes!
 }
+
+"""
+Data for issuing a Stripe credit card payment for a Course
+"""
+input StripePaymentInput {
+  courseId: ID!
+  studentId: ID!
+  """
+  The payment token.id
+  """
+  tokenId: String!
+  """
+  Where the receipt will be sent
+  """
+  receiptEmail: EmailAddress!
+}

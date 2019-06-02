@@ -5,9 +5,9 @@ describe("Mutation resolvers", () => {
     const Course = { registerStudent: jest.fn() };
     const addToMailingList = jest.fn(() => Promise.resolve());
     const context = {
-      logger: { error: jest.fn() },
       models: { Course },
-      emailService: { addToMailingList },
+      logger: { error: jest.fn() },
+      services: { email: { addToMailingList } },
     };
 
     test("returns the registered student", async () => {
@@ -47,5 +47,17 @@ describe("Mutation resolvers", () => {
         expect(context.logger.error).toHaveBeenCalled();
       });
     });
+  });
+
+  test("payForCourseWithStripe: issues Stripe charge and returns the paid student", () => {
+    const args = { paymentData: {} };
+    const Course = { completeStripePayment: jest.fn() };
+    const context = { models: { Course }, services: { stripe: {} } };
+
+    Mutation.payForCourseWithStripe(null, args, context);
+    expect(Course.completeStripePayment).toHaveBeenCalledWith(
+      args.paymentData,
+      context.services.stripe,
+    );
   });
 });

@@ -40,6 +40,7 @@ class Course extends TimestampsBase {
               paymentType: "payment_type",
               invoiceDate: "invoice_date",
               paymentDate: "payment_date",
+              confirmationId: "confirmation_id",
             },
           },
         },
@@ -119,7 +120,59 @@ class Course extends TimestampsBase {
       : course.registerNewStudent(studentData, paymentData);
   }
 
+  static async completeStripePayment(paymentData, stripeService) {
+    const { courseId, studentId } = paymentData;
+
+    const course = await this.query()
+      .findById(courseId)
+      .select(["id", "price", "name"])
+      .throwIfNotFound();
+
+    // throws if not found (student not registered)
+    const student = await course.getRegisteredStudent(studentId, [
+      "payment_date",
+    ]);
+
+    if (student.paymentDate) {
+      // student has already paid, exit early
+      return student;
+    }
+
+    const confirmationId = await stripeService.handleCharge(
+      course,
+      paymentData,
+    );
+
+    await course.updateStudentPayment(studentId, confirmationId);
+
+    return student;
+  }
+
   // -- INSTANCE METHODS -- //
+
+  updateStudentPayment(studentId, confirmationId, returnPayment = false) {
+    const query = this.$relatedQuery("payments")
+      .where("payments.student_id", studentId)
+      .patch({ paymentDate: new Date().toISOString(), confirmationId });
+
+    if (returnPayment) {
+      query.returning("*").first();
+    }
+
+    return query;
+  }
+
+  getRegisteredStudent(studentId, columns = []) {
+    // throws if not registered
+    const query = this.$relatedQuery("students")
+      .where("student_id", studentId)
+      .first()
+      .throwIfNotFound();
+
+    if (columns.length) query.select(columns);
+
+    return query;
+  }
 
   async hasStudent(studentId) {
     const result = await this.$relatedQuery("payments")

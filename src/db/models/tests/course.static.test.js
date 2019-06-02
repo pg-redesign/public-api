@@ -1,21 +1,24 @@
+const AJV = require("ajv");
 const { NotFoundError, ValidationError } = require("objection");
 
 const Course = require("../course");
-const Student = require("../student");
-const { enums } = require("../../../schemas");
+const schemas = require("../../../schemas");
+const studentMock = require("./__mocks__/student");
 const { connection } = require("../../connection");
+
+const schemaValidator = new AJV();
+schemaValidator.addSchema(schemas.types.student, "studentSchema");
+schemaValidator.addSchema(schemas.types.payment, "paymentSchema");
 
 // move to test utils?
 const expectedOrder = (list, sortOrder) => {
   const sorted = [...list];
   const [property, direction] = sortOrder;
 
-  sorted.sort((a, b) => {
+  return sorted.sort((a, b) => {
     const [aValue, bValue] = [a, b].map(obj => obj[property]);
     return direction === "asc" ? aValue > bValue : aValue < bValue;
   });
-
-  return sorted;
 };
 
 /* seeded by "db/test-seeds/make-courses" */
@@ -86,7 +89,6 @@ describe("Course static methods", () => {
     });
   });
 
-  // TODO: complete tests
   describe("registerStudent", () => {
     // capture originals to reset after tests
     const { validateCourseId } = Course;
@@ -103,14 +105,8 @@ describe("Course static methods", () => {
 
       registrationData = {
         courseId: course.id,
-        firstName: "Vamp",
-        lastName: "Hallow",
-        email: "vamp@hallow.com",
-        company: "Vampiire Codes",
-        city: "Salem",
-        state: "MA",
-        country: "USA",
-        paymentType: enums.PaymentTypes.check,
+        paymentType: schemas.enums.PaymentTypes.check,
+        ...studentMock.studentRegistrationData,
       };
 
       // mock internally used methods
@@ -144,13 +140,16 @@ describe("Course static methods", () => {
         );
       });
 
-      test("creates student data object with a location {city, state, country} property", () => {
-        const { city, state, country } = registrationData;
-        expect(studentData.location).toEqual({ city, state, country });
+      test("creates student data object with correct shape (schema validated)", () => {
+        expect(schemaValidator.validate("studentSchema", studentData)).toBe(
+          true,
+        );
       });
 
-      test("creates payment data object {paymentType, invoiceDate, and amount} (course price)", () => {
-        ["amount", "invoiceDate", "paymentType"].forEach(property => expect(paymentData).toHaveProperty(property));
+      test("creates payment data object with correct shape (schema validated)", () => {
+        expect(schemaValidator.validate("paymentSchema", paymentData)).toBe(
+          true,
+        );
       });
     });
 
@@ -160,28 +159,89 @@ describe("Course static methods", () => {
     });
 
     test("student exists in db: registers and returns updated student", async () => {
-      const {
-        firstName,
-        lastName,
-        email,
-        company,
-        city,
-        state,
-        country,
-      } = registrationData;
-      const student = await Student.query().insert({
-        firstName,
-        lastName,
-        email,
-        company,
-        location: { city, state, country },
-      });
+      const student = await studentMock.createStudent();
 
-      await Course.registerStudent(registrationData);
+      await Course.registerStudent({ email: studentMock.studentData.email });
       expect(Course.prototype.registerExistingStudent).toHaveBeenCalled();
 
       // delete student
-      await Student.query().deleteById(student.id);
+      await studentMock.destroyStudent(student.id);
+    });
+  });
+
+  describe("completeStripePayment", () => {
+    const stripeService = { handleCharge: jest.fn() };
+
+    const student = {
+      id: 1,
+      ...studentMock.studentData,
+    };
+
+    let course;
+    let paymentData;
+    const { getRegisteredStudent, updateStudentPayment } = Course.prototype;
+    beforeAll(async () => {
+      course = await Course.query().findOne("start_date", ">", new Date());
+
+      paymentData = {
+        courseId: course.id,
+        studentId: student.id,
+      };
+
+      // mock proto methods
+      Course.prototype.updateStudentPayment = jest.fn();
+      Course.prototype.getRegisteredStudent = jest.fn();
+    });
+    afterAll(() => {
+      // reset proto methods
+      Course.prototype.updateStudentPayment = updateStudentPayment;
+      Course.prototype.getRegisteredStudent = getRegisteredStudent;
+    });
+
+    describe("success", () => {
+      let result;
+      beforeAll(async () => {
+        Course.prototype.getRegisteredStudent.mockImplementationOnce(
+          () => student,
+        );
+
+        result = await Course.completeStripePayment(paymentData, stripeService);
+      });
+      afterAll(() => jest.clearAllMocks());
+
+      test("confirms student existence and registration", () => {
+        expect(Course.prototype.getRegisteredStudent).toHaveBeenCalled();
+      });
+
+      test("calls stripe service to create a charge", () => {
+        expect(stripeService.handleCharge).toHaveBeenCalled();
+      });
+
+      test("updates the payment status of the student", () => {
+        expect(Course.prototype.updateStudentPayment).toHaveBeenCalled();
+      });
+
+      test("returns the student", () => expect(result).toBe(student));
+    });
+
+    describe("failure", () => {
+      test("course does not exist: throws NotFoundError", () => expect(
+        Course.completeStripePayment({ courseId: 0 }),
+      ).rejects.toBeInstanceOf(NotFoundError));
+
+      test("student has already paid: does not call stripe service or update payment status", async () => {
+        Course.prototype.getRegisteredStudent.mockImplementationOnce(() => ({
+          ...student,
+          paymentDate: "some date",
+        }));
+        const notCalled = [
+          stripeService.handleCharge,
+          Course.prototype.updateStudentPayment,
+        ];
+
+        await Course.completeStripePayment(paymentData);
+        notCalled.forEach(action => expect(action).not.toHaveBeenCalled());
+      });
     });
   });
 });

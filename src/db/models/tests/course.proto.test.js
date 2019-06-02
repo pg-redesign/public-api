@@ -1,22 +1,14 @@
-const { ValidationError } = require("objection");
+const { ValidationError, NotFoundError } = require("objection");
 
 const Course = require("../course");
 const Student = require("../student");
 const { enums } = require("../../../schemas");
 const { connection } = require("../../connection");
 
+const studentMock = require("./__mocks__/student");
+
 describe("Course prototype methods", () => {
-  const studentData = {
-    firstName: "Vamp",
-    lastName: "Hallow",
-    email: "vamp@hallow.com",
-    company: "Vampiire Codes",
-    location: {
-      city: "Salem",
-      state: "MA",
-      country: "USA",
-    },
-  };
+  const { studentData } = studentMock;
 
   afterAll(() => connection.destroy());
 
@@ -130,6 +122,70 @@ describe("Course prototype methods", () => {
       } catch (error) {
         expect(error instanceof ValidationError).toBe(true);
       }
+    });
+  });
+
+  describe("getRegisteredStudent", () => {
+    let course;
+    let student;
+    beforeAll(async () => {
+      course = await Course.query()
+        .where("start_date", ">", new Date())
+        .first();
+
+      student = await Course.registerStudent({
+        courseId: course.id,
+        paymentType: enums.PaymentTypes.credit,
+        ...studentMock.studentRegistrationData,
+      });
+    });
+    afterAll(() => Student.query().del());
+
+    test("student is registered: returns the student", async () => {
+      const result = await course.getRegisteredStudent(student.id);
+      expect(result.id).toBe(student.id);
+    });
+
+    test("student not registered: throws NotFoundError", () => expect(course.getRegisteredStudent(0)).rejects.toBeInstanceOf(
+      NotFoundError,
+    ));
+
+    test("columns arg: only returns chosen columns", async () => {
+      const result = await course.getRegisteredStudent(student.id, [
+        "first_name",
+      ]);
+      expect(result).toEqual({ firstName: student.firstName });
+    });
+  });
+
+  describe("updateStudentPayment", () => {
+    const mockConfirmationId = "a confirmation ID";
+
+    let result;
+    beforeAll(async () => {
+      const course = await Course.query()
+        .where("start_date", ">", new Date())
+        .first();
+
+      const student = await Course.registerStudent({
+        courseId: course.id,
+        paymentType: enums.PaymentTypes.credit,
+        ...studentMock.studentRegistrationData,
+      });
+
+      result = await course.updateStudentPayment(
+        student.id,
+        mockConfirmationId,
+        true, // return the payment, default false
+      );
+    });
+    afterAll(() => Student.query().del());
+
+    test("sets the payment date and confirmation ID", () => {
+      const { confirmationId, paymentDate } = result;
+
+      expect(paymentDate).toBeDefined();
+      expect(confirmationId).toBe(mockConfirmationId);
     });
   });
 });
