@@ -162,12 +162,13 @@ describe("Course prototype methods", () => {
     const mockConfirmationId = "a confirmation ID";
 
     let result;
+    let student;
     beforeAll(async () => {
       const course = await Course.query()
         .where("start_date", ">", new Date())
         .first();
 
-      const student = await Course.registerStudent({
+      student = await Course.registerStudent({
         courseId: course.id,
         paymentType: enums.PaymentTypes.credit,
         ...studentMock.studentRegistrationData,
@@ -176,15 +177,16 @@ describe("Course prototype methods", () => {
       result = await course.updateStudentPayment(
         student.id,
         mockConfirmationId,
-        true, // return the payment, default false
       );
     });
     afterAll(() => Student.query().del());
 
+    test("returns the updated student", () => expect(result.id).toBe(student.id));
+
     test("sets the payment date and confirmation ID", () => {
       const { confirmationId, paymentDate } = result;
 
-      expect(paymentDate).toBeDefined();
+      expect(paymentDate).not.toBeNull();
       expect(confirmationId).toBe(mockConfirmationId);
     });
   });

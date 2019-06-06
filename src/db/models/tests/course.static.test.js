@@ -170,7 +170,7 @@ describe("Course static methods", () => {
   });
 
   describe("completeStripePayment", () => {
-    const stripeService = { handleCharge: jest.fn() };
+    const stripeService = { createCharge: jest.fn() };
 
     const student = {
       id: 1,
@@ -204,6 +204,9 @@ describe("Course static methods", () => {
         Course.prototype.getRegisteredStudent.mockImplementationOnce(
           () => student,
         );
+        Course.prototype.updateStudentPayment.mockImplementationOnce(
+          () => student,
+        );
 
         result = await Course.completeStripePayment(paymentData, stripeService);
       });
@@ -214,7 +217,7 @@ describe("Course static methods", () => {
       });
 
       test("calls stripe service to create a charge", () => {
-        expect(stripeService.handleCharge).toHaveBeenCalled();
+        expect(stripeService.createCharge).toHaveBeenCalled();
       });
 
       test("updates the payment status of the student", () => {
@@ -235,7 +238,7 @@ describe("Course static methods", () => {
           paymentDate: "some date",
         }));
         const notCalled = [
-          stripeService.handleCharge,
+          stripeService.createCharge,
           Course.prototype.updateStudentPayment,
         ];
 
