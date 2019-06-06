@@ -3,7 +3,7 @@ const { StripeCardError } = require("stripe").errors;
 const stripeService = require("../stripe");
 
 describe("Stripe service", () => {
-  describe("handleCharge: Creates a Stripe payment for the student", () => {
+  describe("createCharge: Creates a Stripe payment for the student", () => {
     // mock the stripe instance
     const charges = {
       create: jest.fn(),
@@ -18,14 +18,14 @@ describe("Stripe service", () => {
       const stripe = stripeService(stripeInstanceMock);
       charges.create.mockImplementationOnce(() => ({ id: chargeId }));
 
-      return expect(stripe.handleCharge({}, {})).resolves.toBe(chargeId);
+      return expect(stripe.createCharge({}, {})).resolves.toBe(chargeId);
     });
 
     test("Stripe charge fails: throws StripeCardError", () => {
       const stripe = stripeService(stripeInstanceMock);
       charges.create.mockImplementationOnce(() => ({ id: undefined }));
 
-      return expect(stripe.handleCharge({}, {})).rejects.toBeInstanceOf(
+      return expect(stripe.createCharge({}, {})).rejects.toBeInstanceOf(
         StripeCardError,
       );
     });

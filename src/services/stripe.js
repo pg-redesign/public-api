@@ -3,12 +3,12 @@ const constants = require("../utils/constants");
 
 module.exports = stripe => ({
   /**
-   * Creates a Stripe payment for the student
+   * Creates a Stripe payment charge for the student
    * @param {{ id: number, price: number, name: string }} course
    * @param {{ receiptEmail: string, studentId: number, tokenId: string }} paymentData
    * @returns {string} paymentId
    */
-  handleCharge: async (course, paymentData) => {
+  createCharge: async (course, paymentData) => {
     const { receiptEmail, studentId, tokenId } = paymentData;
 
     const charge = await stripe.charges.create({
