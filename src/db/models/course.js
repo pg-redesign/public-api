@@ -138,28 +138,22 @@ class Course extends TimestampsBase {
       return student;
     }
 
-    const confirmationId = await stripeService.handleCharge(
+    const confirmationId = await stripeService.createCharge(
       course,
       paymentData,
     );
 
-    await course.updateStudentPayment(studentId, confirmationId);
-
-    return student;
+    // updates paymentDate, confirmationId and returns the Student
+    return course.updateStudentPayment(studentId, confirmationId);
   }
 
   // -- INSTANCE METHODS -- //
 
-  updateStudentPayment(studentId, confirmationId, returnPayment = false) {
-    const query = this.$relatedQuery("payments")
-      .where("payments.student_id", studentId)
-      .patch({ paymentDate: new Date().toISOString(), confirmationId });
-
-    if (returnPayment) {
-      query.returning("*").first();
-    }
-
-    return query;
+  updateStudentPayment(studentId, confirmationId) {
+    return this.$relatedQuery("students").patchAndFetchById(studentId, {
+      confirmationId,
+      paymentDate: new Date().toISOString(),
+    });
   }
 
   getRegisteredStudent(studentId, columns = []) {

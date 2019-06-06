@@ -1,9 +1,11 @@
+const { student } = require("../types");
+
 module.exports = {
   type: "object",
-  required: ["tokenId", "studentId", "receiptEmail"],
+  required: ["firstName", "lastName", "receiptEmail"],
   properties: {
-    tokenId: { type: "string" },
-    studentId: { type: "string", pattern: "^\\d+$" },
+    firstName: student.properties.firstName,
+    lastName: student.properties.lastName,
     receiptEmail: { type: "string", format: "email" },
   },
 };
