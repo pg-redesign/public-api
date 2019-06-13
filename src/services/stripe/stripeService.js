@@ -1,5 +1,5 @@
 const Stripe = require("stripe");
-const constants = require("../utils/constants");
+const constants = require("../../utils/constants");
 
 module.exports = stripe => ({
   /**

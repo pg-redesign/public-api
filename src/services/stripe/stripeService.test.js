@@ -1,6 +1,6 @@
 const { StripeCardError } = require("stripe").errors;
 
-const stripeService = require("../stripe");
+const stripeService = require("./stripeService");
 
 describe("Stripe service", () => {
   describe("createCharge: Creates a Stripe payment for the student", () => {
