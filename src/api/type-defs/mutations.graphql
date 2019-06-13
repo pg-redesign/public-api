@@ -12,5 +12,8 @@ type Mutation {
   """
   payForCourseWithStripe(paymentData: StripePaymentInput!): Student!
 
-  subscribeToMailingList(email: EmailAddress!): Boolean!
+  """
+  Subscribes a user to the mailing list
+  """
+  subscribeToMailingList(mailingListData: MailingListInput!): Boolean!
 }
