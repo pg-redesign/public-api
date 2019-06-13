@@ -1,9 +1,7 @@
-const Stripe = require("stripe");
-
 const stripeService = require("./stripe");
-
-const stripeInstance = new Stripe(process.env.STRIPE_API_KEY);
+const mailChimpService = require("./mailChimp");
 
 module.exports = {
-  stripe: stripeService(stripeInstance),
+  stripe: stripeService,
+  mailChimp: mailChimpService,
 };
