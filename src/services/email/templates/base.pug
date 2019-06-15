@@ -1,0 +1,23 @@
+doctype
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel="stylesheet", href="base.css")
+
+    title Princeton Groundwater, Inc.
+  body
+    div(style="display: none; max-height: 0px; overflow: hidden;")
+      #{previewText}
+    div(style="display: none; max-height: 0px; overflow: hidden;")
+      &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
+    
+    block body
+
+  hr
+
+  p If you have any questions feel free to contact us by <a href="mailto:#{contactEmail}">email</a> or by phone at <a href="tel:#{contactNumber}">#{contactNumber}<a>
+
+  //- TODO: implement footer
+  //- include ./includes/footer.pug

@@ -1,0 +1,45 @@
+extends base.pug
+
+block body
+  p Hello #{studentFirstName},
+  
+  p Thank you for registering for the upcoming #{courseName}. You are receiving this email because your requested a billing invoice. Your invoice has been included as a PDF attachment to this email.
+  p Your course registration status is currently <b>pending</b> as we have not yet received your payment. You may complete your course registration using one of the following payment options:
+
+  h3 Online
+  p Use our secure credit card payment page: 
+  a(href="#{creditPaymentLink}") https://princeton-groundwater.com/payment/credit
+  p Your credit card payment will be processed by Stripe, a trusted and PCI compliant online payment service. Your card information will be used for this single transaction and will not be stored on our servers.
+
+  h3 Check by Mail
+  p Note that your check must be received and cleared <strong>at least 2 weeks before the start of the course.</strong>
+  
+  h4.subject-title Payable To
+  div.highlighted-subject
+    div.centered-text.subject-details
+      p Princeton Groundwater, Inc.
+    
+  h4.subject-title Mailing Address
+  div.highlighted-subject
+    div.centered-text.subject-details
+      p Princeton Groundwater, Inc.
+      p P.O. Box 273776
+      p Tampa, FL 33688-3776
+
+  h3 Bank Transfer (ACH)
+  p You can transfer your payment using an ACH wire transfer. Note that your transfer must be received and cleared <strong>at least 2 weeks before the start of the course.</strong>
+
+  h4.subject-title Bank Address
+  div.highlighted-subject
+    div.centered-text.subject-details
+      p J.P. Morgan Chase Bank, N.A.
+      p 12703 North Dale Mabry Highway
+      p Tampa, Florida
+
+  h4.subject-title Account
+  div.highlighted-subject
+    div.subject-details
+      p Account number: 951634930
+      p ABA routing number: 267084131
+
+    
