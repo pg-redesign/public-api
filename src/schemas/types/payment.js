@@ -2,7 +2,7 @@ const { PaymentTypes } = require("../enums");
 
 module.exports = {
   type: "object",
-  required: ["amount", "paymentType", "invoiceDate"],
+  required: ["amount", "invoiceDate"],
   properties: {
     amount: { type: "integer" },
     confirmationId: { type: "string" },

@@ -1,5 +1,5 @@
-const enums = require("../enums");
 const { student } = require("../types");
+const { PaymentOptions } = require("../enums");
 
 const { location, ...studentProperties } = student.properties;
 
@@ -11,12 +11,15 @@ const studentRequired = [...student.required, ...location.required].filter(
 
 module.exports = {
   type: "object",
-  required: [...studentRequired, "mailingList", "paymentType", "courseId"],
+  required: [...studentRequired, "mailingList", "paymentOption", "courseId"],
   properties: {
     ...studentProperties,
     ...location.properties,
     mailingList: { type: "boolean" },
     courseId: { type: "string", pattern: "^\\d+$" },
-    paymentType: { type: "string", enum: Object.values(enums.PaymentTypes) },
+    paymentOption: {
+      type: "string",
+      enum: Object.values(PaymentOptions),
+    },
   },
 };

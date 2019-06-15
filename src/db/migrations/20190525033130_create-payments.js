@@ -21,7 +21,7 @@ exports.up = function (knex) {
         useNative: true,
         enumName: "payment_type",
       })
-      .notNullable();
+      .nullable();
     table.integer("amount").notNullable();
     table.datetime("invoice_date").notNullable();
     table.datetime("payment_date").nullable();

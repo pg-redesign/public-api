@@ -1,7 +1,12 @@
 module.exports = {
+  PaymentOptions: {
+    credit: "CREDIT",
+    invoice: "INVOICE",
+  },
   PaymentTypes: {
     check: "CHECK",
     credit: "CREDIT",
+    transfer: "TRANSFER",
   },
   FormTypes: {
     registration: "REGISTRATION",

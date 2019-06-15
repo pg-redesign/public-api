@@ -19,9 +19,9 @@ input RegistrationInput {
   """
   mailingList: Boolean!
   """
-  the Student's chosen payment type for the Course
+  the Student's chosen payment option when registering for the Course
   """
-  paymentType: PaymentTypes!
+  paymentOption: PaymentOptions!
 }
 
 """

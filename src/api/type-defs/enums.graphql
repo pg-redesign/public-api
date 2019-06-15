@@ -1,9 +1,20 @@
 """
-Payment types for Course registration
+Payment options for Course registration
+"""
+enum PaymentOptions {
+  "Stripe credit card payment processing"
+  CREDIT
+  "Receive a Course invoice with payment options"
+  INVOICE
+}
+
+"""
+Payment type used by a registered Student
 """
 enum PaymentTypes {
   CHECK
   CREDIT
+  TRANSFER
 }
 
 """
