@@ -31,6 +31,20 @@ const stripeService = {
 
 const emailService = {
   phoneContact: "+01-813-964-0800",
+  links: (() => {
+    const home = "https://princeton-groundwater.com";
+
+    return {
+      home,
+      creditPayment: (course, student) => {
+        const creditPaymentBase = `${home}/payment/credit`;
+
+        return course && student
+          ? `${creditPaymentBase}?course=${course.id}&student=${student.id}`
+          : creditPaymentBase;
+      },
+    };
+  })(),
   accounts: (() => {
     const name = "Princeton Groundwater, Inc.";
     const domain = "princeton-groundwater.com";
