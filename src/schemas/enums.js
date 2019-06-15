@@ -9,6 +9,7 @@ module.exports = {
     transfer: "TRANSFER",
   },
   FormTypes: {
+    mailingList: "MAILING_LIST",
     registration: "REGISTRATION",
     stripePayment: "STRIPE_PAYMENT",
   },

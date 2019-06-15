@@ -22,5 +22,12 @@ module.exports = {
 
       return models.Course.completeStripePayment(paymentData, services.stripe);
     },
+
+    subscribeToMailingList: (_, args, context) => {
+      const { services } = context;
+      const { mailingListData } = args;
+
+      return services.mailChimp.addToMailingList(mailingListData, context);
+    },
   },
 };

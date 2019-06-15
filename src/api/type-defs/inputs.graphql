@@ -39,3 +39,12 @@ input StripePaymentInput {
   """
   receiptEmail: EmailAddress!
 }
+
+"""
+Data for subscribing to the mailing list
+"""
+input MailingListInput {
+  firstName: String!
+  lastName: String!
+  email: EmailAddress!
+}

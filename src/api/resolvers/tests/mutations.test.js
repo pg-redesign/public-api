@@ -55,9 +55,15 @@ describe("Mutation resolvers", () => {
     const context = { models: { Course }, services: { stripe: {} } };
 
     Mutation.payForCourseWithStripe(null, args, context);
-    expect(Course.completeStripePayment).toHaveBeenCalledWith(
-      args.paymentData,
-      context.services.stripe,
-    );
+    expect(Course.completeStripePayment).toHaveBeenCalled();
+  });
+
+  test("subscribeToMailingList: subscribes a user to the MailChimp mailing list", () => {
+    const args = { mailingListData: {} };
+    const mailChimp = { addToMailingList: jest.fn() };
+    const context = { services: { mailChimp } };
+
+    Mutation.subscribeToMailingList(null, args, context);
+    expect(mailChimp.addToMailingList).toHaveBeenCalled();
   });
 });
