@@ -10,6 +10,7 @@ const fullCourseNames = {
   [courseInternalNames.remediation]: "Remediation Course",
 };
 
+// TODO: move to editable view data
 const courseDescriptions = {
   [courseInternalNames.pollution]: [
     "Basic to Advanced Principles in Groundwater Pollution and Hydrology",
@@ -26,6 +27,19 @@ const courseDescriptions = {
 const stripeService = {
   // NOTE: adjust message based on fullCourseNames
   paymentDescription: course => `Princeton Groundwater ${fullCourseNames[course.name]} payment`,
+};
+
+const emailService = {
+  accounts: (() => {
+    const name = "Princeton Groundwater, Inc.";
+    const domain = "princeton-groundwater.com";
+
+    return {
+      info: { name, address: `info@${domain}` },
+      billing: { name, address: `billing@${domain}` },
+      registration: { name, address: `registration@${domain}` },
+    };
+  })(),
 };
 
 /* eslint max-len:0 */
@@ -85,8 +99,9 @@ const months = {
 
 module.exports = {
   months,
-  fullCourseNames,
+  emailService,
   stripeService,
-  courseInternalNames,
+  fullCourseNames,
   courseDescriptions,
+  courseInternalNames,
 };
