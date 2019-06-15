@@ -1,39 +1,14 @@
-const { handleError, emailService } = require("../emailService");
-
-// mocked internals
-const {
-  renderCourseInvoice,
-  renderRegistrationComplete,
-} = require("../renderers");
+const emailService = require("../emailService");
 const { accounts } = require("../../../utils/constants").emailService;
 
+// mocked
+const utils = require("../utils");
+const renderers = require("../renderers");
+
+jest.mock("../utils.js");
+jest.mock("../renderers.js");
+
 const logger = { error: jest.fn() };
-
-jest.mock("../renderers.js", () => ({
-  renderCourseInvoice: jest.fn(),
-  renderRegistrationComplete: jest.fn(),
-}));
-
-jest.mock("../../../utils/constants.js", () => ({
-  emailService: { accounts: { billing: "billing", info: "info " } },
-}));
-
-describe("Email Service utils", () => {
-  test("handleError: logs email type, email address, and original error", () => {
-    const mockArgs = {
-      error: {},
-      email: "email",
-      emailType: "type",
-    };
-
-    handleError(logger, ...Object.values(mockArgs));
-
-    const [firstCall, secondCall] = logger.error.mock.calls;
-    expect(firstCall[0].includes(mockArgs.email)).toBe(true);
-    expect(firstCall[0].includes(mockArgs.emailType)).toBe(true);
-    expect(secondCall[0]).toBe(mockArgs.error);
-  });
-});
 
 describe("Email Service", () => {
   const course = { id: 1 };
@@ -48,16 +23,12 @@ describe("Email Service", () => {
       services: { file: { generateInvoice: jest.fn(() => invoiceFile) } },
     };
 
-    test("failure: catches and logs the error", () => {
+    test("failure: catches and logs the error", async () => {
       jest.clearAllMocks();
       emailClient.sendMail.mockImplementationOnce(() => Promise.reject(new Error()));
 
-      return mockedEmailService
-        .sendCourseInvoice(course, student, context)
-        .catch((error) => {
-          expect(error).not.toBeDefined();
-          expect(logger.error).toHaveBeenCalled();
-        });
+      await mockedEmailService.sendCourseInvoice(course, student, context);
+      expect(utils.handleError).toHaveBeenCalled();
     });
 
     describe("success", () => {
@@ -76,7 +47,7 @@ describe("Email Service", () => {
 
       test("sends from the billing email account", () => expect(sendMailCallArg.from).toBe(accounts.billing));
 
-      test("uses course invoice template", () => expect(renderCourseInvoice).toHaveBeenCalled());
+      test("uses course invoice template", () => expect(renderers.renderCourseInvoice).toHaveBeenCalled());
 
       test("adds the course invoice as an attachment", () => expect(sendMailCallArg.attachments[0]).toBe(invoiceFile));
     });
@@ -85,16 +56,16 @@ describe("Email Service", () => {
   describe("sendRegistrationComplete", () => {
     const context = { logger };
 
-    test("failure: catches and logs the error", () => {
+    test("failure: catches and logs the error", async () => {
       jest.clearAllMocks();
       emailClient.sendMail.mockImplementationOnce(() => Promise.reject(new Error()));
 
-      return mockedEmailService
-        .sendRegistrationComplete(course, student, context)
-        .catch((error) => {
-          expect(error).not.toBeDefined();
-          expect(logger.error).toHaveBeenCalled();
-        });
+      await mockedEmailService.sendRegistrationComplete(
+        course,
+        student,
+        context,
+      );
+      expect(utils.handleError).toHaveBeenCalled();
     });
 
     describe("success", () => {
@@ -117,7 +88,7 @@ describe("Email Service", () => {
 
       test("sends from the info email account", () => expect(sendMailCallArg.from).toBe(accounts.info));
 
-      test("uses registration complete template", () => expect(renderRegistrationComplete).toHaveBeenCalled());
+      test("uses registration complete template", () => expect(renderers.renderRegistrationComplete).toHaveBeenCalled());
     });
   });
 });
