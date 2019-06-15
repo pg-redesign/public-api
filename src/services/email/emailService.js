@@ -1,12 +1,8 @@
 const renderers = require("./renderers");
+const { handleError } = require("./utils");
 const constants = require("../../utils/constants").emailService;
 
-const handleError = (logger, error, email, emailType) => {
-  logger.error(`[Email Service]: failed sending [${emailType}] to [${email}]`);
-  logger.error(error);
-};
-
-const emailService = emailClient => ({
+module.exports = emailClient => ({
   sendCourseInvoice: async (course, student, context) => {
     const { logger, services } = context;
 
@@ -37,8 +33,3 @@ const emailService = emailClient => ({
       .catch(error => handleError(logger, error, student.email, "registration complete"));
   },
 });
-
-module.exports = {
-  handleError,
-  emailService,
-};
