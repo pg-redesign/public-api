@@ -30,6 +30,7 @@ const stripeService = {
 };
 
 const emailService = {
+  phoneContact: "+01-813-964-0800",
   accounts: (() => {
     const name = "Princeton Groundwater, Inc.";
     const domain = "princeton-groundwater.com";
