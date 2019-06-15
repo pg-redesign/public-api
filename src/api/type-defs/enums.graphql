@@ -10,6 +10,7 @@ enum PaymentTypes {
 Form schema types for client-side validation
 """
 enum FormTypes {
+  MAILING_LIST
   REGISTRATION
   STRIPE_PAYMENT
 }
