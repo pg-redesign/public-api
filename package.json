@@ -1,7 +1,30 @@
 {
-  "name": "pg-public-api",
   "version": "1.0.0",
+  "author": "vampiire",
+  "license": "UNLICENSED",
+  "name": "pg-public-api",
   "description": "pg redesign public GraphQL API",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pg-redesign/public-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pg-redesign/public-api/issues"
+  },
+  "environment": {
+    "PORT": "API server port",
+    "DB_NAME": "database name",
+    "DB_USER": "database user name",
+    "DB_PASSWORD": "database user password",
+    "DB_HOST": "database host name / IP address",
+    "AWS_ACCESS_KEY_ID": "AWS SES mailer",
+    "AWS_SECRET_ACCESS_KEY": "AWS SES mailer",
+    "STRIPE_API_KEY": "Stripe payment processing",
+    "MAILCHIMP_API_KEY": "MailChimp mailing list control",
+    "MAILCHIMP_NEWSLETTER_ID": "MailChimp newsletter mailing list",
+    "ERROR_LOGS_DIR": "relative / absolute path for error log files to be written",
+    "COMBINED_LOGS_DIR": "relative / absolute path for combined log files to be written"
+  },
   "main": "src",
   "scripts": {
     "start": "node src",
@@ -15,8 +38,6 @@
     "env:dev": "env $(< .env)",
     "env:test": "env $(< .test.env)"
   },
-  "author": "vampiire",
-  "license": "UNLICENSED",
   "dependencies": {
     "@okgrow/graphql-scalars": "^0.4.5",
     "@types/stripe": "^6.26.5",
@@ -82,13 +103,5 @@
   },
   "nodemonConfig": {
     "ext": "graphql, js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/pg-redesign/public-api.git"
-  },
-  "bugs": {
-    "url": "https://github.com/pg-redesign/public-api/issues"
-  },
-  "homepage": "https://github.com/pg-redesign/public-api#readme"
+  }
 }
