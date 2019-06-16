@@ -1,5 +1,5 @@
-const { renderPugTemplate } = require("./utils");
 const constants = require("../../utils/constants");
+const { renderPugTemplate, buildCreditPaymentLink } = require("./email-utils");
 
 const renderCourseInvoice = (course, student) => {
   const templateFilename = "course-invoice.pug";
@@ -9,11 +9,8 @@ const renderCourseInvoice = (course, student) => {
     courseName,
     studentFirstName: student.firstName,
     contactEmail: constants.emailService.accounts.billing,
+    creditPaymentLink: buildCreditPaymentLink(course, student),
     previewText: `Billing Invoice: Princeton Groundwater ${courseName}`,
-    creditPaymentLink: constants.emailService.links.creditPayment(
-      course,
-      student,
-    ),
   };
 
   return renderPugTemplate(templateFilename, templateData);

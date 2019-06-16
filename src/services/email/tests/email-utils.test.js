@@ -1,8 +1,10 @@
-// mocked
 const pug = require("pug");
-
 const constants = require("../../../utils/constants");
-const { handleError, renderPugTemplate } = require("../utils");
+const {
+  handleError,
+  renderPugTemplate,
+  buildCreditPaymentLink,
+} = require("../email-utils");
 
 jest.mock("pug");
 
@@ -46,5 +48,32 @@ describe("Email Service utils", () => {
     test("injects any additional template data", () => expect(pugRenderFileOptions.some).toBe(templateData.some));
 
     test("renders the chosen template", () => expect(pug.renderFile).toHaveBeenCalled());
+  });
+
+  describe("buildCreditPaymentLink", () => {
+    const course = { id: 1 };
+    const student = { id: 2 };
+    const creditPaymentLink = "credit link";
+
+    test("appends course and student ID query string to payment link", () => {
+      const output = buildCreditPaymentLink(course, student, creditPaymentLink);
+      expect(output.includes(`course=${course.id}`)).toBe(true);
+      expect(output.includes(`student=${student.id}`)).toBe(true);
+    });
+
+    describe("throws an Error if", () => [
+      {
+        test: "missing course ID",
+        args: [{}, student, creditPaymentLink],
+      },
+      {
+        test: "missing student ID",
+        args: [course, {}, creditPaymentLink],
+      },
+      {
+        test: "missing credit payment site link",
+        args: [course, student, null],
+      },
+    ].forEach(testCase => test(testCase.test, () => expect(() => buildCreditPaymentLink(...testCase.args)).toThrow())));
   });
 });

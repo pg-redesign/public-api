@@ -3,10 +3,10 @@ const {
   renderRegistrationComplete,
 } = require("../renderers");
 
-const utils = require("../utils");
+const emailUtils = require("../email-utils");
 const constants = require("../../../utils/constants");
 
-jest.mock("../utils.js");
+jest.mock("../email-utils.js");
 
 describe("Template Renderers", () => {
   describe("renderCourseInvoice", () => {
@@ -14,7 +14,7 @@ describe("Template Renderers", () => {
     let templateDataArg;
     beforeAll(() => {
       renderCourseInvoice({}, {});
-      const [mockCall] = utils.renderPugTemplate.mock.calls;
+      const [mockCall] = emailUtils.renderPugTemplate.mock.calls;
       [filenameArg, templateDataArg] = mockCall;
     });
 

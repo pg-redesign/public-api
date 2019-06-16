@@ -1,12 +1,12 @@
 const renderers = require("./renderers");
-const { handleError } = require("./utils");
+const { handleError } = require("./email-utils");
 const constants = require("../../utils/constants").emailService;
 
 module.exports = emailClient => ({
   sendCourseInvoice: async (course, student, context) => {
     const { logger, services } = context;
 
-    // { filename, content }
+    // TODO: implement file service, { filename, content }
     const invoiceFile = await services.file.generateInvoice(course, student);
 
     return emailClient

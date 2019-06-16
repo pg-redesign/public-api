@@ -2,10 +2,10 @@ const emailService = require("../emailService");
 const { accounts } = require("../../../utils/constants").emailService;
 
 // mocked
-const utils = require("../utils");
 const renderers = require("../renderers");
+const emailUtils = require("../email-utils");
 
-jest.mock("../utils.js");
+jest.mock("../email-utils.js");
 jest.mock("../renderers.js");
 
 const logger = { error: jest.fn() };
@@ -28,7 +28,7 @@ describe("Email Service", () => {
       emailClient.sendMail.mockImplementationOnce(() => Promise.reject(new Error()));
 
       await mockedEmailService.sendCourseInvoice(course, student, context);
-      expect(utils.handleError).toHaveBeenCalled();
+      expect(emailUtils.handleError).toHaveBeenCalled();
     });
 
     describe("success", () => {
@@ -65,7 +65,7 @@ describe("Email Service", () => {
         student,
         context,
       );
-      expect(utils.handleError).toHaveBeenCalled();
+      expect(emailUtils.handleError).toHaveBeenCalled();
     });
 
     describe("success", () => {

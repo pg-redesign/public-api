@@ -8,6 +8,14 @@ const handleError = (logger, error, email, emailType) => {
   logger.error(error);
 };
 
+const buildCreditPaymentLink = (course, student, creditPaymentLink) => {
+  if (!course.id) throw new Error("Missing course ID");
+  if (!student.id) throw new Error("Missing student ID");
+  if (!creditPaymentLink) throw new Error("Missing credit payment client url");
+
+  return `${creditPaymentLink}?course=${course.id}&student=${student.id}`;
+};
+
 const renderPugTemplate = (filename, templateData) => {
   const basedir = path.join(__dirname, "templates");
 
@@ -26,4 +34,5 @@ const renderPugTemplate = (filename, templateData) => {
 module.exports = {
   handleError,
   renderPugTemplate,
+  buildCreditPaymentLink,
 };
