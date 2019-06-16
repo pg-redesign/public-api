@@ -14,29 +14,31 @@ describe("Course prototype methods", () => {
 
   describe("registerNewStudent", () => {
     let course;
-    let student;
-    let paymentData;
+    let registeredStudent;
     beforeAll(async () => {
       course = await Course.query().findOne("start_date", ">", new Date());
 
-      paymentData = {
+      const paymentData = {
         amount: course.price,
         invoiceDate: new Date().toISOString(),
-        paymentType: enums.PaymentTypes.credit,
       };
+
+      registeredStudent = await course.registerNewStudent(
+        studentData,
+        paymentData,
+      );
     });
 
     afterAll(() => Student.query().del());
 
     test("creates and returns a student", async () => {
-      student = await course.registerNewStudent(studentData, paymentData);
-      expect(student.constructor.name).toBe("Student");
+      expect(registeredStudent.constructor.name).toBe("Student");
     });
 
     test("creates a payment association between the student and the course", async () => {
       await course.$loadRelated({ payments: true, students: true });
       expect(course.payments.length).toBe(1);
-      expect(course.payments[0].studentId).toBe(student.id);
+      expect(course.payments[0].studentId).toBe(registeredStudent.id);
     });
   });
 
@@ -51,16 +53,13 @@ describe("Course prototype methods", () => {
       paymentData = {
         amount: course.price,
         invoiceDate: new Date().toISOString(),
-        paymentType: enums.PaymentTypes.credit,
       };
     });
 
     afterAll(() => Student.query().del());
 
-    test("student is not registered for course: returns false", async () => {
-      const result = await course.hasStudent(1);
-      expect(result).toBe(false);
-    });
+    test("student is not registered for course: returns false", async () => expect(course.hasStudent(1)).resolves.toBe(false));
+
     test("student is registered for course: returns true", async () => {
       const student = await course.registerNewStudent(studentData, paymentData);
       expect(await course.hasStudent(student.id)).toBe(true);
@@ -82,7 +81,6 @@ describe("Course prototype methods", () => {
       paymentData = {
         amount: course.price,
         invoiceDate: new Date().toISOString(),
-        paymentType: enums.PaymentTypes.credit,
       };
 
       result = await course.registerExistingStudent(
@@ -127,23 +125,25 @@ describe("Course prototype methods", () => {
 
   describe("getRegisteredStudent", () => {
     let course;
-    let student;
+    let registeredStudent;
     beforeAll(async () => {
       course = await Course.query()
         .where("start_date", ">", new Date())
         .first();
 
-      student = await Course.registerStudent({
+      const { student } = await Course.registerStudent({
         courseId: course.id,
         paymentType: enums.PaymentTypes.credit,
         ...studentMock.studentRegistrationData,
       });
+
+      registeredStudent = student;
     });
     afterAll(() => Student.query().del());
 
     test("student is registered: returns the student", async () => {
-      const result = await course.getRegisteredStudent(student.id);
-      expect(result.id).toBe(student.id);
+      const result = await course.getRegisteredStudent(registeredStudent.id);
+      expect(result.id).toBe(registeredStudent.id);
     });
 
     test("student not registered: throws NotFoundError", () => expect(course.getRegisteredStudent(0)).rejects.toBeInstanceOf(
@@ -151,42 +151,47 @@ describe("Course prototype methods", () => {
     ));
 
     test("columns arg: only returns chosen columns", async () => {
-      const result = await course.getRegisteredStudent(student.id, [
+      const result = await course.getRegisteredStudent(registeredStudent.id, [
         "first_name",
       ]);
-      expect(result).toEqual({ firstName: student.firstName });
+      expect(result).toEqual({ firstName: registeredStudent.firstName });
     });
   });
 
-  describe("updateStudentPayment", () => {
+  describe("completeStudentRegistration", () => {
     const mockConfirmationId = "a confirmation ID";
 
     let result;
-    let student;
+    let chosenPaymentType;
+    let registeredStudent;
     beforeAll(async () => {
       const course = await Course.query()
         .where("start_date", ">", new Date())
         .first();
 
-      student = await Course.registerStudent({
+      const { student } = await Course.registerStudent({
         courseId: course.id,
-        paymentType: enums.PaymentTypes.credit,
         ...studentMock.studentRegistrationData,
       });
 
-      result = await course.updateStudentPayment(
-        student.id,
+      registeredStudent = student;
+      chosenPaymentType = enums.PaymentTypes.credit;
+
+      result = await course.completeStudentRegistration(
+        registeredStudent.id,
         mockConfirmationId,
+        chosenPaymentType,
       );
     });
     afterAll(() => Student.query().del());
 
-    test("returns the updated student", () => expect(result.id).toBe(student.id));
+    test("returns the updated student", () => expect(result.id).toBe(registeredStudent.id));
 
-    test("sets the payment date and confirmation ID", () => {
-      const { confirmationId, paymentDate } = result;
+    test("sets the student's payment date, payment type, and confirmation ID", () => {
+      const { confirmationId, paymentDate, paymentType } = result;
 
       expect(paymentDate).not.toBeNull();
+      expect(paymentType).toBe(chosenPaymentType);
       expect(confirmationId).toBe(mockConfirmationId);
     });
   });
