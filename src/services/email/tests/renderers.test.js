@@ -1,6 +1,6 @@
 const {
   renderCourseInvoice,
-  renderRegistrationComplete,
+  // renderRegistrationComplete,
 } = require("../renderers");
 
 const emailUtils = require("../email-utils");
