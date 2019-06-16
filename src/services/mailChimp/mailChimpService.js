@@ -25,12 +25,17 @@ module.exports = mailChimp => ({
       })
       .then(() => true)
       .catch((error) => {
-        logger.error(`Failed subscribing [${email}] to mailing list`);
+        logger.error(
+          `[MailChimp Service]: Failed subscribing [${email}] to mailing list`,
+        );
+
         logger.error(error.message);
 
-        if (error.request) {
-          const { data, status } = error.request;
-          logger.error({ data, status });
+        if (error.response) {
+          const { data, status } = error.response;
+          logger.error(
+            `response: ${JSON.stringify({ data, status }, null, 2)}`,
+          );
         }
 
         return false;

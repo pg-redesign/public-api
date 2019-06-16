@@ -53,15 +53,28 @@ describe("mailChimpService.addToMailingList: adds a user to the MailChimp mailin
   });
 
   describe("failure", () => {
-    let result;
-    beforeAll(async () => {
+    test("logs the error and returns false", async () => {
       mailChimpMock.put.mockImplementationOnce(() => Promise.reject(new Error()));
 
-      result = await mockedService.addToMailingList(mailingListData, context);
+      const result = await mockedService.addToMailingList(
+        mailingListData,
+        context,
+      );
+      expect(logger.error).toHaveBeenCalled();
+      expect(result).toBe(false);
     });
 
-    test("logs the error", () => expect(logger.error).toHaveBeenCalled());
+    test("if the error includes a server response logs the data and status", async () => {
+      const error = new Error();
+      error.response = { response: { data: "", status: "" } };
+      mailChimpMock.put.mockImplementationOnce(() => Promise.reject(error));
 
-    test("returns false", () => expect(result).toBe(false));
+      const result = await mockedService.addToMailingList(
+        mailingListData,
+        context,
+      );
+      expect(logger.error).toHaveBeenCalled();
+      expect(result).toBe(false);
+    });
   });
 });
