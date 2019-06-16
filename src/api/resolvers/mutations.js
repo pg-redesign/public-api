@@ -1,26 +1,43 @@
 module.exports = {
   Mutation: {
     registerForCourse: async (_, args, context) => {
-      const { mailingList, ...registrationData } = args.registrationData;
-      const { logger, models, services } = context;
+      const {
+        mailingList,
+        paymentOption,
+        ...registrationData
+      } = args.registrationData;
+
+      const { models, schemas, services } = context;
 
       if (mailingList) {
-        const { email } = registrationData;
-        // TODO: implement email service
-        services.email.addToMailingList(email).catch((error) => {
-          logger.error(`Failed subscribing [${email}] to mailing list`);
-          logger.error(error);
-        });
+        // run in background
+        services.mailChimp.addToMailingList(registrationData, context);
       }
-      // TODO: handle sending invoices for paymentType = "check"?
-      return models.Course.registerStudent(registrationData);
+
+      const { course, student } = await models.Course.registerStudent(
+        registrationData,
+      );
+
+      const { PaymentOptions } = schemas.enums;
+      if (paymentOption === PaymentOptions.invoice) {
+        await services.email.sendCourseInvoice(course, student, context);
+      }
+
+      return student;
     },
 
-    payForCourseWithStripe: (_, args, context) => {
+    payForCourseWithStripe: async (_, args, context) => {
       const { paymentData } = args;
       const { models, services } = context;
 
-      return models.Course.completeStripePayment(paymentData, services.stripe);
+      const { course, student } = await models.Course.completeStripePayment(
+        paymentData,
+        context,
+      );
+
+      await services.email.sendRegistrationComplete(course, student, context);
+
+      return student;
     },
 
     subscribeToMailingList: (_, args, context) => {

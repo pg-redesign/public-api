@@ -105,7 +105,6 @@ describe("Course static methods", () => {
 
       registrationData = {
         courseId: course.id,
-        paymentType: schemas.enums.PaymentTypes.check,
         ...studentMock.studentRegistrationData,
       };
 
@@ -115,14 +114,14 @@ describe("Course static methods", () => {
       Course.prototype.registerExistingStudent = jest.fn(() => updatedStudent);
     });
 
+    afterEach(() => jest.clearAllMocks());
+
     afterAll(() => {
       // reset mocks to original methods
       Course.validateCourseId = validateCourseId;
       Course.prototype.registerNewStudent = registerNewStudent;
       Course.prototype.registerExistingStudent = registerExistingStudent;
     });
-
-    afterEach(() => jest.clearAllMocks());
 
     describe("auxiliary behavior", () => {
       let studentData;
@@ -153,16 +152,23 @@ describe("Course static methods", () => {
       });
     });
 
-    test("student not in db: registers and returns a new student", async () => {
-      await Course.registerStudent(registrationData);
+    test("student not in db: returns course and new registered student", async () => {
+      const output = await Course.registerStudent(registrationData);
       expect(Course.prototype.registerNewStudent).toHaveBeenCalled();
+      expect(output.course).toBe(course);
+      expect(output.student).toBe(newStudent);
     });
 
-    test("student exists in db: registers and returns updated student", async () => {
+    test("student exists in db: returns course and registered student", async () => {
       const student = await studentMock.createStudent();
 
-      await Course.registerStudent({ email: studentMock.studentData.email });
+      const output = await Course.registerStudent({
+        email: studentMock.studentData.email,
+      });
+
       expect(Course.prototype.registerExistingStudent).toHaveBeenCalled();
+      expect(output.course).toBe(course);
+      expect(output.student).toBe(updatedStudent);
 
       // delete student
       await studentMock.destroyStudent(student.id);
@@ -179,7 +185,10 @@ describe("Course static methods", () => {
 
     let course;
     let paymentData;
-    const { getRegisteredStudent, updateStudentPayment } = Course.prototype;
+    const {
+      getRegisteredStudent,
+      completeStudentRegistration,
+    } = Course.prototype;
     beforeAll(async () => {
       course = await Course.query().findOne("start_date", ">", new Date());
 
@@ -189,25 +198,28 @@ describe("Course static methods", () => {
       };
 
       // mock proto methods
-      Course.prototype.updateStudentPayment = jest.fn();
+      Course.prototype.completeStudentRegistration = jest.fn();
       Course.prototype.getRegisteredStudent = jest.fn();
     });
+
     afterAll(() => {
       // reset proto methods
-      Course.prototype.updateStudentPayment = updateStudentPayment;
+      Course.prototype.completeStudentRegistration = completeStudentRegistration;
       Course.prototype.getRegisteredStudent = getRegisteredStudent;
     });
 
     describe("success", () => {
+      // let course;
       let result;
       beforeAll(async () => {
         Course.prototype.getRegisteredStudent.mockImplementationOnce(
           () => student,
         );
-        Course.prototype.updateStudentPayment.mockImplementationOnce(
+        Course.prototype.completeStudentRegistration.mockImplementationOnce(
           () => student,
         );
 
+        // course = await Course.query().findOne("start_date", ">", new Date());
         result = await Course.completeStripePayment(paymentData, stripeService);
       });
       afterAll(() => jest.clearAllMocks());
@@ -221,10 +233,13 @@ describe("Course static methods", () => {
       });
 
       test("updates the payment status of the student", () => {
-        expect(Course.prototype.updateStudentPayment).toHaveBeenCalled();
+        expect(Course.prototype.completeStudentRegistration).toHaveBeenCalled();
       });
 
-      test("returns the student", () => expect(result).toBe(student));
+      test("returns the course and paid student", () => {
+        expect(result.student).toBe(student);
+        expect(result.course.id).toBe(course.id);
+      });
     });
 
     describe("failure", () => {
@@ -239,7 +254,7 @@ describe("Course static methods", () => {
         }));
         const notCalled = [
           stripeService.createCharge,
-          Course.prototype.updateStudentPayment,
+          Course.prototype.completeStudentRegistration,
         ];
 
         await Course.completeStripePayment(paymentData);

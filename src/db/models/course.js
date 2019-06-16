@@ -87,7 +87,6 @@ class Course extends TimestampsBase {
       state,
       country,
       courseId,
-      paymentType,
       ...partialStudent
     } = registrationData;
 
@@ -101,23 +100,24 @@ class Course extends TimestampsBase {
     };
 
     const paymentData = {
-      paymentType,
       amount: course.price,
       invoiceDate: new Date().toISOString(),
     };
 
-    // check for an existing student with the given email
+    // check for an existing student in the system with the given email
     const existingStudent = await Student.query()
       .findOne("email", partialStudent.email)
       .select("id");
 
-    return existingStudent
-      ? course.registerExistingStudent(
+    const student = existingStudent
+      ? await course.registerExistingStudent(
         existingStudent,
         studentData,
         paymentData,
       )
-      : course.registerNewStudent(studentData, paymentData);
+      : await course.registerNewStudent(studentData, paymentData);
+
+    return { course, student };
   }
 
   static async completeStripePayment(paymentData, stripeService) {
@@ -129,13 +129,13 @@ class Course extends TimestampsBase {
       .throwIfNotFound();
 
     // throws if not found (student not registered)
-    const student = await course.getRegisteredStudent(studentId, [
+    const registeredStudent = await course.getRegisteredStudent(studentId, [
       "payment_date",
     ]);
 
-    if (student.paymentDate) {
+    if (registeredStudent.paymentDate) {
       // student has already paid, exit early
-      return student;
+      return registeredStudent;
     }
 
     const confirmationId = await stripeService.createCharge(
@@ -143,14 +143,21 @@ class Course extends TimestampsBase {
       paymentData,
     );
 
-    // updates paymentDate, confirmationId and returns the Student
-    return course.updateStudentPayment(studentId, confirmationId);
+    //
+    const student = await course.completeStudentRegistration(
+      studentId,
+      confirmationId,
+      schemas.enums.PaymentTypes.credit,
+    );
+
+    return { course, student };
   }
 
   // -- INSTANCE METHODS -- //
 
-  updateStudentPayment(studentId, confirmationId) {
+  completeStudentRegistration(studentId, confirmationId, paymentType) {
     return this.$relatedQuery("students").patchAndFetchById(studentId, {
+      paymentType,
       confirmationId,
       paymentDate: new Date().toISOString(),
     });
