@@ -1,30 +1,30 @@
 const { ApolloServer } = require("apollo-server");
-const logger = require("@vampiire/node-logger")(); // TODO: output paths
+const logger = require("@vampiire/node-logger")();
 const { ApolloErrorConverter } = require("apollo-error-converter");
 
 const utils = require("./utils");
-const { models } = require("./db");
 const schemas = require("./schemas");
 const services = require("./services");
 const typeDefs = require("./api/type-defs");
 const resolvers = require("./api/resolvers");
+const { models, objectionErrorMap } = require("./db");
 
-const devMode = process.env.NODE_ENV !== "production";
+const inDevelopment = process.env.NODE_ENV !== "production";
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  playground: devMode,
-  introspection: devMode,
+  playground: inDevelopment,
+  introspection: inDevelopment,
   formatError: new ApolloErrorConverter({
+    errorMap: [objectionErrorMap],
     logger: logger.error.bind(logger),
-    // TODO: configure error map
   }),
   cors: {
     credentials: true,
     optionsSuccessStatus: 200,
     origin: [process.env.CLIENT_ADDRESS].concat(
-      devMode ? [/^http:\/\/(localhost|127.0.0.1):\d{4,5}/] : [],
+      inDevelopment ? [/^http:\/\/(localhost|127.0.0.1):\d{4,5}/] : [],
     ),
   },
 
