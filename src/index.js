@@ -1,5 +1,5 @@
-const { ApolloServer } = require("apollo-server");
-const logger = require("@vampiire/node-logger")();
+const express = require("express");
+const { ApolloServer } = require("apollo-server-express");
 const { ApolloErrorConverter } = require("apollo-error-converter");
 
 const utils = require("./utils");
@@ -8,8 +8,13 @@ const services = require("./services");
 const typeDefs = require("./api/type-defs");
 const resolvers = require("./api/resolvers");
 const { models, objectionErrorMap } = require("./db");
+const { logger, requestLogger } = require("./logger-config");
 
-const inDevelopment = process.env.NODE_ENV !== "production";
+const { env } = process;
+const inDevelopment = env.NODE_ENV !== "production";
+
+const app = express();
+app.use([requestLogger]);
 
 const server = new ApolloServer({
   typeDefs,
@@ -20,30 +25,31 @@ const server = new ApolloServer({
     errorMap: [objectionErrorMap],
     logger: logger.error.bind(logger),
   }),
+
+  context: () => ({
+    env,
+    utils,
+    logger,
+    models,
+    schemas,
+    services,
+  }),
+});
+
+server.applyMiddleware({
+  app,
   cors: {
     credentials: true,
     optionsSuccessStatus: 200,
-    origin: [process.env.CLIENT_ADDRESS].concat(
+    origin: [env.CLIENT_ADDRESS].concat(
       inDevelopment ? [/^http:\/\/(localhost|127.0.0.1):\d{4,5}/] : [],
     ),
   },
-
-  context: (options) => {
-    const { req } = options;
-    // TODO: log requests, logger.request() config in node-logger
-
-    return {
-      req,
-      utils,
-      logger,
-      models,
-      schemas,
-      services,
-    };
-  },
 });
 
-server
-  .listen(process.env.PORT)
-  .then(serverInfo => logger.info(`server up on ${serverInfo.url}`))
-  .catch(logger.error);
+app.listen(env.PORT, (error) => {
+  if (error) {
+    return logger.error(error);
+  }
+  return logger.graphql(`server up on http://localhost:${env.PORT}/graphql`);
+});
