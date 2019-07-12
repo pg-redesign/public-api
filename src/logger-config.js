@@ -24,7 +24,9 @@ const requestLogger = expressLogger({
   colorize: inDevelopment,
   msg: "IP [{{req.ip}}], status {{res.statusCode}}, {{res.responseTime}}ms",
   // skip the gql playground ping requests
-  skip: req => inDevelopment && req.body.operationName === "IntrospectionQuery",
+  skip: req => inDevelopment
+    && req.body
+    && req.body.operationName === "IntrospectionQuery",
   dynamicMeta: req => ({
     ip: req.ip,
     body: req.body,
