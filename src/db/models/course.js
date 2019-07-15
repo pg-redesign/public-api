@@ -2,12 +2,11 @@ const { ValidationError } = require("objection");
 
 const Student = require("./student");
 const schemas = require("../../schemas");
-const { Model } = require("../connection");
-const TimestampsBase = require("./timestamps-base");
+const BaseModel = require("./base-model");
 
 const DEFAULT_SORT = ["start_date", "desc"];
 
-class Course extends TimestampsBase {
+class Course extends BaseModel {
   static get tableName() {
     return "courses";
   }
@@ -20,7 +19,7 @@ class Course extends TimestampsBase {
     return {
       payments: {
         modelClass: "payment",
-        relation: Model.HasManyRelation,
+        relation: BaseModel.HasManyRelation,
         join: {
           from: "courses.id",
           to: "payments.course_id",
@@ -28,7 +27,7 @@ class Course extends TimestampsBase {
       },
       students: {
         modelClass: "student",
-        relation: Model.ManyToManyRelation,
+        relation: BaseModel.ManyToManyRelation,
         join: {
           from: "courses.id",
           to: "students.id",
@@ -50,13 +49,16 @@ class Course extends TimestampsBase {
 
   // -- STATIC METHODS -- //
 
-  static getAll() {
-    return this.query().orderBy(...DEFAULT_SORT);
+  static getAll(columns = []) {
+    return this.query()
+      .select(columns)
+      .orderBy(...DEFAULT_SORT);
   }
 
-  static getUpcoming() {
+  static getUpcoming(columns = []) {
     return (
       this.query()
+        .select(columns)
         .orderBy(...DEFAULT_SORT)
         // only return courses that are upcoming (beyond current date)
         .where("start_date", ">", new Date())
@@ -64,10 +66,10 @@ class Course extends TimestampsBase {
     );
   }
 
-  static async validateCourseId(courseId) {
+  static async validateCourseId(courseId, columns = []) {
     const course = await this.query()
       .findById(courseId)
-      .select(["id", "start_date", "price"])
+      .select(columns)
       .throwIfNotFound();
 
     if (course.startDate < new Date()) {
@@ -90,8 +92,11 @@ class Course extends TimestampsBase {
       ...partialStudent
     } = registrationData;
 
-    // ensures the course is valid for registration
-    const course = await this.validateCourseId(courseId);
+    const course = await this.validateCourseId(courseId, [
+      "id",
+      "start_date",
+      "price",
+    ]);
 
     // shape location property
     const studentData = {
@@ -123,10 +128,11 @@ class Course extends TimestampsBase {
   static async completeStripePayment(paymentData, stripeService) {
     const { courseId, studentId } = paymentData;
 
-    const course = await this.query()
-      .findById(courseId)
-      .select(["id", "price", "name"])
-      .throwIfNotFound();
+    const course = await this.validateCourseId(courseId, [
+      "id",
+      "price",
+      "name",
+    ]);
 
     // throws if not found (student not registered)
     const registeredStudent = await course.getRegisteredStudent(studentId, [
