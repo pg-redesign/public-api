@@ -134,9 +134,7 @@ describe("Course static methods", () => {
       });
 
       test("validates the course ID", () => {
-        expect(Course.validateCourseId).toHaveBeenCalledWith(
-          registrationData.courseId,
-        );
+        expect(Course.validateCourseId).toHaveBeenCalled();
       });
 
       test("creates student data object with correct shape (schema validated)", () => {
@@ -186,6 +184,7 @@ describe("Course static methods", () => {
     let course;
     let paymentData;
     const {
+      validateCourseId,
       getRegisteredStudent,
       completeStudentRegistration,
     } = Course.prototype;
@@ -197,19 +196,20 @@ describe("Course static methods", () => {
         studentId: student.id,
       };
 
-      // mock proto methods
-      Course.prototype.completeStudentRegistration = jest.fn();
+      // mock methods
+      Course.validateCourseId = jest.fn(() => course);
       Course.prototype.getRegisteredStudent = jest.fn();
+      Course.prototype.completeStudentRegistration = jest.fn();
     });
 
     afterAll(() => {
-      // reset proto methods
-      Course.prototype.completeStudentRegistration = completeStudentRegistration;
+      // reset mocked methods
+      Course.validateCourseId = validateCourseId;
       Course.prototype.getRegisteredStudent = getRegisteredStudent;
+      Course.prototype.completeStudentRegistration = completeStudentRegistration;
     });
 
     describe("success", () => {
-      // let course;
       let result;
       beforeAll(async () => {
         Course.prototype.getRegisteredStudent.mockImplementationOnce(
@@ -219,10 +219,13 @@ describe("Course static methods", () => {
           () => student,
         );
 
-        // course = await Course.query().findOne("start_date", ">", new Date());
         result = await Course.completeStripePayment(paymentData, stripeService);
       });
       afterAll(() => jest.clearAllMocks());
+
+      test("validates the course ID", () => {
+        expect(Course.validateCourseId).toHaveBeenCalled();
+      });
 
       test("confirms student existence and registration", () => {
         expect(Course.prototype.getRegisteredStudent).toHaveBeenCalled();
@@ -243,10 +246,6 @@ describe("Course static methods", () => {
     });
 
     describe("failure", () => {
-      test("course does not exist: throws NotFoundError", () => expect(
-        Course.completeStripePayment({ courseId: 0 }),
-      ).rejects.toBeInstanceOf(NotFoundError));
-
       test("student has already paid: does not call stripe service or update payment status", async () => {
         Course.prototype.getRegisteredStudent.mockImplementationOnce(() => ({
           ...student,
