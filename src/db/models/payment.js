@@ -1,8 +1,7 @@
-const { Model } = require("../connection");
 const schemas = require("../../schemas");
-const TimestampsBase = require("./timestamps-base");
+const BaseModel = require("./base-model");
 
-class Payment extends TimestampsBase {
+class Payment extends BaseModel {
   static get tableName() {
     return "payments";
   }
@@ -15,7 +14,7 @@ class Payment extends TimestampsBase {
     return {
       course: {
         modelClass: "course",
-        relation: Model.BelongsToOneRelation,
+        relation: BaseModel.BelongsToOneRelation,
         join: {
           from: "payments.course_id",
           to: "courses.id",
@@ -23,7 +22,7 @@ class Payment extends TimestampsBase {
       },
       student: {
         modelClass: "student",
-        relation: Model.BelongsToOneRelation,
+        relation: BaseModel.BelongsToOneRelation,
         join: {
           from: "payments.student_id",
           to: "students.id",
