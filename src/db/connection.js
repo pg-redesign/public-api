@@ -12,6 +12,6 @@ const connection = require("knex")({
 Model.knex(connection);
 
 module.exports = {
-  connection,
   Model,
+  connection,
 };

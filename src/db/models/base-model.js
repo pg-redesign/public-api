@@ -2,16 +2,16 @@ const { snakeCaseMappers } = require("objection");
 
 const { Model } = require("../connection");
 /**
- * Base class for shared configuration
- * - converts snake_case (db side) <--> camelCase (server side)
+ * Base Model class for shared configuration
  * - sets base model path
  *  - allows relations with modelClass to use 'ModelName' string
- * - automatic timestamps
+ * - converts snake_case (db side) <--> camelCase (API side)
+ * - automatic created_at, updated_at timestamps
  *  - $beforeInsert(): created_at = new Date as ISO string
  *  - $beforeUpdate(): updated_at = new Date as ISO string
  *  - call super[.$beforeInsert()][.$beforeUpdate()] if overriding in subclass
  */
-class TimestampsBase extends Model {
+class BaseModel extends Model {
   static get columnNameMappers() {
     return snakeCaseMappers();
   }
@@ -29,4 +29,4 @@ class TimestampsBase extends Model {
   }
 }
 
-module.exports = TimestampsBase;
+module.exports = BaseModel;
