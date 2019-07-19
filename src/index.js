@@ -41,7 +41,7 @@ server.applyMiddleware({
   cors: {
     credentials: true,
     optionsSuccessStatus: 200,
-    origin: [env.CLIENT_ADDRESS].concat(
+    origin: [env.CLIENT_URL].concat(
       inDevelopment ? [/^http:\/\/(localhost|127.0.0.1):\d{4,5}/] : [],
     ),
   },
@@ -51,5 +51,10 @@ app.listen(env.PORT, (error) => {
   if (error) {
     return logger.error(error);
   }
-  return logger.graphql(`server up on http://localhost:${env.PORT}/graphql`);
+
+  const startupLog = inDevelopment
+    ? `API up on http://localhost:${env.PORT}/graphql`
+    : `API listening on port: ${env.PORT}`;
+
+  return logger.graphql(startupLog);
 });
