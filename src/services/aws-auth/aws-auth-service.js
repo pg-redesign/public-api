@@ -6,7 +6,7 @@ module.exports = awsAuth => ({
     const adminInfo = await this.getAdminInfo(tokenData.access_token);
 
     // throws if admin is invalid
-    const admin = await models.Admin.updateAuth({
+    const admin = await models.Admin.signIn({
       tokenData,
       adminInfo,
     });
