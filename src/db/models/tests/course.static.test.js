@@ -21,7 +21,7 @@ const expectedOrder = (list, sortOrder) => {
   });
 };
 
-/* seeded by "db/test-seeds/make-courses" */
+// seeded by "db/seeds/make-courses"
 describe("Course static methods", () => {
   // destroy connection
   afterAll(() => connection.destroy());
