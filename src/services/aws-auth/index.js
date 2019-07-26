@@ -3,8 +3,8 @@ const awsAuthService = require("./aws-auth-service");
 
 const { AWS_COGNITO_DOMAIN } = process.env;
 
-const awsAuth = axios.create({
+const awsCognito = axios.create({
   baseURL: `https://${AWS_COGNITO_DOMAIN}.amazoncognito.com/oauth2`,
 });
 
-module.exports = awsAuthService(awsAuth);
+module.exports = awsAuthService(awsCognito);
