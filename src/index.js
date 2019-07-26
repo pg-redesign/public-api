@@ -26,8 +26,9 @@ const server = new ApolloServer({
     logger: logger.error.bind(logger),
   }),
 
-  context: () => ({
+  context: ({ req }) => ({
     env,
+    req,
     utils,
     logger,
     models,
@@ -41,9 +42,14 @@ server.applyMiddleware({
   cors: {
     credentials: true,
     optionsSuccessStatus: 200,
-    origin: [env.CLIENT_URL].concat(
-      inDevelopment ? [/^http:\/\/(localhost|127.0.0.1):\d{4,5}/] : [],
-    ),
+    // allow subdomains
+    origin: [/^https:\/\/(.+\.)?princeton-groundwater\.com$/]
+      .concat(env.CLIENT_URL || []) // for development deployment
+      .concat(env.ADMIN_CLIENT_URL || []) // for development deployment
+      // for local development
+      .concat(
+        inDevelopment ? [/^http:\/\/(localhost|127.0.0.1):\d{4,5}$/] : [],
+      ),
   },
 });
 
