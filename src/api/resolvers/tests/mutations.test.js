@@ -130,7 +130,7 @@ describe("Mutation resolvers", () => {
         expect(thrownError).toBeInstanceOf(AuthenticationError);
       });
 
-      test("logs request IP and headers", () => {
+      test("logs user request IP and headers", () => {
         const [requestContextLog] = logger.error.mock.calls;
 
         // first arg is log message
@@ -139,9 +139,25 @@ describe("Mutation resolvers", () => {
         expect(requestContext).toHaveProperty("headers", req.headers);
       });
 
-      test("logs the originally thrown error", () => {
+      test("non-network error: logs the originally thrown error", () => {
         const originalErrorLog = logger.error.mock.calls[1];
         expect(originalErrorLog[0]).toBe(rejectedError);
+      });
+
+      test("network related error: logs response status and data", async () => {
+        jest.clearAllMocks();
+        const networkError = { response: { status: 400, data: {} } };
+        awsAuth.authenticateAdmin.mockImplementationOnce(() => Promise.reject(networkError));
+
+        try {
+          await Mutation.authenticateAdmin(null, { code }, context);
+        } catch (e) {
+          // request context is the first call
+          // first arg is the message
+          const loggedResponseData = logger.error.mock.calls[1][1];
+          expect(loggedResponseData.status).toBe(networkError.response.status);
+          expect(loggedResponseData.data).toBe(networkError.response.data);
+        }
       });
     });
   });
