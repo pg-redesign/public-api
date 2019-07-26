@@ -16,4 +16,9 @@ type Mutation {
   Subscribes a user to the mailing list
   """
   subscribeToMailingList(mailingListData: MailingListInput!): Boolean!
+
+  """
+  Authenticates an Admin user
+  """
+  authenticateAdmin(code: String!): AuthToken!
 }
