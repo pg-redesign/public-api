@@ -63,3 +63,11 @@ type Student {
   company: String!
   location: Location!
 }
+
+"""
+Authentication Token
+"""
+type AuthToken {
+  token: String!
+  expiresIn: Int!
+}
