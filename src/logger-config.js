@@ -24,10 +24,11 @@ const requestLogger = expressLogger({
   winstonInstance: logger,
   colorize: inDevelopment,
   msg: "IP [{{req.ip}}], status {{res.statusCode}}, {{res.responseTime}}ms",
-  // skip the gql playground ping requests
-  skip: req => inDevelopment
-    && req.body
-    && req.body.operationName === "IntrospectionQuery",
+  // skip logging of OPTIONS and gql playground ping requests
+  skip: req => req.method === "OPTIONS"
+    || (inDevelopment
+      && req.body
+      && req.body.operationName === "IntrospectionQuery"),
   dynamicMeta: req => ({
     ip: req.ip,
     body: req.body,
