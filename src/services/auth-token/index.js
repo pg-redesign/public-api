@@ -5,7 +5,7 @@ const signAdminToken = (admin, context) => {
 
   const payload = { sub: admin.id };
   const options = {
-    expiresIn: "1h",
+    expiresIn: 3600,
     issuer: API_DOMAIN,
     algorithm: "HS256",
   };
