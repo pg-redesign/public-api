@@ -1,9 +1,9 @@
 const jwt = require("jsonwebtoken");
 
-const signAdminToken = (admin, context) => {
+const signAdminToken = (adminSubId, context) => {
   const { AUTH_TOKEN_SIGNING_SECRET, API_DOMAIN } = context.env;
 
-  const payload = { sub: admin.id };
+  const payload = { sub: adminSubId };
   const options = {
     expiresIn: 3600,
     issuer: API_DOMAIN,
@@ -18,10 +18,14 @@ const signAdminToken = (admin, context) => {
 const verifyToken = (token, context) => {
   const { AUTH_TOKEN_SIGNING_SECRET, API_DOMAIN } = context.env;
 
-  return jwt.verify(token, AUTH_TOKEN_SIGNING_SECRET, {
-    iss: API_DOMAIN,
-    algorithms: ["HS256"],
-  });
+  try {
+    return jwt.verify(token, AUTH_TOKEN_SIGNING_SECRET, {
+      iss: API_DOMAIN,
+      algorithms: ["HS256"],
+    });
+  } catch (error) {
+    return null;
+  }
 };
 
 module.exports = {

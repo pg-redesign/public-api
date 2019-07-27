@@ -8,9 +8,9 @@ module.exports = awsCognito => ({
     const adminInfo = await this.getUserInfo(tokenData.access_token);
 
     // throws if admin info is invalid
-    const admin = await models.Admin.signIn(adminInfo);
+    await models.Admin.signIn(adminInfo);
 
-    return services.authToken.signAdminToken(admin, context);
+    return services.authToken.signAdminToken(adminInfo.sub, context);
   },
 
   async getTokenData(authorizationCode, context) {

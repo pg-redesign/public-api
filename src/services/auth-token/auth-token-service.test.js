@@ -11,10 +11,10 @@ const token = "some.long.token";
 
 describe("Auth Token Service", () => {
   test("signAdminToken: returns an object with a signed admin token in the form { token, expiresIn }", () => {
-    const admin = { id: 1 };
+    const adminSubId = "admin-sub-id";
     jwt.sign.mockImplementationOnce(() => token);
 
-    const output = signAdminToken(admin, context);
+    const output = signAdminToken(adminSubId, context);
     expect(output.token).toBe(token);
     expect(output.expiresIn).toBeDefined();
   });
