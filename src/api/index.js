@@ -1,8 +1,9 @@
+const { createSchemaDirectives } = require("apollo-directive");
 const { ApolloErrorConverter } = require("apollo-error-converter");
 
 const typeDefs = require("./type-defs");
 const resolvers = require("./resolvers");
-const schemaDirectives = require("./directives");
+const directiveConfigs = require("./directives");
 
 const utils = require("../utils");
 const schemas = require("../schemas");
@@ -16,13 +17,13 @@ const inDevelopment = env.NODE_ENV !== "production";
 module.exports = {
   typeDefs,
   resolvers,
-  schemaDirectives,
   playground: inDevelopment,
   introspection: inDevelopment,
   formatError: new ApolloErrorConverter({
     errorMap: [objectionErrorMap],
     logger: logger.error.bind(logger),
   }),
+  schemaDirectives: createSchemaDirectives({ directiveConfigs }),
 
   context: ({ req }) => ({
     env,
