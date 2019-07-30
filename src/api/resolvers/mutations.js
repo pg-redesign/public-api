@@ -1,3 +1,5 @@
+const { AuthenticationError } = require("apollo-server-express");
+
 module.exports = {
   Mutation: {
     registerForCourse: async (_, args, context) => {
@@ -45,6 +47,32 @@ module.exports = {
       const { mailingListData } = args;
 
       return services.mailChimp.addToMailingList(mailingListData, context);
+    },
+
+    authenticateAdmin: async (_, args, context) => {
+      const { code } = args;
+      const { services, logger } = context;
+
+      return services.awsAuth.authenticateAdmin(code, context).catch((error) => {
+        const { headers, ip } = context.req;
+
+        logger.error("Failed admin authentication, request data:", {
+          ip,
+          headers,
+          awsAuthCode: code,
+        });
+
+        if (error.response) {
+          const { data, status } = error.response;
+          logger.error("request error:", { status, data });
+        } else {
+          logger.error(error);
+        }
+
+        throw new AuthenticationError(
+          "Authentication failed. Request context has been logged for review.",
+        );
+      });
     },
   },
 };

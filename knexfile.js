@@ -1,4 +1,4 @@
-const seeds = { directory: "./src/db/test-seeds" };
+const seeds = { directory: "./src/db/seeds" };
 
 const config = {
   client: "postgresql",
