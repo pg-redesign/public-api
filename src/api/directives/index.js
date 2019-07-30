@@ -1,5 +1,3 @@
-const admin = require("./admin-directive");
+const { adminDirectiveConfig } = require("./admin-directive");
 
-module.exports = {
-  admin,
-};
+module.exports = [adminDirectiveConfig];

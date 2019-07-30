@@ -1,4 +1,3 @@
-const { createDirective } = require("apollo-directive");
 const { AuthenticationError } = require("apollo-server-express");
 
 const isAdmin = (sub, env) => env.ADMIN_SUBS.split(",").includes(sub);
@@ -39,7 +38,11 @@ const requireAdminReplacer = (originalResolver, directiveContext) => function re
   return originalResolver.apply(this, args);
 };
 
-module.exports = createDirective({
-  name: "admin",
-  resolverReplacer: requireAdminReplacer,
-});
+module.exports = {
+  isAdmin,
+  requireAdminReplacer,
+  adminDirectiveConfig: {
+    name: "admin",
+    resolverReplacer: requireAdminReplacer,
+  },
+};
