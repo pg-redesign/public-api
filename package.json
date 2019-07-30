@@ -52,6 +52,7 @@
     "@types/stripe": "^6.26.5",
     "@vampiire/node-logger": "^0.3.0",
     "ajv": "^6.10.0",
+    "apollo-directive": "0.0.1",
     "apollo-error-converter": "^1.1.0",
     "apollo-server-express": "^2.6.7",
     "aws-sdk": "^2.475.0",
