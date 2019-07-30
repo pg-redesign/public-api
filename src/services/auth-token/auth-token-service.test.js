@@ -11,24 +11,34 @@ const token = "some.long.token";
 
 describe("Auth Token Service", () => {
   test("signAdminToken: returns an object with a signed admin token in the form { token, expiresIn }", () => {
-    const admin = { id: 1 };
+    const adminSubId = "admin-sub-id";
     jwt.sign.mockImplementationOnce(() => token);
 
-    const output = signAdminToken(admin, context);
+    const output = signAdminToken(adminSubId, context);
     expect(output.token).toBe(token);
     expect(output.expiresIn).toBeDefined();
   });
 
-  test("verifyToken: verifies the signature and issuer, returns the decoded token", () => {
-    const decodedToken = {};
-    jwt.verify.mockImplementationOnce(() => decodedToken);
+  describe("verifyToken", () => {
+    test("valid token: verifies the signature and issuer, returns the decoded token", () => {
+      const decodedToken = {};
+      jwt.verify.mockImplementationOnce(() => decodedToken);
 
-    const output = verifyToken(token, context);
-    expect(jwt.verify).toHaveBeenCalledWith(
-      token,
-      context.env.AUTH_TOKEN_SIGNING_SECRET,
-      { iss: context.env.API_DOMAIN, algorithms: ["HS256"] },
-    );
-    expect(output).toBe(decodedToken);
+      const output = verifyToken(token, context);
+      expect(jwt.verify).toHaveBeenCalledWith(
+        token,
+        context.env.AUTH_TOKEN_SIGNING_SECRET,
+        { iss: context.env.API_DOMAIN, algorithms: ["HS256"] },
+      );
+      expect(output).toBe(decodedToken);
+    });
+
+    test("invalid token: returns null", () => {
+      jwt.verify.mockImplementationOnce(() => {
+        throw new Error();
+      });
+
+      expect(verifyToken(token, context)).toBeNull();
+    });
   });
 });
