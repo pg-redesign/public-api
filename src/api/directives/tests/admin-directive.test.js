@@ -1,107 +1,77 @@
-const { createTestClient } = require("apollo-server-testing");
+const { isAdmin, requireAdminReplacer } = require("../admin-directive");
 
-const testUtils = require("../../../test-utils");
-const { connection } = require("../../../db/connection");
+const validSubId = "admin-sub-id";
+const env = {
+  ADMIN_SUBS: `${validSubId},another-admin-sub-id`,
+};
 
-const { runTests } = testUtils.testRunner;
-const { testServer, baseContext } = testUtils.testServer;
-const { buildToken, buildAuthedRequestContext } = testUtils.builders;
+describe("@admin directive", () => {
+  describe("isAdmin utility", () => {
+    test("valid admin sub ID: returns true", () => expect(isAdmin(validSubId, env)).toBe(true));
+    test("invalid admin sub ID: returns false", () => expect(isAdmin("nonsense-sub-id", env)).toBe(false));
+  });
 
-const client = createTestClient(testServer);
-testServer.mergeContext({ logger: { error: () => {} } }); // suppress log messages
+  describe("requireAdminReplacer -> requireAdminResolver", () => {
+    const originalResolver = jest.fn();
+    const directiveContext = { objectType: "Course", field: "students" };
 
-describe("@admin directive resolver", () => {
-  afterAll(() => connection.destroy());
-
-  const invalidAuthTests = baseTestConfig => [
-    {
-      ...baseTestConfig,
-      test: "missing Authorization header: throws AuthenticationError",
-      expectedErrors: true,
-      testContext: { req: { headers: {} } },
-    },
-    {
-      ...baseTestConfig,
-      test: "invalid token: throws AuthenticationError",
-      expectedErrors: true,
-      testContext: {
-        req: { headers: { Authorization: "Bearer nonsense-token" } },
+    const logger = { error: jest.fn() };
+    const req = {
+      ip: "ip.address",
+      headers: {
+        Authorization: "Bearer token",
       },
-    },
-    {
-      ...baseTestConfig,
-      test: "invalid admin sub ID: throws AuthenticationError",
-      expectedErrors: true,
-      testContext: {
-        req: {
-          headers: {
-            Authorization: `Bearer ${buildToken("nonsense-sub", baseContext)}`,
-          },
-        },
-      },
-    },
-  ];
-
-  const objectTypeFieldTests = () => {
-    const variables = { emails: ["student@email.com"] };
-    // @admin on Query.getStudents should apply to field
-    const query = `
-      query GetStudentData($emails: [EmailAddress!]!) {
-        getStudents(emails: $emails) {
-          id
-        }
-      }
-    `;
-
-    const baseTestConfig = {
-      query,
-      client,
-      variables,
-      testServer,
+    };
+    const services = { authToken: { verifyToken: jest.fn() } };
+    const context = {
+      req,
+      env,
+      logger,
+      services,
     };
 
-    return [
-      {
-        ...baseTestConfig,
-        test: "valid Bearer token and admin sub ID: resolves Students",
-        expectedData: { getStudents: [] },
-        testContext: buildAuthedRequestContext(baseContext),
-      },
-      ...invalidAuthTests(baseTestConfig),
-    ];
-  };
+    test("valid admin authentication: returns a call to the original resolver", async () => {
+      services.authToken.verifyToken.mockImplementationOnce(() => ({
+        sub: validSubId,
+      }));
 
-  const objectTypeTests = () => {
-    // @admin on Payment Type should apply to Course.payments
-    const query = `
-        query GetUpcomingCourseStudents {
-          getCourses {
-            payments {
-              id
-            }
-          }
+      const requireAdminResolver = requireAdminReplacer(
+        originalResolver,
+        directiveContext,
+      );
+
+      await requireAdminResolver(null, {}, context);
+      expect(originalResolver).toHaveBeenCalled();
+    });
+
+    describe("failure cases: logs the failed request context and throws an AuthenticationError", () => {
+      afterEach(() => jest.clearAllMocks());
+
+      const testFailCase = async () => {
+        const requireAdminResolver = requireAdminReplacer(
+          originalResolver,
+          directiveContext,
+        );
+
+        try {
+          await requireAdminResolver(null, {}, context);
+        } catch (error) {
+          expect(logger.error).toHaveBeenCalled();
+          expect(error.name).toBe("AuthenticationError");
         }
-      `;
+      };
 
-    const baseTestConfig = {
-      query,
-      client,
-      testServer,
-      variables: {},
-    };
+      test("invalid bearer token", () => {
+        services.authToken.verifyToken.mockImplementationOnce(() => null);
+        return testFailCase();
+      });
 
-    return [
-      {
-        ...baseTestConfig,
-        test:
-          "valid Bearer token and admin sub ID: resolves Course.payments list",
-        expectedData: { getCourses: [{ payments: [] }] },
-        testContext: buildAuthedRequestContext(baseContext),
-      },
-      ...invalidAuthTests(baseTestConfig),
-    ];
-  };
-
-  describe("@admin applied to an Object Type Field: Query.getStudent", () => runTests(objectTypeFieldTests()));
-  describe("@admin applied to an Object Type: Payment (accessed by Course.payments)", () => runTests(objectTypeTests()));
+      test("token.sub is not a valid admin sub ID", () => {
+        services.authToken.verifyToken.mockImplementationOnce(() => ({
+          sub: "nonsense-sub-id",
+        }));
+        return testFailCase();
+      });
+    });
+  });
 });
