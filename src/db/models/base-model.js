@@ -4,7 +4,8 @@ const { Model } = require("../connection");
 /**
  * Base Model class for shared configuration
  * - sets base model path
- *  - allows relations with modelClass to use 'ModelName' string
+ *  - allows relations with modelClass to use 'model-file-name' string (no extension)
+ *  - ex: Course model in 'course.js' can be set as modelClass: 'course'
  * - converts snake_case (db side) <--> camelCase (API side)
  * - automatic created_at, updated_at timestamps
  *  - $beforeInsert(): created_at = new Date as ISO string
