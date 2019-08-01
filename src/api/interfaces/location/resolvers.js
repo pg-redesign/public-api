@@ -34,9 +34,6 @@ module.exports = {
     ...baseResolvers,
     // access using inline spread
     // ...on CourseLocation { courses }
-    courses: (location, args) => {
-      const { courseFilters = {} } = args;
-      return location.getCourses(courseFilters);
-    },
+    courses: courseLocation => courseLocation.getCourses(),
   },
 };
