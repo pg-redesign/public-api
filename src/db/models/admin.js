@@ -11,12 +11,16 @@ class Admin extends BaseModel {
   }
 
   // -- STATIC METHODS -- //
-  static signIn(adminInfo) {
+  static async signIn(adminInfo) {
     const { sub } = adminInfo;
 
-    return this.query()
+    const admin = await this.query()
       .findOne({ sub })
       .throwIfNotFound();
+
+    return admin
+      .$query()
+      .patchAndFetch({ lastLogin: new Date().toISOString() });
   }
 }
 
