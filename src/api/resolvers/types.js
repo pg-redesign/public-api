@@ -24,6 +24,9 @@ module.exports = {
       const { courseDescriptions } = context.utils.constants;
       return courseDescriptions[course.name];
     },
+
+    // TODO: tests
+    location: course => course.getLocation(),
   },
 
   Location: {
