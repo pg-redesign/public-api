@@ -1,12 +1,16 @@
+const locationBase = require("./location-base");
+
 module.exports = {
   type: "object",
-  required: ["city", "state", "country", "mapURL"],
+  required: locationBase.required.concat("mapUrl"),
   properties: {
-    city: { type: "string", minLength: 3, maxLength: 32 },
-    state: { type: "string", minLength: 2, maxLength: 32 },
-    country: { type: "string", minLength: 2, maxLength: 32 },
-    /* prettier-ignore */
-    /* eslint-disable no-useless-escape */
-    mapURL: { type: "string", pattern: "/^(https:\/\/goo\.gl\/maps\/)[A-Za-z0-9]+$/" },
+    ...locationBase.properties,
+    mapUrl: {
+      type: "string",
+      maxLength: 64,
+      /* prettier-ignore */
+      /* eslint-disable no-useless-escape */
+      pattern: "^(https:\/\/goo\.gl\/maps\/)[A-Za-z0-9]+$",
+    },
   },
 };
