@@ -22,6 +22,27 @@ class CourseLocation extends BaseModel {
       },
     };
   }
+
+  // -- STATIC METHODS -- //
+  // TODO: tests
+  static create(locationData) {
+    return this.query().insert(locationData);
+  }
+
+  static getBy(field, columns = []) {
+    return this.query()
+      .where(field)
+      .select(columns);
+  }
+
+  static getAll(columns = []) {
+    return this.query().select(columns);
+  }
+
+  // -- PROTO METHODS -- //
+  getCourses(columns = []) {
+    return this.$relatedQuery("courses").select(columns);
+  }
 }
 
 module.exports = CourseLocation;

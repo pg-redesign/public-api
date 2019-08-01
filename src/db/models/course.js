@@ -169,7 +169,6 @@ class Course extends BaseModel {
 
   // -- INSTANCE METHODS -- //
 
-  // TODO: tests
   getLocation(columns = []) {
     return this.$relatedQuery("location").select(columns);
   }
