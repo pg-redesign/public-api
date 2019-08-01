@@ -11,4 +11,10 @@ type Query {
     - upcoming: returns up to two upcoming Courses
   """
   getCourses(upcoming: Boolean = true): [Course!]!
+
+  """
+  Admin only
+  Retrieve the list of Course Locations
+  """
+  getCourseLocations: [CourseLocation!]! @admin
 }
