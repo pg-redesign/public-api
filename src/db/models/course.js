@@ -17,6 +17,14 @@ class Course extends BaseModel {
 
   static get relationMappings() {
     return {
+      location: {
+        modelClass: "course-location",
+        relation: BaseModel.BelongsToOneRelation,
+        join: {
+          from: "courses.course_location_id",
+          to: "course_locations.id",
+        },
+      },
       payments: {
         modelClass: "payment",
         relation: BaseModel.HasManyRelation,
@@ -161,6 +169,11 @@ class Course extends BaseModel {
 
   // -- INSTANCE METHODS -- //
 
+  // TODO: tests
+  getLocation(columns = []) {
+    return this.$relatedQuery("location").select(columns);
+  }
+
   completeStudentRegistration(studentId, confirmationId, paymentType) {
     return this.$relatedQuery("students").patchAndFetchById(studentId, {
       paymentType,
@@ -173,10 +186,9 @@ class Course extends BaseModel {
     // throws if not registered
     const query = this.$relatedQuery("students")
       .where("student_id", studentId)
+      .select(columns)
       .first()
       .throwIfNotFound();
-
-    if (columns.length) query.select(columns);
 
     return query;
   }
