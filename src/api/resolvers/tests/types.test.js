@@ -80,6 +80,14 @@ describe("Course Type resolvers", () => {
       ],
     );
   });
+
+  describe("Course.location", () => {
+    const course = { getLocation: jest.fn() };
+    test("returns the associated CourseLocation", async () => {
+      await typeResolvers.Course.location(course);
+      expect(course.getLocation).toHaveBeenCalled();
+    });
+  });
 });
 
 describe("Location Type resolvers", () => {

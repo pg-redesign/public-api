@@ -16,7 +16,7 @@ type Course {
 
   """
   Location details
-  - location.mapURL: GoogleMaps URL of hotel / conference center
+  - location.mapUrl: GoogleMaps URL of hotel / conference center
   """
   location: Location!
 
@@ -41,7 +41,7 @@ type Location {
   """
   For Course Type: GoogleMaps URL of hotel / conference center
   """
-  mapURL: URL
+  mapUrl: URL
   city: String!
   state: String!
   country: String!
