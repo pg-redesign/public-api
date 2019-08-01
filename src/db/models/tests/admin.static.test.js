@@ -8,12 +8,31 @@ describe("Admin static methods", () => {
   afterAll(() => connection.destroy());
 
   describe("signIn: completes admin authentication flow", () => {
-    test("success: finds and returns an Admin by its AWS Cognito sub ID", async () => {
+    describe("success", () => {
       const sub = process.env.ADMIN_SUBS.split(",")[0];
-      const output = await Admin.signIn({ sub });
-      expect(output).toBeDefined();
-      expect(output.sub).toBe(sub);
+
+      let admin;
+      let previousLogin;
+      beforeAll(async () => {
+        previousLogin = new Date();
+        previousLogin.setFullYear(previousLogin.getFullYear() - 1);
+        await Admin.query()
+          .where({ sub })
+          .patch({ lastLogin: previousLogin.toISOString() });
+
+        admin = await Admin.signIn({ sub });
+      });
+
+      test("finds an Admin by its AWS Cognito sub ID and updates the lastLogin field value", () => {
+        expect(admin.lastLogin).not.toEqual(previousLogin);
+      });
+
+      test("returns the found Admin", async () => {
+        expect(admin).toBeDefined();
+        expect(admin.sub).toBe(sub);
+      });
     });
+
     test("failure: invalid sub ID throws NotFoundError", () => {
       const sub = "invalid-sub";
       expect(Admin.signIn({ sub })).rejects.toThrow(NotFoundError);
