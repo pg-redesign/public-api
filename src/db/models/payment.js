@@ -16,7 +16,7 @@ class Payment extends BaseModel {
         modelClass: "course",
         relation: BaseModel.BelongsToOneRelation,
         join: {
-          from: "payments.course_id",
+          from: "payments.courseId",
           to: "courses.id",
         },
       },
@@ -24,7 +24,7 @@ class Payment extends BaseModel {
         modelClass: "student",
         relation: BaseModel.BelongsToOneRelation,
         join: {
-          from: "payments.student_id",
+          from: "payments.studentId",
           to: "students.id",
         },
       },

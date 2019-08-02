@@ -6,7 +6,7 @@ const createLocationsAndCourses = seeds => Promise.all(
     const courseLocation = await CourseLocation.query().insert(data.location);
     return Course.query().insert({
       ...data.course,
-      course_location_id: courseLocation.id,
+      courseLocationId: courseLocation.id,
     });
   }),
 );
@@ -16,7 +16,9 @@ exports.seed = async (knex) => {
   CourseLocation.knex(knex);
 
   await Course.query().del();
-  await CourseLocation.query().del();
+  await CourseLocation.query()
+    .del()
+    .debug();
 
   return createLocationsAndCourses(courseMocks);
 };

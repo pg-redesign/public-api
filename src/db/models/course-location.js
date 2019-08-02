@@ -3,7 +3,7 @@ const BaseModel = require("./base-model");
 
 class CourseLocation extends BaseModel {
   static get tableName() {
-    return "course_locations";
+    return "courseLocations";
   }
 
   static get jsonSchema() {
@@ -16,21 +16,21 @@ class CourseLocation extends BaseModel {
         modelClass: "course",
         relation: BaseModel.HasManyRelation,
         join: {
-          from: "course_locations.id",
-          to: "courses.course_location_id",
+          from: "courseLocations.id",
+          to: "courses.courseLocationId",
         },
       },
     };
   }
 
   // -- STATIC METHODS -- //
-  // TODO: tests
   static create(locationData) {
     return this.query().insert(locationData);
   }
 
   static getBy(field, columns = []) {
     return this.query()
+      .first()
       .where(field)
       .select(columns);
   }
