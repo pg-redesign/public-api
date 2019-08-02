@@ -1,9 +1,10 @@
+const { Course, CourseLocation } = require("../..");
 const { courseInternalNames } = require("../../../../utils/constants");
 
 const pastYear = new Date().getFullYear() - 1;
 const futureYear = new Date().getFullYear() + 1;
 
-module.exports = [
+const courseMocks = [
   {
     course: {
       name: courseInternalNames.pollution,
@@ -33,3 +34,27 @@ module.exports = [
     },
   },
 ];
+
+const cleanupLocationsAndCourses = () => CourseLocation.query()
+  .del()
+  .then(() => Course.query().del());
+
+const createLocationsAndCourses = async (seeds = courseMocks) => {
+  await cleanupLocationsAndCourses();
+
+  return Promise.all(
+    seeds.map(async (data) => {
+      const courseLocation = await CourseLocation.query().insert(data.location);
+      return Course.query().insert({
+        ...data.course,
+        courseLocationId: courseLocation.id,
+      });
+    }),
+  );
+};
+
+module.exports = {
+  courseMocks,
+  createLocationsAndCourses,
+  cleanupLocationsAndCourses,
+};
