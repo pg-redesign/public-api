@@ -1,4 +1,3 @@
-const Course = require("../course");
 const CourseLocation = require("../course-location");
 const { connection } = require("../../connection");
 const {
