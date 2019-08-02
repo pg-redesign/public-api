@@ -23,6 +23,16 @@ describe("Query resolvers", () => {
     const forms = { formName: "schema" };
     const context = { schemas: { forms } };
 
-    expect(Query.getFormSchema(null, { form: "formName" }, context)).toBe(forms.formName);
+    expect(Query.getFormSchema(null, { form: "formName" }, context)).toBe(
+      forms.formName,
+    );
+  });
+
+  test("getCourseLocations: returns a list of course locations", async () => {
+    const CourseLocation = { getAll: jest.fn() };
+    const context = { models: { CourseLocation } };
+
+    await Query.getCourseLocations(null, {}, context);
+    expect(CourseLocation.getAll).toHaveBeenCalled();
   });
 });
