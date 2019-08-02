@@ -56,7 +56,9 @@ input CourseData {
   courseLocationId: ID!
   name: CourseShortNames!
   """
-  startDate and endDate must be a Date string in ISO format
+  startDate and endDate in either:
+  - ISO Date format
+  - HTML Date format (MM/dd/YYYY)
   """
   startDate: String!
   endDate: String!
