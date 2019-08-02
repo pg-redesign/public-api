@@ -17,4 +17,10 @@ type Query {
   Retrieve the list of Course Locations
   """
   getCourseLocations: [CourseLocation!]! @admin
+
+  """
+  Admin only
+  Retrieve a list of Courses by a Course Location ID
+  """
+  getCoursesByLocation(courseLocationId: ID!): [Course!]! @admin
 }
