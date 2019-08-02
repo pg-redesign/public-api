@@ -161,4 +161,28 @@ describe("Mutation resolvers", () => {
       });
     });
   });
+
+  describe("createCourseLocation", () => {
+    const CourseLocation = { create: jest.fn() };
+    const context = { models: { CourseLocation } };
+
+    test("creates and returns a new Course Location", async () => {
+      await Mutation.createCourseLocation(
+        null,
+        { courseLocationData: {} },
+        context,
+      );
+      expect(CourseLocation.create).toHaveBeenCalled();
+    });
+  });
+
+  describe("createCourse", () => {
+    const Course = { create: jest.fn() };
+    const context = { models: { Course } };
+
+    test("creates and returns a new Course", async () => {
+      await Mutation.createCourse(null, { courseData: {} }, context);
+      expect(Course.create).toHaveBeenCalled();
+    });
+  });
 });
