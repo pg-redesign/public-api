@@ -1,5 +1,3 @@
-const { snakeCaseMappers } = require("objection");
-
 const { Model } = require("../connection");
 /**
  * Base Model class for shared configuration
@@ -13,20 +11,16 @@ const { Model } = require("../connection");
  *  - call super[.$beforeInsert()][.$beforeUpdate()] if overriding in subclass
  */
 class BaseModel extends Model {
-  static get columnNameMappers() {
-    return snakeCaseMappers();
-  }
-
   static get modelPaths() {
     return [__dirname];
   }
 
   $beforeInsert() {
-    this.created_at = new Date().toISOString();
+    this.createdAt = new Date().toISOString();
   }
 
   $beforeUpdate() {
-    this.updated_at = new Date().toISOString();
+    this.updatedAt = new Date().toISOString();
   }
 }
 
