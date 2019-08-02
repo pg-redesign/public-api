@@ -17,4 +17,8 @@ module.exports = {
     english: "ENGLISH",
     portuguese: "PORTUGUESE",
   },
+  CourseShortNames: {
+    pollution: "POLLUTION",
+    remediation: "REMEDIATION",
+  },
 };
