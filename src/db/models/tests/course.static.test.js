@@ -5,6 +5,10 @@ const Course = require("../course");
 const schemas = require("../../../schemas");
 const studentMock = require("./__mocks__/student");
 const { connection } = require("../../connection");
+const {
+  createLocationsAndCourses,
+  cleanupLocationsAndCourses,
+} = require("./__mocks__/course");
 
 const schemaValidator = new AJV();
 schemaValidator.addSchema(schemas.types.student, "studentSchema");
@@ -21,10 +25,13 @@ const expectedOrder = (list, sortOrder) => {
   });
 };
 
-// seeded by "db/seeds/make-courses"
 describe("Course static methods", () => {
-  // destroy connection
-  afterAll(() => connection.destroy());
+  beforeAll(() => createLocationsAndCourses());
+  // destroy connection and cleanup DB
+  afterAll(async () => {
+    await cleanupLocationsAndCourses();
+    return connection.destroy();
+  });
 
   // -- STATIC METHODS -- //
   describe("getAll", () => {

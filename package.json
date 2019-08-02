@@ -39,7 +39,7 @@
     "dev": "npm run env:dev -- nodemon",
     "test": "jest --runInBand --no-cache",
     "lint": "eslint .",
-    "test:local": "npm run env:test -- npm run knex:seed && npm run env:test -- jest --runInBand",
+    "test:local": "npm run env:test -- jest --runInBand",
     "test:travis": "npm run test -- --coverage && cat ./coverage/lcov.info | coveralls",
     "knex:migrate": "knex migrate:latest",
     "knex:seed": "knex seed:run",

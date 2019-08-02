@@ -25,14 +25,6 @@ module.exports = {
       return courseDescriptions[course.name];
     },
 
-    // TODO: tests
     location: course => course.getLocation(),
-  },
-
-  Location: {
-    concatenated: (location) => {
-      const { city, state, country } = location;
-      return `${city}, ${state}, ${country}`;
-    },
   },
 };

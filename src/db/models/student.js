@@ -17,7 +17,7 @@ class Student extends BaseModel {
         relation: BaseModel.HasManyRelation,
         join: {
           from: "students.id",
-          to: "payments.student_id",
+          to: "payments.studentId",
         },
       },
       courses: {
@@ -27,8 +27,8 @@ class Student extends BaseModel {
           from: "students.id",
           to: "courses.id",
           through: {
-            from: "payments.student_id",
-            to: "payments.course_id",
+            from: "payments.studentId",
+            to: "payments.courseId",
           },
         },
       },

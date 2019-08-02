@@ -4,7 +4,7 @@ const Student = require("./student");
 const schemas = require("../../schemas");
 const BaseModel = require("./base-model");
 
-const DEFAULT_SORT = ["start_date", "desc"];
+const DEFAULT_SORT = ["startDate", "desc"];
 
 class Course extends BaseModel {
   static get tableName() {
@@ -21,8 +21,8 @@ class Course extends BaseModel {
         modelClass: "course-location",
         relation: BaseModel.BelongsToOneRelation,
         join: {
-          from: "courses.course_location_id",
-          to: "course_locations.id",
+          from: "courses.courseLocationId",
+          to: "courseLocations.id",
         },
       },
       payments: {
@@ -30,7 +30,7 @@ class Course extends BaseModel {
         relation: BaseModel.HasManyRelation,
         join: {
           from: "courses.id",
-          to: "payments.course_id",
+          to: "payments.courseId",
         },
       },
       students: {
@@ -40,14 +40,14 @@ class Course extends BaseModel {
           from: "courses.id",
           to: "students.id",
           through: {
-            from: "payments.course_id",
-            to: "payments.student_id",
+            from: "payments.courseId",
+            to: "payments.studentId",
             extra: {
               amount: "amount",
-              paymentType: "payment_type",
-              invoiceDate: "invoice_date",
-              paymentDate: "payment_date",
-              confirmationId: "confirmation_id",
+              paymentType: "paymentType",
+              invoiceDate: "invoiceDate",
+              paymentDate: "paymentDate",
+              confirmationId: "confirmationId",
             },
           },
         },
@@ -69,7 +69,7 @@ class Course extends BaseModel {
         .select(columns)
         .orderBy(...DEFAULT_SORT)
         // only return courses that are upcoming (beyond current date)
-        .where("start_date", ">", new Date())
+        .where("startDate", ">", new Date())
         .limit(2)
     );
   }
@@ -102,7 +102,7 @@ class Course extends BaseModel {
 
     const course = await this.validateCourseId(courseId, [
       "id",
-      "start_date",
+      "startDate",
       "price",
     ]);
 
@@ -144,7 +144,7 @@ class Course extends BaseModel {
 
     // throws if not found (student not registered)
     const registeredStudent = await course.getRegisteredStudent(studentId, [
-      "payment_date",
+      "paymentDate",
     ]);
 
     if (registeredStudent.paymentDate) {
@@ -169,7 +169,6 @@ class Course extends BaseModel {
 
   // -- INSTANCE METHODS -- //
 
-  // TODO: tests
   getLocation(columns = []) {
     return this.$relatedQuery("location").select(columns);
   }
@@ -185,7 +184,7 @@ class Course extends BaseModel {
   getRegisteredStudent(studentId, columns = []) {
     // throws if not registered
     const query = this.$relatedQuery("students")
-      .where("student_id", studentId)
+      .where("studentId", studentId)
       .select(columns)
       .first()
       .throwIfNotFound();
@@ -195,8 +194,8 @@ class Course extends BaseModel {
 
   async hasStudent(studentId) {
     const result = await this.$relatedQuery("payments")
-      .select("payments.student_id")
-      .where("student_id", studentId);
+      .select("payments.studentId")
+      .where("studentId", studentId);
 
     return Boolean(result.length);
   }
@@ -224,7 +223,7 @@ class Course extends BaseModel {
 
     // create payment association
     await this.$relatedQuery("payments").insert({
-      student_id: student.id,
+      studentId: student.id,
       ...paymentData,
     });
 

@@ -1,4 +1,12 @@
-const path = require("path");
 const { importSchema } = require("graphql-import");
+const { interfaceTypeDefs } = require("../interfaces");
 
-module.exports = importSchema(path.join(__dirname, "index.graphql"));
+const combinedTypeDefs = `
+# loads the SDL type defs
+  # import * from '${__dirname}/index.graphql'
+
+# loads the interface type def strings
+  ${interfaceTypeDefs}
+`;
+
+module.exports = importSchema(combinedTypeDefs);

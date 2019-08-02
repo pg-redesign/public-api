@@ -2,10 +2,14 @@ const { NotFoundError } = require("objection");
 
 const Admin = require("../admin");
 const { connection } = require("../../connection");
+const { createAdmins, cleanupAdmins } = require("./__mocks__/admin");
 
-// seeded by db/seeds/make-admins.js
 describe("Admin static methods", () => {
-  afterAll(() => connection.destroy());
+  beforeAll(() => createAdmins());
+  afterAll(async () => {
+    await cleanupAdmins();
+    return connection.destroy();
+  });
 
   describe("signIn: completes admin authentication flow", () => {
     describe("success", () => {

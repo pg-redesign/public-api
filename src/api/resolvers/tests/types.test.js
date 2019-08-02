@@ -83,18 +83,10 @@ describe("Course Type resolvers", () => {
 
   describe("Course.location", () => {
     const course = { getLocation: jest.fn() };
+
     test("returns the associated CourseLocation", async () => {
       await typeResolvers.Course.location(course);
       expect(course.getLocation).toHaveBeenCalled();
     });
-  });
-});
-
-describe("Location Type resolvers", () => {
-  test("concatenated: returns \"city, state, country\" format", () => {
-    const location = { city: "city", state: "state", country: "country" };
-    expect(typeResolvers.Location.concatenated(location)).toBe(
-      "city, state, country",
-    );
   });
 });
