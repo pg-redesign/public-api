@@ -57,6 +57,16 @@ class Course extends BaseModel {
 
   // -- STATIC METHODS -- //
 
+  static create(rawData) {
+    const courseData = {
+      ...rawData,
+      endDate: new Date(rawData.endDate).toISOString(),
+      startDate: new Date(rawData.startDate).toISOString(),
+    };
+
+    return this.query().insert(courseData);
+  }
+
   static getAll(columns = []) {
     return this.query()
       .select(columns)
