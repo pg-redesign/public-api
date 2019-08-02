@@ -3,22 +3,36 @@ type Mutation {
   Registers a Student for a Course
   - if the Student exists in the database their information is updated
   """
-  registerForCourse(registrationData: RegistrationInput!): Student!
+  registerForCourse(registrationData: RegistrationData!): Student!
 
   """
   Processes a Stripe credit card Course payment
   - sends receipt email
   - updates Student's payment status on success
   """
-  payForCourseWithStripe(paymentData: StripePaymentInput!): Student!
+  payForCourseWithStripe(paymentData: StripePaymentData!): Student!
 
   """
   Subscribes a user to the mailing list
   """
-  subscribeToMailingList(mailingListData: MailingListInput!): Boolean!
+  subscribeToMailingList(mailingListData: MailingListData!): Boolean!
 
   """
   Authenticates an Admin user
   """
   authenticateAdmin(code: String!): AuthToken!
+
+  """
+  Admin only
+  creates a new Course Location
+  """
+  createCourseLocation(
+    courseLocationData: CourseLocationData!
+  ): CourseLocation! @admin
+
+  """
+  Admin only
+  creates a new Course
+  """
+  createCourse(courseData: CourseData!): Course! @admin
 }
