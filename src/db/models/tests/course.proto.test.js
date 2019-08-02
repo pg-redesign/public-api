@@ -6,13 +6,21 @@ const CourseLocation = require("../course-location");
 const { enums } = require("../../../schemas");
 const { connection } = require("../../connection");
 
-const courseMocks = require("./__mocks__/course");
 const studentMock = require("./__mocks__/student");
+const {
+  courseMocks,
+  createLocationsAndCourses,
+  cleanupLocationsAndCourses,
+} = require("./__mocks__/course");
 
 describe("Course prototype methods", () => {
   const { studentData } = studentMock;
 
-  afterAll(() => connection.destroy());
+  beforeAll(() => createLocationsAndCourses());
+  afterAll(async () => {
+    await cleanupLocationsAndCourses();
+    return connection.destroy();
+  });
 
   describe("registerNewStudent", () => {
     let course;
@@ -202,6 +210,8 @@ describe("Course prototype methods", () => {
     let course;
     let courseLocation;
     beforeAll(async () => {
+      await cleanupLocationsAndCourses();
+
       const [courseMock] = courseMocks;
       courseLocation = await CourseLocation.query().insert(courseMock.location);
       course = await Course.query().insert({
@@ -209,7 +219,6 @@ describe("Course prototype methods", () => {
         courseLocationId: courseLocation.id,
       });
     });
-    afterAll(() => CourseLocation.query().deleteById(courseLocation.id));
 
     it("returns the related CourseLocation", async () => {
       const result = await course.getLocation();
