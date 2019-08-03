@@ -21,5 +21,4 @@ jobs:
       script:
         - npm run lint
         - npm run knex:migrate
-        - npm run knex:seed
         - npm run test:travis

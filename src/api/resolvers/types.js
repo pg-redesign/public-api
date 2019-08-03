@@ -24,12 +24,7 @@ module.exports = {
       const { courseDescriptions } = context.utils.constants;
       return courseDescriptions[course.name];
     },
-  },
 
-  Location: {
-    concatenated: (location) => {
-      const { city, state, country } = location;
-      return `${city}, ${state}, ${country}`;
-    },
+    location: course => course.getLocation(),
   },
 };

@@ -1,25 +1,21 @@
-// internal (DB, API) single word names
-const courseInternalNames = {
-  pollution: "POLLUTION",
-  remediation: "REMEDIATION",
-};
+const { CourseShortNames } = require("../schemas/enums");
 
 // full course name
 const fullCourseNames = {
-  [courseInternalNames.pollution]: "Pollution & Hydrology Course",
-  [courseInternalNames.remediation]: "Remediation Course",
+  [CourseShortNames.pollution]: "Pollution & Hydrology Course",
+  [CourseShortNames.remediation]: "Remediation Course",
 };
 
 // TODO: move to editable view data
 const courseDescriptions = {
-  [courseInternalNames.pollution]: [
+  [CourseShortNames.pollution]: [
     "Basic to Advanced Principles in Groundwater Pollution and Hydrology",
     "Basic to Advanced Concepts and Principles of Groundwater Flow, Fate and Transport and Natural Attenuation",
     "Groundwater Monitoring And Sampling Technology",
     "Conceptual Site Models (CSM) & Remediation Strategies",
     "Practical Applications of Modern Modeling Software",
   ],
-  [courseInternalNames.remediation]: [
+  [CourseShortNames.remediation]: [
     // TODO: complete description
   ],
 };
@@ -113,5 +109,4 @@ module.exports = {
   stripeService,
   fullCourseNames,
   courseDescriptions,
-  courseInternalNames,
 };

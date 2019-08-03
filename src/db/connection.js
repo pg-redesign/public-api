@@ -1,5 +1,5 @@
-const { Model } = require("objection");
 const knex = require("knex");
+const { Model, knexSnakeCaseMappers } = require("objection");
 
 const {
   DB_HOST,
@@ -20,6 +20,7 @@ const connection = knex({
     database: DB_NAME || RDS_DB_NAME,
     password: DB_PASSWORD || RDS_PASSWORD,
   },
+  ...knexSnakeCaseMappers(),
 });
 
 Model.knex(connection);

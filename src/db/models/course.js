@@ -4,7 +4,7 @@ const Student = require("./student");
 const schemas = require("../../schemas");
 const BaseModel = require("./base-model");
 
-const DEFAULT_SORT = ["start_date", "desc"];
+const DEFAULT_SORT = ["startDate", "desc"];
 
 class Course extends BaseModel {
   static get tableName() {
@@ -17,12 +17,20 @@ class Course extends BaseModel {
 
   static get relationMappings() {
     return {
+      location: {
+        modelClass: "course-location",
+        relation: BaseModel.BelongsToOneRelation,
+        join: {
+          from: "courses.courseLocationId",
+          to: "courseLocations.id",
+        },
+      },
       payments: {
         modelClass: "payment",
         relation: BaseModel.HasManyRelation,
         join: {
           from: "courses.id",
-          to: "payments.course_id",
+          to: "payments.courseId",
         },
       },
       students: {
@@ -32,14 +40,14 @@ class Course extends BaseModel {
           from: "courses.id",
           to: "students.id",
           through: {
-            from: "payments.course_id",
-            to: "payments.student_id",
+            from: "payments.courseId",
+            to: "payments.studentId",
             extra: {
               amount: "amount",
-              paymentType: "payment_type",
-              invoiceDate: "invoice_date",
-              paymentDate: "payment_date",
-              confirmationId: "confirmation_id",
+              paymentType: "paymentType",
+              invoiceDate: "invoiceDate",
+              paymentDate: "paymentDate",
+              confirmationId: "confirmationId",
             },
           },
         },
@@ -49,21 +57,49 @@ class Course extends BaseModel {
 
   // -- STATIC METHODS -- //
 
-  static getAll(columns = []) {
-    return this.query()
-      .select(columns)
-      .orderBy(...DEFAULT_SORT);
+  static create(rawData) {
+    const courseData = {
+      ...rawData,
+      endDate: new Date(rawData.endDate).toISOString(),
+      startDate: new Date(rawData.startDate).toISOString(),
+    };
+
+    return this.query().insert(courseData);
   }
 
-  static getUpcoming(columns = []) {
-    return (
-      this.query()
-        .select(columns)
-        .orderBy(...DEFAULT_SORT)
-        // only return courses that are upcoming (beyond current date)
-        .where("start_date", ">", new Date())
-        .limit(2)
-    );
+  /**
+   * duplicated queries!
+   *
+   * LESSON LEARNED:
+   * objection queries are NOT Promises
+   * - they are "thenable" but not a Promise implementation
+   * - if you have a chain: resolver -> Model/instance method -> QueryBuilder
+   * - what is returned is a Query thenable query stub
+   * - AS (2.0+) will end up executing the method twice
+   * - AS chains a .then() on the end (thinking it is a promise) which then
+   * - queryBuilder + .then() -> executes the query and returns a promise + .then() (on a promise) -> resolves second time
+   * - itself returns a promise and terminates the query
+   *
+   * AS thread:https://github.com/apollographql/apollo-server/issues/2501
+   *
+   * solution:
+   * - make the resolver or method async (to wrap it in a promise)
+   * - terminate the query using .execute() in the method
+   */
+  static async getAll(columns = []) {
+    return this.query()
+      .select(columns)
+      .orderBy(...DEFAULT_SORT)
+      .debug();
+  }
+
+  static async getUpcoming(columns = []) {
+    return this.query()
+      .select(columns)
+      .orderBy(...DEFAULT_SORT)
+
+      .where("startDate", ">", new Date()) // courses that are upcoming (beyond current date)
+      .limit(2);
   }
 
   static async validateCourseId(courseId, columns = []) {
@@ -94,7 +130,7 @@ class Course extends BaseModel {
 
     const course = await this.validateCourseId(courseId, [
       "id",
-      "start_date",
+      "startDate",
       "price",
     ]);
 
@@ -136,7 +172,7 @@ class Course extends BaseModel {
 
     // throws if not found (student not registered)
     const registeredStudent = await course.getRegisteredStudent(studentId, [
-      "payment_date",
+      "paymentDate",
     ]);
 
     if (registeredStudent.paymentDate) {
@@ -161,7 +197,11 @@ class Course extends BaseModel {
 
   // -- INSTANCE METHODS -- //
 
-  completeStudentRegistration(studentId, confirmationId, paymentType) {
+  async getLocation(columns = []) {
+    return this.$relatedQuery("location").select(columns);
+  }
+
+  async completeStudentRegistration(studentId, confirmationId, paymentType) {
     return this.$relatedQuery("students").patchAndFetchById(studentId, {
       paymentType,
       confirmationId,
@@ -169,27 +209,24 @@ class Course extends BaseModel {
     });
   }
 
-  getRegisteredStudent(studentId, columns = []) {
-    // throws if not registered
-    const query = this.$relatedQuery("students")
-      .where("student_id", studentId)
+  // throws if not registered
+  async getRegisteredStudent(studentId, columns = []) {
+    return this.$relatedQuery("students")
+      .where("studentId", studentId)
+      .select(columns)
       .first()
       .throwIfNotFound();
-
-    if (columns.length) query.select(columns);
-
-    return query;
   }
 
   async hasStudent(studentId) {
     const result = await this.$relatedQuery("payments")
-      .select("payments.student_id")
-      .where("student_id", studentId);
+      .select("payments.studentId")
+      .where("studentId", studentId);
 
     return Boolean(result.length);
   }
 
-  registerNewStudent(studentData, paymentData) {
+  async registerNewStudent(studentData, paymentData) {
     return this.$relatedQuery("students").insert({
       ...studentData,
       ...paymentData,
@@ -212,7 +249,7 @@ class Course extends BaseModel {
 
     // create payment association
     await this.$relatedQuery("payments").insert({
-      student_id: student.id,
+      studentId: student.id,
       ...paymentData,
     });
 

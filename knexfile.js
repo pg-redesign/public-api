@@ -1,3 +1,5 @@
+const { knexSnakeCaseMappers } = require("objection");
+
 const seeds = { directory: "./src/db/seeds" };
 
 const config = {
@@ -20,6 +22,8 @@ const config = {
     // min: 2,
     // max: 10,
   },
+  // map snake_case to camelCase for seeds and migrations that use Models
+  ...knexSnakeCaseMappers(),
 };
 
 module.exports = {

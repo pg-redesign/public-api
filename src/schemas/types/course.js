@@ -1,21 +1,12 @@
-const location = require("./location");
-const { courseInternalNames } = require("../../utils/constants");
+const { CourseShortNames } = require("../enums");
 
 module.exports = {
   type: "object",
-  required: ["name", "price", "startDate", "endDate", "location"],
+  required: ["name", "price", "startDate", "endDate"],
   properties: {
     price: { type: "integer" },
     startDate: { type: "string", format: "date-time" },
     endDate: { type: "string", format: "date-time" },
-    name: { type: "string", enum: Object.values(courseInternalNames) },
-    location: {
-      ...location,
-      required: [...location.required, "mapURL"],
-      properties: {
-        ...location.properties,
-        mapURL: { type: "string" },
-      },
-    },
+    name: { type: "string", enum: Object.values(CourseShortNames) },
   },
 };
