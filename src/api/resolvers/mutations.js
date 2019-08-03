@@ -74,5 +74,19 @@ module.exports = {
         );
       });
     },
+
+    createCourseLocation: (_, args, context) => {
+      const { courseLocationData } = args;
+      const { CourseLocation } = context.models;
+
+      return CourseLocation.create(courseLocationData);
+    },
+
+    createCourse: (_, args, context) => {
+      const { courseData } = args;
+      const { Course } = context.models;
+
+      return Course.create(courseData);
+    },
   },
 };

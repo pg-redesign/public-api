@@ -1,7 +1,7 @@
 """
-Used for registering a Student for a Course
+Data for registering a Student for a Course
 """
-input RegistrationInput {
+input RegistrationData {
   """
   a valid Course ID
   - registration allowed up to the start date of the Course
@@ -27,7 +27,7 @@ input RegistrationInput {
 """
 Data for issuing a Stripe credit card payment for a Course
 """
-input StripePaymentInput {
+input StripePaymentData {
   courseId: ID!
   studentId: ID!
   """
@@ -43,8 +43,41 @@ input StripePaymentInput {
 """
 Data for subscribing to the mailing list
 """
-input MailingListInput {
+input MailingListData {
   firstName: String!
   lastName: String!
   email: EmailAddress!
+}
+
+"""
+Data for creating a new Course
+"""
+input CourseData {
+  courseLocationId: ID!
+  name: CourseShortNames!
+  """
+  startDate and endDate in either:
+  - ISO Date format
+  - HTML Date format (MM/dd/YYYY)
+  """
+  startDate: String!
+  endDate: String!
+  """
+  price of the Course in whole dollars
+  """
+  price: Int!
+}
+
+"""
+Data for creating a new Course Location
+"""
+input CourseLocationData {
+  """
+  the Google Maps location URL
+  - format: https://goo.gl/maps/<location code>
+  """
+  mapUrl: URL!
+  city: String!
+  state: String!
+  country: String!
 }

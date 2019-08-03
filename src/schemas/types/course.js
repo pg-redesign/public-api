@@ -1,4 +1,4 @@
-const { courseInternalNames } = require("../../utils/constants");
+const { CourseShortNames } = require("../enums");
 
 module.exports = {
   type: "object",
@@ -7,6 +7,6 @@ module.exports = {
     price: { type: "integer" },
     startDate: { type: "string", format: "date-time" },
     endDate: { type: "string", format: "date-time" },
-    name: { type: "string", enum: Object.values(courseInternalNames) },
+    name: { type: "string", enum: Object.values(CourseShortNames) },
   },
 };

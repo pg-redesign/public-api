@@ -56,7 +56,7 @@ describe("Course Type resolvers", () => {
   });
 
   describe("Course.name", () => {
-    const course = { name: utils.constants.courseInternalNames.pollution };
+    const course = { name: schemas.enums.CourseShortNames.pollution };
     const context = { utils };
 
     test("default: returns formatted full course name", () => {
@@ -71,13 +71,12 @@ describe("Course Type resolvers", () => {
   });
 
   test("Course.description: returns description for the course type (name)", () => {
-    const course = { name: utils.constants.courseInternalNames.pollution };
+    const shortName = schemas.enums.CourseShortNames.pollution;
+    const course = { name: shortName };
     const context = { utils };
 
     expect(typeResolvers.Course.description(course, null, context)).toEqual(
-      utils.constants.courseDescriptions[
-        utils.constants.courseInternalNames.pollution
-      ],
+      utils.constants.courseDescriptions[shortName],
     );
   });
 

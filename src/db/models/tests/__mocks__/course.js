@@ -1,5 +1,5 @@
 const { Course, CourseLocation } = require("../..");
-const { courseInternalNames } = require("../../../../utils/constants");
+const { CourseShortNames } = require("../../../../schemas/enums");
 
 const pastYear = new Date().getFullYear() - 1;
 const futureYear = new Date().getFullYear() + 1;
@@ -7,7 +7,7 @@ const futureYear = new Date().getFullYear() + 1;
 const courseMocks = [
   {
     course: {
-      name: courseInternalNames.pollution,
+      name: CourseShortNames.pollution,
       price: 1695,
       startDate: new Date(`October 24, ${futureYear}`).toISOString(),
       endDate: new Date(`October 31, ${futureYear}`).toISOString(),
@@ -21,7 +21,7 @@ const courseMocks = [
   },
   {
     course: {
-      name: courseInternalNames.remediation,
+      name: CourseShortNames.remediation,
       price: 300,
       startDate: new Date(`October 24, ${pastYear}`).toISOString(),
       endDate: new Date(`October 31, ${pastYear}`).toISOString(),

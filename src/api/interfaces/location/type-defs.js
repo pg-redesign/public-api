@@ -34,6 +34,7 @@ const StudentLocation = `
 const CourseLocation = `
   type CourseLocation implements Location {
     ${baseFields}
+    id: ID!
     mapUrl: URL!
     courses: [Course!]!
   }

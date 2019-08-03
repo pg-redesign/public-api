@@ -5,6 +5,7 @@ const Course = require("../course");
 const schemas = require("../../../schemas");
 const studentMock = require("./__mocks__/student");
 const { connection } = require("../../connection");
+const CourseLocation = require("../course-location");
 const {
   createLocationsAndCourses,
   cleanupLocationsAndCourses,
@@ -33,7 +34,53 @@ describe("Course static methods", () => {
     return connection.destroy();
   });
 
-  // -- STATIC METHODS -- //
+  describe("create", () => {
+    const locationData = {
+      city: "New Orleans",
+      state: "LA",
+      country: "USA",
+      mapUrl: "https://goo.gl/maps/c0d3",
+    };
+
+    let course;
+    let rawCourseData;
+    let courseLocation;
+    beforeAll(async () => {
+      courseLocation = await CourseLocation.create(locationData);
+
+      const thisYear = new Date().getFullYear();
+      rawCourseData = {
+        price: 1695,
+        courseLocationId: courseLocation.id,
+        name: schemas.enums.CourseShortNames.remediation,
+        startDate: "10/24/".concat(thisYear + 1),
+        endDate: "10/31/".concat(thisYear + 1),
+      };
+
+      course = await Course.create(rawCourseData);
+    });
+
+    afterAll(async () => {
+      await courseLocation.$query().del();
+      return course.$query().del();
+    });
+
+    it("converts the start and end dates into ISO string format", () => {
+      const [expectedStart, expectedEnd] = [
+        rawCourseData.startDate,
+        rawCourseData.endDate,
+      ].map(rawDate => new Date(rawDate).toISOString());
+
+      expect(course.startDate).toEqual(expectedStart);
+      expect(course.endDate).toEqual(expectedEnd);
+    });
+
+    it("creates and returns a new Course", () => {
+      expect(course).toBeDefined();
+      expect(course.courseLocationId).toBe(courseLocation.id);
+    });
+  });
+
   describe("getAll", () => {
     let results;
     beforeAll(async () => {

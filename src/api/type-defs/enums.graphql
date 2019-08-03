@@ -1,3 +1,5 @@
+# TODO: remove pluralization (front and backend)
+
 """
 Payment options for Course registration
 """
@@ -32,4 +34,12 @@ Language options for translated outputs
 enum LanguageTypes {
   ENGLISH
   PORTUGUESE
+}
+
+"""
+Internal Course (short) name
+"""
+enum CourseShortNames {
+  POLLUTION
+  REMEDIATION
 }
