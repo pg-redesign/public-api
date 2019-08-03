@@ -24,23 +24,23 @@ class CourseLocation extends BaseModel {
   }
 
   // -- STATIC METHODS -- //
-  static create(locationData) {
+  static async create(locationData) {
     return this.query().insert(locationData);
   }
 
-  static getBy(field, columns = []) {
+  static async getBy(field, columns = []) {
     return this.query()
       .first()
       .where(field)
       .select(columns);
   }
 
-  static getAll(columns = []) {
+  static async getAll(columns = []) {
     return this.query().select(columns);
   }
 
   // -- PROTO METHODS -- //
-  getCourses(columns = []) {
+  async getCourses(columns = []) {
     return this.$relatedQuery("courses").select(columns);
   }
 }

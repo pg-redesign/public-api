@@ -67,21 +67,39 @@ class Course extends BaseModel {
     return this.query().insert(courseData);
   }
 
-  static getAll(columns = []) {
+  /**
+   * duplicated queries!
+   *
+   * LESSON LEARNED:
+   * objection queries are NOT Promises
+   * - they are "thenable" but not a Promise implementation
+   * - if you have a chain: resolver -> Model/instance method -> QueryBuilder
+   * - what is returned is a Query thenable query stub
+   * - AS (2.0+) will end up executing the method twice
+   * - AS chains a .then() on the end (thinking it is a promise) which then
+   * - queryBuilder + .then() -> executes the query and returns a promise + .then() (on a promise) -> resolves second time
+   * - itself returns a promise and terminates the query
+   *
+   * AS thread:https://github.com/apollographql/apollo-server/issues/2501
+   *
+   * solution:
+   * - make the resolver or method async (to wrap it in a promise)
+   * - terminate the query using .execute() in the method
+   */
+  static async getAll(columns = []) {
     return this.query()
       .select(columns)
-      .orderBy(...DEFAULT_SORT);
+      .orderBy(...DEFAULT_SORT)
+      .debug();
   }
 
-  static getUpcoming(columns = []) {
-    return (
-      this.query()
-        .select(columns)
-        .orderBy(...DEFAULT_SORT)
-        // only return courses that are upcoming (beyond current date)
-        .where("startDate", ">", new Date())
-        .limit(2)
-    );
+  static async getUpcoming(columns = []) {
+    return this.query()
+      .select(columns)
+      .orderBy(...DEFAULT_SORT)
+
+      .where("startDate", ">", new Date()) // courses that are upcoming (beyond current date)
+      .limit(2);
   }
 
   static async validateCourseId(courseId, columns = []) {
@@ -179,11 +197,11 @@ class Course extends BaseModel {
 
   // -- INSTANCE METHODS -- //
 
-  getLocation(columns = []) {
+  async getLocation(columns = []) {
     return this.$relatedQuery("location").select(columns);
   }
 
-  completeStudentRegistration(studentId, confirmationId, paymentType) {
+  async completeStudentRegistration(studentId, confirmationId, paymentType) {
     return this.$relatedQuery("students").patchAndFetchById(studentId, {
       paymentType,
       confirmationId,
@@ -191,15 +209,13 @@ class Course extends BaseModel {
     });
   }
 
-  getRegisteredStudent(studentId, columns = []) {
-    // throws if not registered
-    const query = this.$relatedQuery("students")
+  // throws if not registered
+  async getRegisteredStudent(studentId, columns = []) {
+    return this.$relatedQuery("students")
       .where("studentId", studentId)
       .select(columns)
       .first()
       .throwIfNotFound();
-
-    return query;
   }
 
   async hasStudent(studentId) {
@@ -210,7 +226,7 @@ class Course extends BaseModel {
     return Boolean(result.length);
   }
 
-  registerNewStudent(studentData, paymentData) {
+  async registerNewStudent(studentData, paymentData) {
     return this.$relatedQuery("students").insert({
       ...studentData,
       ...paymentData,
