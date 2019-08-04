@@ -287,7 +287,7 @@ describe("Course prototype methods", () => {
       });
     });
 
-    it("requires that ambiguous column names (like 'id') be prefixed with 'student.'", () => {
+    it("requires that ambiguous column names (like 'id') be prefixed with 'students.'", () => {
       expect(course.getStudents({}, ["id", "firstName"])).rejects.toThrow();
     });
 
@@ -323,6 +323,110 @@ describe("Course prototype methods", () => {
 
       it("with both filters at once", async () => {
         const output = await course.getStudents({
+          paymentFilters: { paymentComplete: false, paymentType },
+        });
+
+        expect(output).toHaveLength(0);
+      });
+    });
+  });
+
+  describe("getPayments", () => {
+    let course;
+    let students;
+    let paymentType;
+    let paidStudent;
+    beforeAll(async () => {
+      await cleanupLocationsAndCourses();
+
+      const [courseMock] = courseMocks;
+      const courseLocation = await CourseLocation.create(courseMock.location);
+
+      course = await courseLocation
+        .$relatedQuery("courses")
+        .insert(courseMock.course);
+
+      const studentsData = [
+        { ...studentMock.studentRegistrationData },
+        { ...studentMock.studentRegistrationData, email: "witch@gmail.com" },
+        { ...studentMock.studentRegistrationData, email: "hallow@gmail.com" },
+      ];
+
+      students = await Promise.all(
+        studentsData.map(async (data) => {
+          const { student } = await Course.registerStudent({
+            ...data,
+            courseId: course.id,
+          });
+
+          return student;
+        }),
+      );
+
+      [paidStudent] = students;
+      paymentType = enums.PaymentTypes.credit;
+
+      await course.completeStudentRegistration(
+        paidStudent.id,
+        "confirmiation-id",
+        paymentType,
+      );
+    });
+
+    afterAll(() => Student.query().del());
+
+    it("returns a list of the Course Payments", () => expect(course.getPayments()).resolves.toHaveLength(students.length));
+
+    it("allows specific Payment columns to be selected", async () => {
+      const output = await course.getPayments({}, [
+        "payments.id",
+        "invoiceDate",
+      ]);
+      output.forEach((student) => {
+        expect(student).toHaveProperty("id");
+        expect(student).toHaveProperty("invoiceDate");
+        expect(student).not.toHaveProperty("amount");
+      });
+    });
+
+    it("requires that ambiguous column names (like 'id') be prefixed with 'payments.'", () => {
+      expect(course.getPayments({}, ["id", "firstName"])).rejects.toThrow();
+    });
+
+    describe("filters.paymentFilters: filters the Payments list", () => {
+      it("for a specific paymentType", async () => {
+        const output = await course.getPayments({
+          paymentFilters: { paymentType },
+        });
+
+        expect(output).toHaveLength(1);
+        expect(output[0].studentId).toBe(paidStudent.id);
+      });
+
+      it("for completed payments", async () => {
+        const output = await course.getPayments({
+          paymentFilters: { paymentComplete: true },
+        });
+
+        expect(output).toHaveLength(1);
+        expect(output[0].studentId).toBe(paidStudent.id);
+      });
+
+      it("for incomplete payments", async () => {
+        const output = await course.getPayments({
+          paymentFilters: { paymentComplete: false },
+        });
+
+        expect(output).toHaveLength(students.length - 1);
+        expect(
+          output.every(
+            incompletePayment => incompletePayment.studentId !== paidStudent.id,
+          ),
+        ).toBe(true);
+      });
+
+      it("with both filters at once", async () => {
+        const output = await course.getPayments({
           paymentFilters: { paymentComplete: false, paymentType },
         });
 

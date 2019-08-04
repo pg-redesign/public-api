@@ -193,28 +193,45 @@ class Course extends BaseModel {
     return { course, student };
   }
 
+  // abstraction for duplicated payment filters logic in getStudents, getPayments
+  static applyPaymentFilters(paymentFilters, baseQuery) {
+    if (!paymentFilters) return baseQuery;
+
+    const { paymentComplete, paymentType } = paymentFilters;
+
+    if (paymentType) baseQuery.where({ paymentType });
+
+    if (paymentComplete === true) {
+      baseQuery.whereNotNull("paymentDate");
+    } else if (paymentComplete === false) {
+      baseQuery.whereNull("paymentDate");
+    }
+
+    return baseQuery;
+  }
+
   // -- INSTANCE METHODS -- //
 
   async getLocation(columns = []) {
     return this.$relatedQuery("location").select(columns);
   }
 
-  async getStudents(filters = {}, columns = []) {
-    const { paymentFilters } = filters;
+  async getStudents(filters = {}, studentColumns = []) {
+    // apply payment filters, appends to and returns QueryBuilder instance
+    const query = Course.applyPaymentFilters(
+      filters.paymentFilters,
+      this.$relatedQuery("students").select(studentColumns),
+    );
 
-    const query = this.$relatedQuery("students").select(columns);
+    return query;
+  }
 
-    if (paymentFilters) {
-      const { paymentComplete, paymentType } = paymentFilters;
-
-      if (paymentType) query.where({ paymentType });
-
-      if (paymentComplete === true) {
-        query.whereNotNull("paymentDate");
-      } else if (paymentComplete === false) {
-        query.whereNull("paymentDate");
-      }
-    }
+  async getPayments(filters = {}, paymentColumns = []) {
+    // apply payment filters, appends to and returns QueryBuilder instance
+    const query = Course.applyPaymentFilters(
+      filters.paymentFilters,
+      this.$relatedQuery("payments").select(paymentColumns),
+    );
 
     return query;
   }
