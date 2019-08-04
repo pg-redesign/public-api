@@ -22,6 +22,22 @@ class BaseModel extends Model {
   $beforeUpdate() {
     this.updatedAt = new Date().toISOString();
   }
+
+  // -- STATIC METHODS -- //
+  static async create(data) {
+    return this.query().insert(data);
+  }
+
+  static async getBy(field, columns = []) {
+    return this.query()
+      .first()
+      .where(field)
+      .select(columns);
+  }
+
+  static async getAll(columns = []) {
+    return this.query().select(columns);
+  }
 }
 
 module.exports = BaseModel;
