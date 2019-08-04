@@ -1,10 +1,8 @@
 const utils = require("../../../utils");
-const typeResolvers = require("../types");
+const { Course } = require("../types");
 const schemas = require("../../../schemas");
 
 describe("Course Type resolvers", () => {
-  const { Course } = typeResolvers;
-
   describe("Course.date", () => {
     const courseDateRange = jest.fn();
     const endDate = new Date("October 31, 2020");
@@ -75,7 +73,7 @@ describe("Course Type resolvers", () => {
     const course = { name: shortName };
     const context = { utils };
 
-    expect(typeResolvers.Course.description(course, null, context)).toEqual(
+    expect(Course.description(course, null, context)).toEqual(
       utils.constants.courseDescriptions[shortName],
     );
   });
@@ -84,8 +82,28 @@ describe("Course Type resolvers", () => {
     const course = { getLocation: jest.fn() };
 
     test("returns the associated CourseLocation", async () => {
-      await typeResolvers.Course.location(course);
+      await Course.location(course);
       expect(course.getLocation).toHaveBeenCalled();
+    });
+  });
+
+  describe("Course.students", () => {
+    const args = { paymentFilters: {} };
+    const course = { getStudents: jest.fn() };
+
+    it("returns a list of registered Students with optional payment filters", async () => {
+      await Course.students(course, args);
+      expect(course.getStudents).toHaveBeenCalledWith(args);
+    });
+  });
+
+  describe("Course.payments", () => {
+    const args = { paymentFilters: {} };
+    const course = { getPayments: jest.fn() };
+
+    it("returns a list of Course Payments with optional payment filters", async () => {
+      await Course.payments(course, args);
+      expect(course.getPayments).toHaveBeenCalledWith(args);
     });
   });
 });

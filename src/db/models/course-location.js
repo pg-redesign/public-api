@@ -24,20 +24,6 @@ class CourseLocation extends BaseModel {
   }
 
   // -- STATIC METHODS -- //
-  static async create(locationData) {
-    return this.query().insert(locationData);
-  }
-
-  static async getBy(field, columns = []) {
-    return this.query()
-      .first()
-      .where(field)
-      .select(columns);
-  }
-
-  static async getAll(columns = []) {
-    return this.query().select(columns);
-  }
 
   // -- PROTO METHODS -- //
   async getCourses(columns = []) {

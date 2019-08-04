@@ -60,4 +60,15 @@ describe("Query resolvers", () => {
       expect(courseLocation.getCourses).toHaveBeenCalled();
     });
   });
+
+  describe("getStudent", () => {
+    const args = { field: {} };
+    const Student = { getBy: jest.fn() };
+    const context = { models: { Student } };
+
+    it("finds and returns a Student by its ID or email", async () => {
+      await Query.getStudent(null, args, context);
+      expect(Student.getBy).toHaveBeenCalledWith(args.field);
+    });
+  });
 });

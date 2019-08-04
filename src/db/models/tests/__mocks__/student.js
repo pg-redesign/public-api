@@ -25,7 +25,7 @@ const studentRegistrationData = {
   ...studentLocation,
 };
 
-const createStudent = () => Student.query().insert(studentData);
+const createStudent = (data = studentData) => Student.query().insert(data);
 
 const destroyStudent = studentId => Student.query().deleteById(studentId);
 
