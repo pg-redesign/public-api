@@ -56,7 +56,6 @@ class Course extends BaseModel {
   }
 
   // -- STATIC METHODS -- //
-
   static create(rawData) {
     const courseData = {
       ...rawData,
@@ -64,7 +63,7 @@ class Course extends BaseModel {
       startDate: new Date(rawData.startDate).toISOString(),
     };
 
-    return this.query().insert(courseData);
+    return super.create(courseData);
   }
 
   /**
@@ -89,15 +88,13 @@ class Course extends BaseModel {
   static async getAll(columns = []) {
     return this.query()
       .select(columns)
-      .orderBy(...DEFAULT_SORT)
-      .debug();
+      .orderBy(...DEFAULT_SORT);
   }
 
   static async getUpcoming(columns = []) {
     return this.query()
       .select(columns)
       .orderBy(...DEFAULT_SORT)
-
       .where("startDate", ">", new Date()) // courses that are upcoming (beyond current date)
       .limit(2);
   }
@@ -130,8 +127,8 @@ class Course extends BaseModel {
 
     const course = await this.validateCourseId(courseId, [
       "id",
-      "startDate",
       "price",
+      "startDate",
     ]);
 
     // shape location property
@@ -146,9 +143,10 @@ class Course extends BaseModel {
     };
 
     // check for an existing student in the system with the given email
-    const existingStudent = await Student.query()
-      .findOne("email", partialStudent.email)
-      .select("id");
+    const existingStudent = await Student.getBy(
+      { email: partialStudent.email },
+      ["id"],
+    );
 
     const student = existingStudent
       ? await course.registerExistingStudent(
@@ -166,8 +164,8 @@ class Course extends BaseModel {
 
     const course = await this.validateCourseId(courseId, [
       "id",
-      "price",
       "name",
+      "price",
     ]);
 
     // throws if not found (student not registered)
@@ -201,12 +199,24 @@ class Course extends BaseModel {
     return this.$relatedQuery("location").select(columns);
   }
 
-  async completeStudentRegistration(studentId, confirmationId, paymentType) {
-    return this.$relatedQuery("students").patchAndFetchById(studentId, {
-      paymentType,
-      confirmationId,
-      paymentDate: new Date().toISOString(),
-    });
+  async getStudents(filters = {}, columns = []) {
+    const { paymentFilters } = filters;
+
+    const query = this.$relatedQuery("students").select(columns);
+
+    if (paymentFilters) {
+      const { paymentComplete, paymentType } = paymentFilters;
+
+      if (paymentType) query.where({ paymentType });
+
+      if (paymentComplete === true) {
+        query.whereNotNull("paymentDate");
+      } else if (paymentComplete === false) {
+        query.whereNull("paymentDate");
+      }
+    }
+
+    return query;
   }
 
   // throws if not registered
@@ -219,11 +229,11 @@ class Course extends BaseModel {
   }
 
   async hasStudent(studentId) {
-    const result = await this.$relatedQuery("payments")
-      .select("payments.studentId")
-      .where("studentId", studentId);
+    const result = await this.$relatedQuery("students")
+      .where({ studentId })
+      .resultSize();
 
-    return Boolean(result.length);
+    return Boolean(result);
   }
 
   async registerNewStudent(studentData, paymentData) {
@@ -254,6 +264,20 @@ class Course extends BaseModel {
     });
 
     return updatedStudent;
+  }
+
+  async completeStudentRegistration(studentId, confirmationId, paymentType) {
+    await this.$relatedQuery("payments")
+      .where({ studentId })
+      .patch({
+        paymentType,
+        confirmationId,
+        paymentDate: new Date().toISOString(),
+      });
+
+    return this.$relatedQuery("students")
+      .where({ studentId })
+      .first();
   }
 }
 
