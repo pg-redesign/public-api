@@ -81,3 +81,19 @@ input CourseLocationData {
   state: String!
   country: String!
 }
+
+"""
+filter Payment related details
+"""
+input PaymentFilters {
+  paymentComplete: Boolean
+  paymentType: PaymentOptions
+}
+
+"""
+used to uniquely identify a Student
+"""
+input StudentIdentifier {
+  id: ID
+  email: EmailAddress
+}
