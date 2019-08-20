@@ -12,10 +12,11 @@ const renderCourseInvoice = (course, student) => {
 
   const templateData = {
     courseName,
+    ...baseTemplateData,
     studentFirstName: student.firstName,
+    contactEmail: constants.emailService.accounts.billing,
     creditPaymentLink: buildCreditPaymentLink(course, student),
     previewText: `Billing Invoice: Princeton Groundwater ${courseName}`,
-    ...baseTemplateData,
   };
 
   return renderPugTemplate(templateFilename, templateData);
@@ -28,8 +29,8 @@ const renderRegistrationComplete = (course, student) => {
 
   const templateData = {
     courseName,
-    studentFirstName: student.firstName,
     ...baseTemplateData,
+    studentFirstName: student.firstName,
   };
 
   return renderPugTemplate(templateFilename, templateData);
