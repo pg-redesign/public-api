@@ -159,7 +159,8 @@ class Course extends BaseModel {
     return { course, student };
   }
 
-  static async completeStripePayment(paymentData, stripeService) {
+  static async completeStripePayment(paymentData, context) {
+    const { services } = context;
     const { courseId, studentId } = paymentData;
 
     const course = await this.validateCourseId(courseId, [
@@ -175,15 +176,14 @@ class Course extends BaseModel {
 
     if (registeredStudent.paymentDate) {
       // student has already paid, exit early
-      return registeredStudent;
+      return { course, student: registeredStudent };
     }
 
-    const confirmationId = await stripeService.createCharge(
+    const confirmationId = await services.stripe.createCharge(
       course,
       paymentData,
     );
 
-    //
     const student = await course.completeStudentRegistration(
       studentId,
       confirmationId,

@@ -229,6 +229,7 @@ describe("Course static methods", () => {
 
   describe("completeStripePayment", () => {
     const stripeService = { createCharge: jest.fn() };
+    const context = { services: { stripe: stripeService } };
 
     const student = {
       id: 1,
@@ -273,7 +274,7 @@ describe("Course static methods", () => {
           () => student,
         );
 
-        result = await Course.completeStripePayment(paymentData, stripeService);
+        result = await Course.completeStripePayment(paymentData, context);
       });
       afterAll(() => jest.clearAllMocks());
 
@@ -294,13 +295,13 @@ describe("Course static methods", () => {
       });
 
       test("returns the course and paid student", () => {
-        expect(result.student).toBe(student);
         expect(result.course.id).toBe(course.id);
+        expect(result.student.id).toBe(student.id);
       });
     });
 
     describe("failure", () => {
-      test("student has already paid: does not call stripe service or update payment status", async () => {
+      test("student has already paid: returns the course and student without creating a new charge", async () => {
         Course.prototype.getRegisteredStudent.mockImplementationOnce(() => ({
           ...student,
           paymentDate: "some date",
@@ -310,8 +311,10 @@ describe("Course static methods", () => {
           Course.prototype.completeStudentRegistration,
         ];
 
-        await Course.completeStripePayment(paymentData);
+        const result = await Course.completeStripePayment(paymentData, context);
         notCalled.forEach(action => expect(action).not.toHaveBeenCalled());
+        expect(result.course.id).toBe(course.id);
+        expect(result.student.id).toBe(student.id);
       });
     });
   });
