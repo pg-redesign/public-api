@@ -1,38 +1,39 @@
-const pug = require("pug");
+const ejs = require("ejs");
 const path = require("path");
 
-const constants = require("../../utils/constants");
+const constants = require("./constants");
 
 const handleError = (logger, error, email, emailType) => {
   logger.error(`[Email Service]: failed sending [${emailType}] to [${email}]`);
   logger.error(error);
 };
 
-const buildCreditPaymentLink = (course, student, creditPaymentLink) => {
+// TODO: implement support in client
+const buildCreditPaymentLink = (course, student) => {
   if (!course.id) throw new Error("Missing course ID");
   if (!student.id) throw new Error("Missing student ID");
-  if (!creditPaymentLink) throw new Error("Missing credit payment client url");
 
-  return `${creditPaymentLink}?course=${course.id}&student=${student.id}`;
+  const creditPaymentBase = constants.siteLinks.creditPayment;
+  // use student email instead of exposing id?
+  return `${creditPaymentBase}?course=${course.id}&student=${student.id}`;
 };
 
-const renderPugTemplate = (filename, templateData) => {
+/**
+ * renders the template in templates/ dir by its name
+ * @param {string} templateFileName template file name (from templates/names.js)
+ * @param {{}} templateData object of template data to be injected
+ */
+const renderTemplate = (templateFileName, templateData) => {
   const basedir = path.join(__dirname, "templates");
 
-  return pug.renderFile(path.join(basedir, filename), {
-    basedir,
-    filename,
-    cache: true,
-    // default contacts
-    contactPhone: constants.emailService.phoneContact,
-    contactEmail: constants.emailService.accounts.info,
-    // template data, may overwrite default contacts
-    ...templateData,
-  });
+  return ejs.renderFile(
+    path.join(basedir, `${templateFileName}.ejs`),
+    templateData,
+  );
 };
 
 module.exports = {
   handleError,
-  renderPugTemplate,
+  renderTemplate,
   buildCreditPaymentLink,
 };

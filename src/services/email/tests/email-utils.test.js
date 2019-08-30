@@ -1,16 +1,12 @@
-const pug = require("pug");
-const constants = require("../../../utils/constants");
-const {
-  handleError,
-  renderPugTemplate,
-  buildCreditPaymentLink,
-} = require("../email-utils");
-
-jest.mock("pug");
+const { handleError, buildCreditPaymentLink } = require("../email-utils");
 
 const logger = { error: jest.fn() };
 
 describe("Email Service utils", () => {
+  beforeAll(() => {
+    process.env.EMAIL_DOMAIN = "test.princeton-groundwater.com ";
+  });
+
   test("handleError: logs email type, email address, and original error", () => {
     const mockArgs = {
       error: {},
@@ -24,30 +20,6 @@ describe("Email Service utils", () => {
     expect(firstCall[0].includes(mockArgs.email)).toBe(true);
     expect(firstCall[0].includes(mockArgs.emailType)).toBe(true);
     expect(secondCall[0]).toBe(mockArgs.error);
-  });
-
-  describe("renderPugTemplate", () => {
-    const templateData = { some: "data" };
-    const filename = "template.pug";
-
-    let pugRenderFileOptions;
-    beforeAll(() => {
-      renderPugTemplate(filename, templateData);
-      const [mockCall] = pug.renderFile.mock.calls;
-      [pugRenderFileOptions] = mockCall.slice(1);
-    });
-
-    test("sets default template email contact to info account", () => expect(pugRenderFileOptions.contactEmail).toBe(
-      constants.emailService.accounts.info,
-    ));
-
-    test("sets default template phone contact to business number", () => expect(pugRenderFileOptions.contactPhone).toBe(
-      constants.emailService.phoneContact,
-    ));
-
-    test("injects any additional template data", () => expect(pugRenderFileOptions.some).toBe(templateData.some));
-
-    test("renders the chosen template", () => expect(pug.renderFile).toHaveBeenCalled());
   });
 
   describe("buildCreditPaymentLink", () => {
@@ -69,10 +41,6 @@ describe("Email Service utils", () => {
       {
         test: "missing student ID",
         args: [course, {}, creditPaymentLink],
-      },
-      {
-        test: "missing credit payment site link",
-        args: [course, student, null],
       },
     ].forEach(testCase => test(testCase.test, () => expect(() => buildCreditPaymentLink(...testCase.args)).toThrow())));
   });
