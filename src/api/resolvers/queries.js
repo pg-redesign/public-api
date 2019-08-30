@@ -30,5 +30,12 @@ module.exports = {
       // empty list expected by schema if location is not found
       return courseLocation ? courseLocation.getCourses() : [];
     },
+
+    getStudent: async (_, args, context) => {
+      const { field } = args;
+      const { Student } = context.models;
+
+      return Student.getBy(field);
+    },
   },
 };

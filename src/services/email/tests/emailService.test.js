@@ -86,7 +86,7 @@ describe("Email Service", () => {
 
       test("sends a registration completed email to the student", () => expect(sendMailCallArg.to).toBe(student.email));
 
-      test("sends from the info email account", () => expect(sendMailCallArg.from).toBe(accounts.info));
+      test("sends from the info email account", () => expect(sendMailCallArg.from).toBe(accounts.registration));
 
       test("uses registration complete template", () => expect(renderers.renderRegistrationComplete).toHaveBeenCalled());
     });

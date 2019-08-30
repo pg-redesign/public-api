@@ -23,13 +23,15 @@ module.exports = emailClient => ({
   sendRegistrationComplete: async (course, student, context) => {
     const { logger } = context;
 
-    return emailClient
-      .sendMail({
+    try {
+      await emailClient.sendMail({
         to: student.email,
-        from: constants.accounts.info,
+        from: constants.accounts.registration,
         subject: "Princeton Groundwater course registration complete",
         html: renderers.renderRegistrationComplete(course, student),
-      })
-      .catch(error => handleError(logger, error, student.email, "registration complete"));
+      });
+    } catch (error) {
+      handleError(logger, error, student.email, "registration complete");
+    }
   },
 });

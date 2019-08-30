@@ -1,12 +1,18 @@
 const constants = require("../../utils/constants");
 const { renderPugTemplate, buildCreditPaymentLink } = require("./email-utils");
 
+const baseTemplateData = {
+  contactPhone: constants.emailService.phoneContact,
+  contactEmail: constants.emailService.accounts.registration,
+};
+
 const renderCourseInvoice = (course, student) => {
   const templateFilename = "course-invoice.pug";
   const courseName = constants.fullCourseNames[course.name];
 
   const templateData = {
     courseName,
+    ...baseTemplateData,
     studentFirstName: student.firstName,
     contactEmail: constants.emailService.accounts.billing,
     creditPaymentLink: buildCreditPaymentLink(course, student),
@@ -18,11 +24,12 @@ const renderCourseInvoice = (course, student) => {
 
 // TODO: complete implementation
 const renderRegistrationComplete = (course, student) => {
-  const templateFilename = "course-invoice.pug";
+  const templateFilename = "course-registration-complete.pug";
   const courseName = constants.fullCourseNames[course.name];
 
   const templateData = {
     courseName,
+    ...baseTemplateData,
     studentFirstName: student.firstName,
   };
 

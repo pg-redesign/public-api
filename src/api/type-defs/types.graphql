@@ -32,6 +32,18 @@ type Course {
   List of course description items
   """
   description: [String!]!
+
+  """
+  Admin only
+  Students registered for the Course
+  """
+  students(paymentFilters: PaymentFilters): [Student!]! @admin
+
+  """
+  Admin only
+  Course registration Payments
+  """
+  payments(paymentFilters: PaymentFilters!): [Payment!]! @admin
 }
 
 """
@@ -41,9 +53,11 @@ type Student {
   id: ID!
   firstName: String!
   lastName: String!
-  email: EmailAddress!
   company: String!
+  email: EmailAddress!
   location: StudentLocation!
+  courses: [Course!]! @admin
+  payments: [Payment!]! @admin
 }
 
 """
@@ -52,4 +66,19 @@ Authentication Token
 type AuthToken {
   token: String!
   expiresIn: Int!
+}
+
+"""
+Admin only
+Course registration Payment details
+"""
+type Payment @admin {
+  id: ID!
+  amount: Int!
+  course: Course!
+  student: Student!
+  invoiceDate: String!
+  paymentDate: String
+  confirmationId: String
+  paymentType: PaymentTypes!
 }
