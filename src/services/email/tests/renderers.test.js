@@ -1,29 +1,43 @@
-const {
-  renderCourseInvoice,
-  // renderRegistrationComplete,
-} = require("../renderers");
+const templates = require("../templates");
+const { renderCourseInvoice } = require("../renderers");
 
-const emailUtils = require("../email-utils");
-const constants = require("../../../utils/constants");
+// mocked
+const { renderTemplate } = require("../email-utils");
 
 jest.mock("../email-utils.js");
 
+const { courseMocks } = require("../../../db/models/tests/__mocks__/course");
+const { studentData } = require("../../../db/models/tests/__mocks__/student");
+
+const student = {
+  id: 1,
+  ...studentData,
+};
+
+const course = {
+  id: 1,
+  ...courseMocks[0].course,
+};
+
 describe("Template Renderers", () => {
   describe("renderCourseInvoice", () => {
-    let filenameArg;
-    let templateDataArg;
-    beforeAll(() => {
-      renderCourseInvoice({}, {});
-      const [mockCall] = emailUtils.renderPugTemplate.mock.calls;
-      [filenameArg, templateDataArg] = mockCall;
+    let renderTemplateCall;
+    beforeAll(async () => {
+      await renderCourseInvoice(course, student);
+      [renderTemplateCall] = renderTemplate.mock.calls;
     });
 
-    test("sets course invoice template data", () => expect(Object.keys(templateDataArg).length).toBeTruthy());
+    test("renders the course invoice template with all required data", () => {
+      const courseInvoiceTemplate = templates.courseInvoice;
+      const [templateFileName, templateData] = renderTemplateCall;
 
-    test("overrides default contact email to billing account", () => expect(templateDataArg.contactEmail).toBe(
-      constants.emailService.accounts.billing,
-    ));
+      expect(templateFileName).toBe(courseInvoiceTemplate.fileName);
 
-    test("renders the course invoice template", () => expect(filenameArg).toBe("course-invoice.pug"));
+      const templateDataFields = Object.keys(templateData);
+      const hasRequiredData = courseInvoiceTemplate.requiredData.every(
+        requiredField => templateDataFields.includes(requiredField),
+      );
+      expect(hasRequiredData).toBe(true);
+    });
   });
 });
