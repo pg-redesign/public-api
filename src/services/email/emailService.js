@@ -1,12 +1,15 @@
-const renderers = require("./renderers");
+const constants = require("./constants");
 const { handleError } = require("./email-utils");
-const constants = require("../../utils/constants").emailService;
+const {
+  renderCourseInvoice,
+  renderRegistrationComplete,
+} = require("./renderers");
 
 module.exports = emailClient => ({
   sendCourseInvoice: async (course, student, context) => {
     const { logger, services } = context;
 
-    // TODO: implement file service, { filename, content }
+    // TODO: implement file service -> { filename, content }
     const invoiceFile = await services.file.generateInvoice(course, student);
 
     return emailClient
@@ -14,7 +17,7 @@ module.exports = emailClient => ({
         to: student.email,
         from: constants.accounts.billing,
         subject: "Princeton Groundwater billing invoice",
-        html: renderers.renderCourseInvoice(course, student),
+        html: renderCourseInvoice(course, student),
         attachments: [invoiceFile],
       })
       .catch(error => handleError(logger, error, student.email, "course invoice"));
@@ -28,7 +31,7 @@ module.exports = emailClient => ({
         to: student.email,
         from: constants.accounts.registration,
         subject: "Princeton Groundwater course registration complete",
-        html: renderers.renderRegistrationComplete(course, student),
+        html: renderRegistrationComplete(course, student),
       });
     } catch (error) {
       handleError(logger, error, student.email, "registration complete");

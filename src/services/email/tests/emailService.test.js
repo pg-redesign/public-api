@@ -1,12 +1,12 @@
+const { accounts } = require("../constants");
 const emailService = require("../emailService");
-const { accounts } = require("../../../utils/constants").emailService;
 
 // mocked
 const renderers = require("../renderers");
 const emailUtils = require("../email-utils");
 
-jest.mock("../email-utils.js");
 jest.mock("../renderers.js");
+jest.mock("../email-utils.js");
 
 const logger = { error: jest.fn() };
 
@@ -15,6 +15,10 @@ describe("Email Service", () => {
   const student = { email: "email" };
   const emailClient = { sendMail: jest.fn() };
   const mockedEmailService = emailService(emailClient);
+
+  beforeAll(() => {
+    process.env.EMAIL_DOMAIN = "test.princeton-groundwater.com";
+  });
 
   describe("sendCourseInvoice", () => {
     const invoiceFile = "invoice file";
