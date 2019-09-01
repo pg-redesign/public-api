@@ -1,7 +1,7 @@
 const constants = require("./constants");
+const templates = require("./templates");
 const { courseConstants } = require("../../utils");
 const { renderTemplate, buildCreditPaymentLink } = require("./email-utils");
-const { courseInvoice } = require("./templates");
 
 const baseTemplateData = {
   contactPhone: constants.phoneContact,
@@ -9,6 +9,7 @@ const baseTemplateData = {
 };
 
 const renderCourseInvoice = (course, student) => {
+  const { courseInvoice } = templates;
   const courseName = courseConstants.fullCourseNames[course.name];
 
   const paymentDeadline = new Date(course.startDate);
@@ -25,6 +26,18 @@ const renderCourseInvoice = (course, student) => {
   });
 };
 
+// TODO: create the template file and tests
+const renderRegistrationComplete = (course, student) => {
+  const { courseRegistrationComplete } = templates;
+
+  return renderTemplate(courseRegistrationComplete.fileName, {
+    ...baseTemplateData,
+    studentFirstName: student.firstName,
+    courseName: courseConstants.fullCourseNames[course.name],
+  });
+};
+
 module.exports = {
   renderCourseInvoice,
+  renderRegistrationComplete,
 };
