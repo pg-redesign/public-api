@@ -1,39 +1,40 @@
-const constants = require("../../utils/constants");
-const { renderPugTemplate, buildCreditPaymentLink } = require("./email-utils");
+const constants = require("./constants");
+const templates = require("./templates");
+const { courseConstants } = require("../../utils");
+const { renderTemplate, buildCreditPaymentLink } = require("./email-utils");
 
 const baseTemplateData = {
-  contactPhone: constants.emailService.phoneContact,
-  contactEmail: constants.emailService.accounts.registration,
+  contactPhone: constants.phoneContact,
+  contactEmail: constants.accounts.registration.address,
 };
 
 const renderCourseInvoice = (course, student) => {
-  const templateFilename = "course-invoice.pug";
-  const courseName = constants.fullCourseNames[course.name];
+  const { courseInvoice } = templates;
+  const courseName = courseConstants.fullCourseNames[course.name];
 
-  const templateData = {
-    courseName,
+  const paymentDeadline = new Date(course.startDate);
+  paymentDeadline.setDate(paymentDeadline.getDate() - 14);
+
+  return renderTemplate(courseInvoice.fileName, {
     ...baseTemplateData,
+    courseName,
     studentFirstName: student.firstName,
-    contactEmail: constants.emailService.accounts.billing,
+    paymentDeadline: paymentDeadline.toDateString(),
+    contactEmail: constants.accounts.billing.address,
     creditPaymentLink: buildCreditPaymentLink(course, student),
     previewText: `Billing Invoice: Princeton Groundwater ${courseName}`,
-  };
-
-  return renderPugTemplate(templateFilename, templateData);
+  });
 };
 
-// TODO: complete implementation
+// TODO: create the template file and tests
 const renderRegistrationComplete = (course, student) => {
-  const templateFilename = "course-registration-complete.pug";
-  const courseName = constants.fullCourseNames[course.name];
+  const { courseRegistrationComplete } = templates;
 
-  const templateData = {
-    courseName,
+  return renderTemplate(courseRegistrationComplete.fileName, {
     ...baseTemplateData,
     studentFirstName: student.firstName,
-  };
-
-  return renderPugTemplate(templateFilename, templateData);
+    courseName: courseConstants.fullCourseNames[course.name],
+  });
 };
 
 module.exports = {

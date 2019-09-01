@@ -1,5 +1,5 @@
 const Stripe = require("stripe");
-const constants = require("../../utils/constants");
+const { fullCourseNames } = require("../../utils").courseConstants;
 
 module.exports = stripe => ({
   /**
@@ -16,7 +16,7 @@ module.exports = stripe => ({
       source: tokenId,
       amount: course.price * 100, // in USD cents
       receipt_email: receiptEmail,
-      description: constants.stripeService.paymentDescription(course),
+      description: `${fullCourseNames[course.name]} registration`,
       metadata: {
         studentId,
         courseId: course.id,

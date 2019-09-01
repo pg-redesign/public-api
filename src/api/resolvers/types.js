@@ -1,6 +1,6 @@
 const Course = {
   name: (course, args, context) => {
-    const { fullCourseNames } = context.utils.constants;
+    const { fullCourseNames } = context.utils.courseConstants;
 
     return args.short ? course.name : fullCourseNames[course.name];
   },
@@ -16,12 +16,6 @@ const Course = {
 
     // if there are args give precedence to start
     return start ? startDate.toUTCString() : endDate.toUTCString();
-  },
-
-  description: (course, _, context) => {
-    // TODO: reimplement as a db fetch for admin editing
-    const { courseDescriptions } = context.utils.constants;
-    return courseDescriptions[course.name];
   },
 
   location: course => course.getLocation(),

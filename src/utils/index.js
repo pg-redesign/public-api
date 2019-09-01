@@ -1,7 +1,7 @@
 const format = require("./format");
-const constants = require("./constants");
+const courseConstants = require("./course-constants");
 
 module.exports = {
   format,
-  constants,
+  courseConstants,
 };
