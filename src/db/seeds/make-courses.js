@@ -4,7 +4,7 @@ const {
   cleanupLocationsAndCourses,
 } = require("../models/tests/__mocks__/course");
 
-exports.seed = async (knex) => {
+exports.seed = async knex => {
   Course.knex(knex);
   CourseLocation.knex(knex);
 

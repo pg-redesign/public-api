@@ -53,7 +53,7 @@ module.exports = {
       const { code } = args;
       const { services, logger } = context;
 
-      return services.awsAuth.authenticateAdmin(code, context).catch((error) => {
+      return services.awsAuth.authenticateAdmin(code, context).catch(error => {
         const { headers, ip } = context.req;
 
         logger.error("Failed admin authentication, request data:", {

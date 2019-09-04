@@ -4,7 +4,7 @@ const Student = require("./student");
 const schemas = require("../../schemas");
 const BaseModel = require("./base-model");
 
-const DEFAULT_SORT = ["startDate", "desc"];
+const DEFAULT_SORT = ["startDate", "asc"];
 
 class Course extends BaseModel {
   static get tableName() {
@@ -150,10 +150,10 @@ class Course extends BaseModel {
 
     const student = existingStudent
       ? await course.registerExistingStudent(
-        existingStudent,
-        studentData,
-        paymentData,
-      )
+          existingStudent,
+          studentData,
+          paymentData,
+        )
       : await course.registerNewStudent(studentData, paymentData);
 
     return { course, student };
@@ -261,24 +261,30 @@ class Course extends BaseModel {
   }
 
   async registerExistingStudent(student, studentData, paymentData) {
-    if (await this.hasStudent(student.id)) {
-      throw new ValidationError({
-        type: "ExistingRelation",
-        message: "Student already registered",
-      });
-    }
-
-    // update student info
+    // update student information (in case any has changed)
     const updatedStudent = await Student.query().updateAndFetchById(
       student.id,
       studentData,
     );
 
-    // create payment association
-    await this.$relatedQuery("payments").insert({
-      studentId: student.id,
-      ...paymentData,
-    });
+    // check if the student has an association with the course through a payment
+    const payment = await updatedStudent.getCoursePayment(this.id, [
+      "paymentDate",
+    ]);
+
+    if (!payment) {
+      // student is not associated with course yet
+      await this.$relatedQuery("payments").insert({
+        studentId: student.id,
+        ...paymentData,
+      });
+    } else if (payment.paymentDate) {
+      // student is associated and payment is already complete
+      throw new ValidationError({
+        type: "ExistingRelation",
+        message: "Student already paid",
+      });
+    }
 
     return updatedStudent;
   }

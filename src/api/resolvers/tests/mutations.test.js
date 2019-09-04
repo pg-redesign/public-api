@@ -84,9 +84,11 @@ describe("Mutation resolvers", () => {
 
     beforeAll(() => Mutation.payForCourseWithStripe(null, args, context));
 
-    test("issues Stripe charge and returns the updated student", () => expect(Course.completeStripePayment).toHaveBeenCalled());
+    test("issues Stripe charge and returns the updated student", () =>
+      expect(Course.completeStripePayment).toHaveBeenCalled());
 
-    test("sends registration complete email", () => expect(sendRegistrationComplete).toHaveBeenCalled());
+    test("sends registration complete email", () =>
+      expect(sendRegistrationComplete).toHaveBeenCalled());
   });
 
   test("subscribeToMailingList: subscribes a user to the mailing list", () => {
@@ -117,7 +119,9 @@ describe("Mutation resolvers", () => {
 
       let thrownError;
       beforeAll(async () => {
-        awsAuth.authenticateAdmin.mockImplementationOnce(() => Promise.reject(rejectedError));
+        awsAuth.authenticateAdmin.mockImplementationOnce(() =>
+          Promise.reject(rejectedError),
+        );
 
         try {
           await Mutation.authenticateAdmin(null, { code }, context);
@@ -147,7 +151,9 @@ describe("Mutation resolvers", () => {
       test("network related error: logs response status and data", async () => {
         jest.clearAllMocks();
         const networkError = { response: { status: 400, data: {} } };
-        awsAuth.authenticateAdmin.mockImplementationOnce(() => Promise.reject(networkError));
+        awsAuth.authenticateAdmin.mockImplementationOnce(() =>
+          Promise.reject(networkError),
+        );
 
         try {
           await Mutation.authenticateAdmin(null, { code }, context);

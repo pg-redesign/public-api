@@ -29,7 +29,9 @@ describe("Email Service", () => {
 
     test("failure: catches and logs the error", async () => {
       jest.clearAllMocks();
-      emailClient.sendMail.mockImplementationOnce(() => Promise.reject(new Error()));
+      emailClient.sendMail.mockImplementationOnce(() =>
+        Promise.reject(new Error()),
+      );
 
       await mockedEmailService.sendCourseInvoice(course, student, context);
       expect(emailUtils.handleError).toHaveBeenCalled();
@@ -47,13 +49,17 @@ describe("Email Service", () => {
         [sendMailCallArg] = callArgs;
       });
 
-      test("sends an invoice email to the student", () => expect(sendMailCallArg.to).toBe(student.email));
+      test("sends an invoice email to the student", () =>
+        expect(sendMailCallArg.to).toBe(student.email));
 
-      test("sends from the billing email account", () => expect(sendMailCallArg.from).toBe(accounts.billing));
+      test("sends from the billing email account", () =>
+        expect(sendMailCallArg.from).toBe(accounts.billing));
 
-      test("uses course invoice template", () => expect(renderers.renderCourseInvoice).toHaveBeenCalled());
+      test("uses course invoice template", () =>
+        expect(renderers.renderCourseInvoice).toHaveBeenCalled());
 
-      test("adds the course invoice as an attachment", () => expect(sendMailCallArg.attachments[0]).toBe(invoiceFile));
+      test("adds the course invoice as an attachment", () =>
+        expect(sendMailCallArg.attachments[0]).toBe(invoiceFile));
     });
   });
 
@@ -62,7 +68,9 @@ describe("Email Service", () => {
 
     test("failure: catches and logs the error", async () => {
       jest.clearAllMocks();
-      emailClient.sendMail.mockImplementationOnce(() => Promise.reject(new Error()));
+      emailClient.sendMail.mockImplementationOnce(() =>
+        Promise.reject(new Error()),
+      );
 
       await mockedEmailService.sendRegistrationComplete(
         course,
@@ -88,11 +96,14 @@ describe("Email Service", () => {
         [sendMailCallArg] = callArgs;
       });
 
-      test("sends a registration completed email to the student", () => expect(sendMailCallArg.to).toBe(student.email));
+      test("sends a registration completed email to the student", () =>
+        expect(sendMailCallArg.to).toBe(student.email));
 
-      test("sends from the info email account", () => expect(sendMailCallArg.from).toBe(accounts.registration));
+      test("sends from the info email account", () =>
+        expect(sendMailCallArg.from).toBe(accounts.registration));
 
-      test("uses registration complete template", () => expect(renderers.renderRegistrationComplete).toHaveBeenCalled());
+      test("uses registration complete template", () =>
+        expect(renderers.renderRegistrationComplete).toHaveBeenCalled());
     });
   });
 });

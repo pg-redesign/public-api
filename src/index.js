@@ -26,7 +26,7 @@ graphqlServer.applyMiddleware({
   },
 });
 
-app.listen(process.env.PORT, (error) => {
+app.listen(process.env.PORT, error => {
   if (error) {
     return logger.error(error);
   }

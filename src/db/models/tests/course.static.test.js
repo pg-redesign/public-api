@@ -7,6 +7,7 @@ const studentMock = require("./__mocks__/student");
 const { connection } = require("../../connection");
 const CourseLocation = require("../course-location");
 const {
+  getNextCourse,
   createLocationsAndCourses,
   cleanupLocationsAndCourses,
 } = require("./__mocks__/course");
@@ -102,13 +103,16 @@ describe("Course static methods", () => {
       results = await Course.getUpcoming();
     });
 
-    test("returns up to 2 courses", () => expect(results.length).toBeLessThanOrEqual(2));
+    test("returns up to 2 courses", () =>
+      expect(results.length).toBeLessThanOrEqual(2));
 
-    test(`courses are sorted by DEFAULT_SORT: [${Course.DEFAULT_SORT.toString()}]`, () => expect(results).toEqual(results, Course.DEFAULT_SORT));
+    test(`courses are sorted by DEFAULT_SORT: [${Course.DEFAULT_SORT.toString()}]`, () =>
+      expect(results).toEqual(results, Course.DEFAULT_SORT));
 
-    test("filters courses older than the current date", () => expect(results.every(course => course.startDate >= new Date())).toBe(
-      true,
-    ));
+    test("filters courses older than the current date", () =>
+      expect(results.every(course => course.startDate >= new Date())).toBe(
+        true,
+      ));
   });
 
   describe("validateCourseId", () => {
@@ -117,7 +121,9 @@ describe("Course static methods", () => {
     beforeAll(async () => {
       const date = new Date();
       [pastCourse, upcomingCourse] = await Promise.all(
-        ["<", ">"].map(equalityClause => Course.query().findOne("start_date", equalityClause, date)),
+        ["<", ">"].map(equalityClause =>
+          Course.query().findOne("startDate", equalityClause, date),
+        ),
       );
     });
 
@@ -155,7 +161,7 @@ describe("Course static methods", () => {
     let course;
     let registrationData;
     beforeAll(async () => {
-      course = await Course.query().findOne("start_date", ">", new Date());
+      course = await getNextCourse();
 
       registrationData = {
         courseId: course.id,
@@ -244,7 +250,7 @@ describe("Course static methods", () => {
       completeStudentRegistration,
     } = Course.prototype;
     beforeAll(async () => {
-      course = await Course.query().findOne("start_date", ">", new Date());
+      course = await getNextCourse();
 
       paymentData = {
         courseId: course.id,

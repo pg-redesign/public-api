@@ -48,6 +48,7 @@
     "knex:migrate": "knex migrate:latest",
     "knex:seed:admins": "knex seed:run --specific make-admins.js",
     "lint": "eslint .",
+    "prettify": "prettier --write 'src/**/*.js'",
     "test": "jest --runInBand --no-cache",
     "test:local": "npm run env:test -- jest --runInBand",
     "test:travis": "npm run test -- --coverage && cat ./coverage/lcov.info | coveralls"
@@ -84,8 +85,10 @@
     "eslint-config-prettier": "^4.3.0",
     "eslint-plugin-import": "^2.17.2",
     "eslint-plugin-jest": "^22.6.4",
+    "eslint-plugin-prettier": "^3.1.0",
     "jest": "^24.8.0",
     "nodemon": "^1.19.0",
+    "prettier": "^1.18.2",
     "sonarqube-scanner": "^2.4.1"
   },
   "eslintConfig": {
@@ -95,12 +98,13 @@
       "jest/globals": true
     },
     "extends": [
-      "prettier",
       "airbnb-base",
+      "prettier",
       "plugin:jest/recommended"
     ],
     "plugins": [
-      "jest"
+      "jest",
+      "prettier"
     ],
     "globals": {
       "Atomics": "readonly",
@@ -110,17 +114,17 @@
       "ecmaVersion": 2018
     },
     "rules": {
-      "quotes": [
-        "error",
-        "double"
-      ],
-      "max-len": [
-        0,
-        100
-      ]
+      "prettier/prettier": "error"
     }
   },
   "nodemonConfig": {
     "ext": "graphql, js"
+  },
+  "prettier": {
+    "tabWidth": 2,
+    "printWidth": 80,
+    "singleQuote": false,
+    "proseWrap": "never",
+    "trailingComma": "all"
   }
 }

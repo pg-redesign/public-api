@@ -1,6 +1,7 @@
-const buildToken = (sub, context) => context.services.authToken.signAdminToken(sub, context).token;
+const buildToken = (sub, context) =>
+  context.services.authToken.signAdminToken(sub, context).token;
 
-const buildAuthedRequestContext = (context) => {
+const buildAuthedRequestContext = context => {
   const sub = context.env.ADMIN_SUBS.split(",")[0];
   const token = buildToken(sub, context);
 

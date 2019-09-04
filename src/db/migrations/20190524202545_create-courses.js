@@ -1,8 +1,8 @@
 /* eslint func-names:0 */
 const { CourseShortNames } = require("../../schemas/enums");
 
-exports.up = function (knex) {
-  return knex.schema.createTable("courses", (table) => {
+exports.up = function(knex) {
+  return knex.schema.createTable("courses", table => {
     // creates column "id" as int not null auto increment primary
     table.increments("id"); // shorthand: table.increments();
 
@@ -41,7 +41,7 @@ exports.up = function (knex) {
   });
 };
 
-exports.down = function (knex) {
+exports.down = function(knex) {
   return knex.schema.dropTable("courses");
 };
 

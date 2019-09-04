@@ -1,5 +1,5 @@
 const baseResolvers = {
-  concatenated: (location) => {
+  concatenated: location => {
     const { city, state, country } = location;
     return `${city}, ${state}, ${country}`;
   },
@@ -17,7 +17,7 @@ module.exports = {
      * Course.location: CourseLocation (implementing type, specific)
      * - does not because it specifies the implementing type already
      */
-    __resolveType: (location) => {
+    __resolveType: location => {
       // use a unique field on the implementing Type to determine which to resolve
       if (location.mapUrl) return "CourseLocation";
       return "StudentLocation";

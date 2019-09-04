@@ -1,8 +1,6 @@
 const { createHash } = require("crypto");
 
-const mailingListEndpoint = `/lists/${
-  process.env.MAILCHIMP_NEWSLETTER_ID
-}/members`;
+const mailingListEndpoint = `/lists/${process.env.MAILCHIMP_NEWSLETTER_ID}/members`;
 
 module.exports = mailChimp => ({
   addToMailingList: async (mailingListData, context) => {
@@ -24,7 +22,7 @@ module.exports = mailChimp => ({
         },
       })
       .then(() => true)
-      .catch((error) => {
+      .catch(error => {
         logger.error(
           `[MailChimp Service]: Failed subscribing [${email}] to mailing list`,
         );
