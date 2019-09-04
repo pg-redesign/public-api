@@ -55,26 +55,32 @@ describe("CourseLocation static methods", () => {
     let courseLocations;
     beforeAll(async () => {
       courseLocations = await Promise.all(
-        [location, otherLocation].map(locationData => CourseLocation.create(locationData)),
+        [location, otherLocation].map(locationData =>
+          CourseLocation.create(locationData),
+        ),
       );
     });
-    afterAll(() => Promise.all(
-      courseLocations.map(courseLocation => courseLocation.$query().del()),
-    ));
+    afterAll(() =>
+      Promise.all(
+        courseLocations.map(courseLocation => courseLocation.$query().del()),
+      ),
+    );
 
     it("returns all CourseLocation entries", async () => {
       const output = await CourseLocation.getAll();
       expect(output.length).toBe(courseLocations.length);
       expect(
-        output.every(entry => courseLocations.some(
-          courseLocation => entry.id === courseLocation.id,
-        )),
+        output.every(entry =>
+          courseLocations.some(
+            courseLocation => entry.id === courseLocation.id,
+          ),
+        ),
       ).toBe(true);
     });
 
     it("allows specific columns to be selected", async () => {
       const output = await CourseLocation.getAll(["state"]);
-      output.forEach((courseLocation) => {
+      output.forEach(courseLocation => {
         expect(courseLocation.state).toBeDefined();
         expect(courseLocation.id).not.toBeDefined();
       });
