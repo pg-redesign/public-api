@@ -34,6 +34,14 @@ class Student extends BaseModel {
       },
     };
   }
+
+  // -- PROTO METHODS -- //
+  async getCoursePayment(courseId, columns = []) {
+    return this.$relatedQuery("payments")
+      .first()
+      .columns(columns)
+      .where({ courseId });
+  }
 }
 
 module.exports = Student;
