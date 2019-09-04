@@ -48,7 +48,7 @@
     "knex:migrate": "knex migrate:latest",
     "knex:seed:admins": "knex seed:run --specific make-admins.js",
     "lint": "eslint .",
-    "prettify": "prettier .",
+    "prettify": "prettier --write 'src/**/*.js'",
     "test": "jest --runInBand --no-cache",
     "test:local": "npm run env:test -- jest --runInBand",
     "test:travis": "npm run test -- --coverage && cat ./coverage/lcov.info | coveralls"
@@ -113,15 +113,7 @@
       "ecmaVersion": 2018
     },
     "rules": {
-      "prettier/prettier": "error",
-      "quotes": [
-        "error",
-        "double"
-      ],
-      "max-len": [
-        0,
-        100
-      ]
+      "prettier/prettier": "error"
     }
   },
   "nodemonConfig": {
@@ -129,6 +121,8 @@
   },
   "prettier": {
     "tabWidth": 2,
+    "printWidth": 80,
+    "singleQuote": false,
     "proseWrap": "never",
     "trailingComma": "all"
   }
