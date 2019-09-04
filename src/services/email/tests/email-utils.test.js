@@ -33,15 +33,20 @@ describe("Email Service utils", () => {
       expect(output.includes(`student=${student.id}`)).toBe(true);
     });
 
-    describe("throws an Error if", () => [
-      {
-        test: "missing course ID",
-        args: [{}, student, creditPaymentLink],
-      },
-      {
-        test: "missing student ID",
-        args: [course, {}, creditPaymentLink],
-      },
-    ].forEach(testCase => test(testCase.test, () => expect(() => buildCreditPaymentLink(...testCase.args)).toThrow())));
+    describe("throws an Error if", () =>
+      [
+        {
+          test: "missing course ID",
+          args: [{}, student, creditPaymentLink],
+        },
+        {
+          test: "missing student ID",
+          args: [course, {}, creditPaymentLink],
+        },
+      ].forEach(testCase =>
+        test(testCase.test, () =>
+          expect(() => buildCreditPaymentLink(...testCase.args)).toThrow(),
+        ),
+      ));
   });
 });

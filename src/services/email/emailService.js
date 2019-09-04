@@ -20,7 +20,9 @@ module.exports = emailClient => ({
         html: renderCourseInvoice(course, student),
         attachments: [invoiceFile],
       })
-      .catch(error => handleError(logger, error, student.email, "course invoice"));
+      .catch(error =>
+        handleError(logger, error, student.email, "course invoice"),
+      );
   },
 
   sendRegistrationComplete: async (course, student, context) => {

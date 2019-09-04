@@ -1,8 +1,8 @@
 /* eslint func-names:0 */
 const { enums } = require("../../schemas");
 
-exports.up = function (knex) {
-  return knex.schema.createTable("payments", (table) => {
+exports.up = function(knex) {
+  return knex.schema.createTable("payments", table => {
     table.increments();
     table
       .integer("course_id")
@@ -32,7 +32,7 @@ exports.up = function (knex) {
   });
 };
 
-exports.down = function (knex) {
+exports.down = function(knex) {
   return knex.schema.dropTable("payments");
 };
 

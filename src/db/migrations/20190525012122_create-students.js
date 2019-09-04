@@ -6,8 +6,8 @@ const {
   lastName,
 } = require("../../schemas").types.student.properties;
 
-exports.up = function (knex) {
-  return knex.schema.createTable("students", (table) => {
+exports.up = function(knex) {
+  return knex.schema.createTable("students", table => {
     table.increments();
     table.string("first_name", firstName.maxLength).notNullable();
     table.string("last_name", lastName.maxLength).notNullable();
@@ -26,7 +26,7 @@ exports.up = function (knex) {
   });
 };
 
-exports.down = function (knex) {
+exports.down = function(knex) {
   return knex.schema.dropTable("students");
 };
 

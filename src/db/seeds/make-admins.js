@@ -12,7 +12,7 @@ exports.seed = async () => {
 
   // reset the admins if there is a mismatch
   return (
-    countResult.count !== adminSubs.length
-    && cleanupAdmins().then(() => createAdmins())
+    countResult.count !== adminSubs.length &&
+    cleanupAdmins().then(() => createAdmins())
   );
 };

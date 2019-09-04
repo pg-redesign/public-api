@@ -77,7 +77,8 @@ describe("AWS Auth Service", () => {
       expect(mockRequestPayload).toBe(expectedPayload);
     });
 
-    test("returns the token data object", () => expect(output).toEqual(tokenDataMock));
+    test("returns the token data object", () =>
+      expect(output).toEqual(tokenDataMock));
   });
 
   describe("getUserInfo", () => {
@@ -104,7 +105,8 @@ describe("AWS Auth Service", () => {
       });
     });
 
-    test("returns the admin info object", () => expect(output).toEqual(adminInfoMock));
+    test("returns the admin info object", () =>
+      expect(output).toEqual(adminInfoMock));
   });
 
   describe("authenticateAdmin", () => {
@@ -119,6 +121,7 @@ describe("AWS Auth Service", () => {
       expect(mockedService.getUserInfo).toHaveBeenCalled();
     });
 
-    test("returns an API signed admin token object", () => expect(context.services.authToken.signAdminToken).toHaveBeenCalled());
+    test("returns an API signed admin token object", () =>
+      expect(context.services.authToken.signAdminToken).toHaveBeenCalled());
   });
 });

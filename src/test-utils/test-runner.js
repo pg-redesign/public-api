@@ -1,4 +1,4 @@
-const runTest = async (config) => {
+const runTest = async config => {
   const {
     client,
     testServer,
@@ -32,7 +32,7 @@ const runTest = async (config) => {
   }
 };
 
-const runTests = (tests) => {
+const runTests = tests => {
   tests.forEach(testConfig => test(testConfig.test, () => runTest(testConfig)));
 };
 
