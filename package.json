@@ -63,7 +63,7 @@
     "graphql-import": "^0.7.1",
     "graphql-type-json": "^0.3.0",
     "jsonwebtoken": "^8.5.1",
-    "knex": "^0.19.1",
+    "knex": "^0.19.5",
     "nodemailer": "^6.2.1",
     "objection": "^1.6.9",
     "pg": "^7.11.0",
