@@ -27,7 +27,7 @@ const renderTemplate = (templateFileName, templateData) => {
   const basedir = path.join(__dirname, "templates");
 
   return ejs.renderFile(
-    path.join(basedir, `${templateFileName}.ejs`),
+    path.join(basedir, `${templateFileName}`),
     templateData,
   );
 };
