@@ -1,8 +1,10 @@
+const emailDomain = process.env.EMAIL_DOMAIN;
+
 module.exports = {
   // in href="tel:" compatible format
   phoneContact: "+01-813-964-0800",
   siteLinks: (() => {
-    const home = "https://princeton-groundwater.com";
+    const home = `https://${emailDomain}`;
     const creditPayment = `${home}/payment/credit`;
 
     return {
@@ -11,13 +13,12 @@ module.exports = {
     };
   })(),
   accounts: (() => {
-    const domain = process.env.EMAIL_DOMAIN;
     const name = "Princeton Groundwater, Inc.";
 
     return {
-      info: { name, address: `info@${domain}` },
-      billing: { name, address: `billing@${domain}` },
-      registration: { name, address: `registration@${domain}` },
+      info: { name, address: `info@${emailDomain}` },
+      billing: { name, address: `billing@${emailDomain}` },
+      registration: { name, address: `registration@${emailDomain}` },
     };
   })(),
 };
