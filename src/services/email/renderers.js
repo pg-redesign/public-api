@@ -26,18 +26,6 @@ const renderCourseInvoice = (course, student) => {
   });
 };
 
-// TODO: create the template file and tests
-const renderRegistrationComplete = (course, student) => {
-  const { courseRegistrationComplete } = templates;
-
-  return renderTemplate(courseRegistrationComplete.fileName, {
-    ...baseTemplateData,
-    studentFirstName: student.firstName,
-    courseName: courseConstants.fullCourseNames[course.name],
-  });
-};
-
 module.exports = {
   renderCourseInvoice,
-  renderRegistrationComplete,
 };

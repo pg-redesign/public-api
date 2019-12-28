@@ -12,8 +12,4 @@ module.exports = {
       "creditPaymentLink",
     ],
   },
-  courseRegistrationComplete: {
-    fileName: "course-registration-complete.ejs",
-    requiredData: [...footerExpectedData],
-  },
 };
