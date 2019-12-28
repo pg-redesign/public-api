@@ -5,8 +5,8 @@ module.exports = {
     fileName: "course-invoice.ejs",
     requiredData: [
       ...footerExpectedData,
-      "courseName",
       "previewText",
+      "courseFullName",
       "paymentDeadline",
       "studentFirstName",
       "creditPaymentLink",
