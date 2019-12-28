@@ -7,10 +7,10 @@
     <p>Hello <%= studentFirstName %>,</p>
 
     <p>
-      Thank you for registering for the upcoming <%= courseName %>. You are
-      receiving this email because your requested information about our
-      alternative payment options. We currently offer online credit card, check
-      or ACH bank transfer payment options.
+      Thank you for registering for <%= courseFullName %>. You are receiving
+      this email because you requested alternative payment options during your
+      registration. We currently offer online credit card, check or ACH bank
+      transfer payment methods.
     </p>
 
     <p>
@@ -22,8 +22,10 @@
 
     <p>
       Your course registration status is currently <b>pending</b> as we have not
-      yet received your payment. You may complete your course registration using
-      one of the following payment options:
+      yet received your payment. If you believe this is incorrect please send us
+      an <a href="mailto:<%= contactEmail %>"> email</a> and we will contact you
+      about resolving this issue. Otherwise, you may complete your course
+      registration using one of the following payment options:
     </p>
 
     <div>
