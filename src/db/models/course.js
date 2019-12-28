@@ -66,25 +66,6 @@ class Course extends BaseModel {
     return super.create(courseData);
   }
 
-  /**
-   * duplicated queries!
-   *
-   * LESSON LEARNED:
-   * objection queries are NOT Promises
-   * - they are "thenable" but not a Promise implementation
-   * - if you have a chain: resolver -> Model/instance method -> QueryBuilder
-   * - what is returned is a Query thenable query stub
-   * - AS (2.0+) will end up executing the method twice
-   * - AS chains a .then() on the end (thinking it is a promise) which then
-   * - queryBuilder + .then() -> executes the query and returns a promise + .then() (on a promise) -> resolves second time
-   * - itself returns a promise and terminates the query
-   *
-   * AS thread:https://github.com/apollographql/apollo-server/issues/2501
-   *
-   * solution:
-   * - make the resolver or method async (to wrap it in a promise)
-   * - terminate the query using .execute() in the method
-   */
   static async getAll(columns = []) {
     return this.query()
       .select(columns)
@@ -127,6 +108,7 @@ class Course extends BaseModel {
 
     const course = await this.validateCourseId(courseId, [
       "id",
+      "name",
       "price",
       "startDate",
     ]);
