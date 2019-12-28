@@ -14,8 +14,8 @@
   "environment": {
     "PORT": "API server listening port",
     "API_DOMAIN": "hosted API domain for signing auth tokens",
-    "CLIENT_URL": "hosted client URL for CORS whitelist",
-    "ADMIN_CLIENT_URL": "hosted admin client URL for CORS whitelist",
+    "CLIENT_ORIGIN": "hosted client URL for CORS whitelist",
+    "ADMIN_CLIENT_ORIGIN": "hosted admin client URL for CORS whitelist",
     "DB_NAME": "database name",
     "DB_USER": "database user name",
     "DB_PASSWORD": "database user password",
