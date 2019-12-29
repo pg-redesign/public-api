@@ -147,6 +147,24 @@ describe("Course static methods", () => {
         expect(error instanceof ValidationError).toBe(true);
       }
     });
+
+    test("allows specific columns to be selected", async () => {
+      const course = await Course.validateCourseId(upcomingCourse.id, [
+        "id",
+        "price",
+      ]);
+
+      expect(course.id).toBe(upcomingCourse.id);
+      expect(course.price).toBe(upcomingCourse.price);
+    });
+
+    test("allows selected relations to be eagerly loaded", async () => {
+      const course = await Course.validateCourseId(upcomingCourse.id, [], {
+        location: true,
+      });
+
+      expect(course.location).toBeDefined();
+    });
   });
 
   describe("registerStudent", () => {

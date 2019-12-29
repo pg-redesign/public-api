@@ -80,8 +80,9 @@ class Course extends BaseModel {
       .limit(2);
   }
 
-  static async validateCourseId(courseId, columns = []) {
+  static async validateCourseId(courseId, columns = [], relations = {}) {
     const course = await this.query()
+      .withGraphJoined(relations)
       .findById(courseId)
       .select(columns)
       .throwIfNotFound();
@@ -106,12 +107,9 @@ class Course extends BaseModel {
       ...partialStudent
     } = registrationData;
 
-    const course = await this.validateCourseId(courseId, [
-      "id",
-      "name",
-      "price",
-      "startDate",
-    ]);
+    const course = await this.validateCourseId(courseId, [], {
+      location: true,
+    });
 
     // shape location property
     const studentData = {
