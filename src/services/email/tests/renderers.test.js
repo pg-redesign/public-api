@@ -1,13 +1,12 @@
 const templates = require("../templates");
 const { renderCourseInvoice } = require("../renderers");
-
-// mocked
-const { renderTemplate } = require("../email-utils");
-
-jest.mock("../email-utils.js");
-
 const { courseMocks } = require("../../../db/models/tests/__mocks__/course");
 const { studentData } = require("../../../db/models/tests/__mocks__/student");
+
+// mocked
+const renderTemplate = require("../templates/render-template");
+
+jest.mock("../templates/render-template");
 
 const student = {
   id: 1,
@@ -33,10 +32,13 @@ describe("Template Renderers", () => {
 
       expect(templateFileName).toBe(courseInvoiceTemplate.fileName);
 
-      const templateDataFields = Object.keys(templateData);
       const hasRequiredData = courseInvoiceTemplate.requiredData.every(
-        requiredField => templateDataFields.includes(requiredField),
+        requiredField => {
+          console.log({ requiredField, val: templateData[requiredField] });
+          return templateData[requiredField];
+        }, // every value is defined (truthy)
       );
+
       expect(hasRequiredData).toBe(true);
     });
   });

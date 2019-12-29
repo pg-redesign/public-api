@@ -14,16 +14,12 @@
   "environment": {
     "PORT": "API server listening port",
     "API_DOMAIN": "hosted API domain for signing auth tokens",
-    "CLIENT_URL": "hosted client URL for CORS whitelist",
-    "ADMIN_CLIENT_URL": "hosted admin client URL for CORS whitelist",
-    "DB_NAME": "database name (local)",
-    "DB_USER": "database user name (local)",
-    "DB_PASSWORD": "database user password (local)",
-    "DB_HOST": "database host name / IP address (local)",
-    "RDS_DB_NAME": "AWS RDS database name (deployed)",
-    "RDS_USERNAME": "AWS RDS database user name (deployed)",
-    "RDS_PASSWORD": "AWS RDS database user password (deployed)",
-    "RDS_HOSTNAME": "AWS RDS database host name / IP address (deployed)",
+    "CLIENT_ORIGIN": "hosted client URL for CORS whitelist",
+    "ADMIN_CLIENT_ORIGIN": "hosted admin client URL for CORS whitelist",
+    "DB_NAME": "database name",
+    "DB_USER": "database user name",
+    "DB_PASSWORD": "database user password",
+    "DB_HOST": "database host name / IP address",
     "EMAIL_DOMAIN": "automated email sending domain",
     "AWS_SES_ACCESS_KEY_ID": "AWS SES mailer credentials",
     "AWS_SES_SECRET_ACCESS_KEY": "AWS SES mailer credentials",
@@ -70,7 +66,7 @@
     "graphql-import": "^0.7.1",
     "graphql-type-json": "^0.3.0",
     "jsonwebtoken": "^8.5.1",
-    "knex": "^0.19.1",
+    "knex": "^0.19.5",
     "nodemailer": "^6.2.1",
     "objection": "^1.6.9",
     "pg": "^7.11.0",
@@ -99,8 +95,8 @@
     },
     "extends": [
       "airbnb-base",
-      "prettier",
-      "plugin:jest/recommended"
+      "plugin:jest/recommended",
+      "prettier"
     ],
     "plugins": [
       "jest",

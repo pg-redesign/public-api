@@ -17,8 +17,8 @@ graphqlServer.applyMiddleware({
     optionsSuccessStatus: 200,
     // allow subdomains
     origin: [/^https:\/\/(.+\.)?princeton-groundwater\.com$/]
-      .concat(process.env.CLIENT_URL || []) // for development deployment
-      .concat(process.env.ADMIN_CLIENT_URL || []) // for development deployment
+      .concat(process.env.CLIENT_ORIGIN || []) // for development deployment
+      .concat(process.env.ADMIN_CLIENT_ORIGIN || []) // for development deployment
       // for local development
       .concat(
         inDevelopment ? [/^http:\/\/(localhost|127.0.0.1):\d{4,5}$/] : [],

@@ -1,7 +1,8 @@
 const constants = require("./constants");
 const templates = require("./templates");
 const { courseConstants } = require("../../utils");
-const { renderTemplate, buildCreditPaymentLink } = require("./email-utils");
+const { buildCreditPaymentLink } = require("./email-utils");
+const renderTemplate = require("./templates/render-template");
 
 const baseTemplateData = {
   contactPhone: constants.phoneContact,
@@ -10,34 +11,22 @@ const baseTemplateData = {
 
 const renderCourseInvoice = (course, student) => {
   const { courseInvoice } = templates;
-  const courseName = courseConstants.fullCourseNames[course.name];
+  const courseFullName = courseConstants.fullCourseNames[course.name];
 
   const paymentDeadline = new Date(course.startDate);
   paymentDeadline.setDate(paymentDeadline.getDate() - 14);
 
   return renderTemplate(courseInvoice.fileName, {
     ...baseTemplateData,
-    courseName,
+    courseFullName,
     studentFirstName: student.firstName,
-    paymentDeadline: paymentDeadline.toDateString(),
     contactEmail: constants.accounts.billing.address,
+    paymentDeadline: paymentDeadline.toDateString().slice(4),
     creditPaymentLink: buildCreditPaymentLink(course, student),
-    previewText: `Billing Invoice: Princeton Groundwater ${courseName}`,
-  });
-};
-
-// TODO: create the template file and tests
-const renderRegistrationComplete = (course, student) => {
-  const { courseRegistrationComplete } = templates;
-
-  return renderTemplate(courseRegistrationComplete.fileName, {
-    ...baseTemplateData,
-    studentFirstName: student.firstName,
-    courseName: courseConstants.fullCourseNames[course.name],
+    previewText: `Billing Invoice: Princeton Groundwater ${courseFullName}`,
   });
 };
 
 module.exports = {
   renderCourseInvoice,
-  renderRegistrationComplete,
 };

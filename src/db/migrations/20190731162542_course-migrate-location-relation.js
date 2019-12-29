@@ -50,6 +50,7 @@ const reverseMigrateLocations = async () =>
           // reset to old Model state for validation
           Course.jsonSchema = oldSchema;
           Course.relationMappings = {};
+          /* eslint no-console: 0 */
           console.warn(
             "Course Model must have its JSON schema and relationMappings reset to old state",
           );

@@ -7,33 +7,55 @@
     <p>Hello <%= studentFirstName %>,</p>
 
     <p>
-      Thank you for registering for the upcoming <%= courseName %>. You are receiving this email because your requested a billing invoice. Your invoice has been included as a PDF attachment to this email.
+      Thank you for registering for <%= courseFullName %>. You are receiving
+      this email because you requested alternative payment options during your
+      registration. We currently offer online credit card, check or ACH bank
+      transfer payment methods.
     </p>
 
     <p>
-      Your course registration status is currently <b>pending</b> as we have not yet received your payment. You may complete your course registration using one of the following payment options:
+      If you would like to discuss special instructions or circumstances with
+      our staff they can be reached by
+      <a href="mailto:<%= contactEmail %>"> email</a> or by phone at
+      <a href="tel:<%= contactPhone %>"><%= contactPhone %></a>
+    </p>
+
+    <p>
+      Your course registration status is currently <b>pending</b> as we have not
+      yet received your payment. If you believe this is incorrect please send us
+      an <a href="mailto:<%= contactEmail %>"> email</a> and we will contact you
+      about resolving this issue. Otherwise, you may complete your course
+      registration using one of the following payment options:
     </p>
 
     <div>
       <h3>Online</h3>
       <p>
-        Use our secure credit card payment page: 
-        <a href="<%= creditPaymentLink %>" target="_blank" rel="noopener noreferrer">
+        Use our secure credit card payment page:
+        <a
+          href="<%= creditPaymentLink %>"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           https://princeton-groundwater.com/payment/credit
-        </a> 
+        </a>
       </p>
       <p>
-        Your credit card payment will be processed by 
-        <a href="https://stripe.com" target="_blank" rel="noopener noreferrer">Stripe</a>, 
-        a trusted and PCI compliant online payment service. Your card information will be used for this single transaction and will not be stored on our servers.
+        Your credit card payment will be processed by
+        <a href="https://stripe.com" target="_blank" rel="noopener noreferrer"
+          >Stripe</a
+        >, a trusted and PCI compliant online payment service. Your card
+        information will be used for this single transaction and will neither be
+        sent to nor stored on our servers.
       </p>
     </div>
 
     <div>
       <h3>Check by Mail</h3>
       <p>
-        Note that your check must be received and cleared 
-        <strong>by <%= paymentDeadline %></strong>, 2 weeks before the start of the course.
+        Note that your check must be received and cleared
+        <strong>by <%= paymentDeadline %></strong>, 2 weeks before the start of
+        the course.
       </p>
 
       <h4 class="subject-title">Payable To</h4>
@@ -56,8 +78,10 @@
     <div>
       <h3>Bank Transfer (ACH)</h3>
       <p>
-        You can transfer your payment using an ACH wire transfer. Note that your transfer must be received and cleared 
-        <strong>by <%= paymentDeadline %></strong>, 2 weeks before the start of the course.
+        You can transfer your payment using an ACH wire transfer. Note that your
+        transfer must be received and cleared
+        <strong>by <%= paymentDeadline %></strong>, 2 weeks before the start of
+        the course.
       </p>
 
       <h4 class="subject-title">Bank Address</h4>
@@ -78,6 +102,7 @@
       </div>
     </div>
 
-    <%- include('fragments/footer', { contactEmail: contactEmail, contactPhone: contactPhone }); %>
+    <%- include('fragments/footer', { contactEmail: contactEmail, contactPhone:
+    contactPhone }); %>
   </body>
 </html>

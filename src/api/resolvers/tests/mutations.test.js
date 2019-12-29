@@ -73,22 +73,17 @@ describe("Mutation resolvers", () => {
 
   describe("payForCourseWithStripe", () => {
     const args = { paymentData: {} };
-    const sendRegistrationComplete = jest.fn();
     const Course = {
       completeStripePayment: jest.fn(() => Promise.resolve({})),
     };
     const context = {
       models: { Course },
-      services: { email: { sendRegistrationComplete } },
     };
 
     beforeAll(() => Mutation.payForCourseWithStripe(null, args, context));
 
     test("issues Stripe charge and returns the updated student", () =>
       expect(Course.completeStripePayment).toHaveBeenCalled());
-
-    test("sends registration complete email", () =>
-      expect(sendRegistrationComplete).toHaveBeenCalled());
   });
 
   test("subscribeToMailingList: subscribes a user to the mailing list", () => {

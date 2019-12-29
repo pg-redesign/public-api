@@ -30,14 +30,12 @@ module.exports = {
 
     payForCourseWithStripe: async (_, args, context) => {
       const { paymentData } = args;
-      const { models, services } = context;
+      const { models } = context;
 
-      const { course, student } = await models.Course.completeStripePayment(
+      const { student } = await models.Course.completeStripePayment(
         paymentData,
         context,
       );
-
-      await services.email.sendRegistrationComplete(course, student, context);
 
       return student;
     },
