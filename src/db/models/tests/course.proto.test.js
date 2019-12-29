@@ -48,7 +48,7 @@ describe("Course prototype methods", () => {
     });
 
     test("creates a payment association between the student and the course", async () => {
-      await course.$loadRelated({ payments: true, students: true });
+      await course.$fetchGraph({ payments: true, students: true });
       expect(course.payments.length).toBe(1);
       expect(course.payments[0].studentId).toBe(registeredStudent.id);
     });
@@ -114,7 +114,7 @@ describe("Course prototype methods", () => {
     });
 
     test("creates a payment association between the existing student and the course", async () => {
-      await course.$loadRelated({ payments: true, students: true });
+      await course.$fetchGraph({ payments: true, students: true });
       expect(course.payments.length).toBe(1);
       expect(course.payments[0].studentId).toBe(existingStudent.id);
     });
