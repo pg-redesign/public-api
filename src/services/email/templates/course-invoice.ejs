@@ -7,35 +7,66 @@
     <p>Hello <%= studentFirstName %>,</p>
 
     <p>
-      Thank you for registering for <%= courseFullName %>. You are receiving
+      Thank you for registering for <%= courseData.name %>. You are receiving
       this email because you requested alternative payment options during your
       registration. We currently offer online credit card, check or ACH bank
       transfer payment methods.
     </p>
 
     <p>
-      If you would like to discuss special instructions or circumstances with
-      our staff they can be reached by
+      If you would like to discuss special payment instructions or requests with
+      our staff you can reach us by
       <a href="mailto:<%= contactEmail %>"> email</a> or by phone at
       <a href="tel:<%= contactPhone %>"><%= contactPhone %></a>
     </p>
 
     <p>
-      Your course registration status is currently <b>pending</b> as we have not
+      <b>Your course registration status is currently pending</b> as we have not
       yet received your payment. If you believe this is incorrect please send us
       an <a href="mailto:<%= contactEmail %>"> email</a> and we will contact you
       about resolving this issue. Otherwise, you may complete your course
-      registration using one of the following payment options:
+      registration by paying through one of the options below.
     </p>
+
+    <hr />
+
+    <h2>Course Details</h2>
+
+    <table>
+      <tr>
+        <th>Price</th>
+        <td>$<%= courseData.price %> [USD]</td>
+      </tr>
+      <tr>
+        <th>Dates</th>
+        <td><%= courseData.dates %></td>
+      </tr>
+      <tr>
+        <th>Location</th>
+        <td>
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            href="<%= courseData.location.mapUrl %>"
+          >
+            <%= courseData.location.name %>
+          </a>
+        </td>
+      </tr>
+    </table>
+
+    <hr />
+
+    <h2>Payment Options</h2>
 
     <div>
       <h3>Online</h3>
       <p>
         Use our secure credit card payment page:
         <a
-          href="<%= creditPaymentLink %>"
           target="_blank"
           rel="noopener noreferrer"
+          href="<%= creditPaymentLink %>"
         >
           https://princeton-groundwater.com/payment/credit
         </a>
