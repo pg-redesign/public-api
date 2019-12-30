@@ -325,20 +325,17 @@ describe("Course static methods", () => {
     });
 
     describe("failure", () => {
-      test("student has already paid: returns the course and student without creating a new charge", async () => {
+      test("student has already paid: throws ValidationError and does not submit Stripe charge", async () => {
         Course.prototype.getRegisteredStudent.mockImplementationOnce(() => ({
           ...student,
           paymentDate: "some date",
         }));
-        const notCalled = [
-          stripeService.createCharge,
-          Course.prototype.completeStudentRegistration,
-        ];
 
-        const result = await Course.completeStripePayment(paymentData, context);
-        notCalled.forEach(action => expect(action).not.toHaveBeenCalled());
-        expect(result.course.id).toBe(course.id);
-        expect(result.student.id).toBe(student.id);
+        expect(
+          Course.completeStripePayment(paymentData, context),
+        ).rejects.toThrow(ValidationError);
+
+        expect(stripeService.createCharge).not.toHaveBeenCalled();
       });
     });
   });
