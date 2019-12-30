@@ -10,19 +10,19 @@ const inDevelopment = process.env.NODE_ENV !== "production";
 
 app.use([requestLogger]);
 
+// healthcheck endpoint
+app.get("/health", (_, res) => res.sendStatus(200));
+
 graphqlServer.applyMiddleware({
   app,
   cors: {
     credentials: true,
     optionsSuccessStatus: 200,
     // allow subdomains
-    origin: [/^https:\/\/(.+\.)?princeton-groundwater\.com$/]
-      .concat(process.env.CLIENT_ORIGIN || []) // for development deployment
-      .concat(process.env.ADMIN_CLIENT_ORIGIN || []) // for development deployment
+    origin: [/^https:\/\/(.+\.)?princeton-groundwater\.com$/].concat(
       // for local development
-      .concat(
-        inDevelopment ? [/^http:\/\/(localhost|127.0.0.1):\d{4,5}$/] : [],
-      ),
+      inDevelopment ? [/^http:\/\/(localhost|127.0.0.1):\d{4,5}$/] : [],
+    ),
   },
 });
 
