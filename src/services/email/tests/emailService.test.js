@@ -17,7 +17,7 @@ describe("Email Service", () => {
   const mockedEmailService = emailService(emailClient);
 
   beforeAll(() => {
-    process.env.EMAIL_DOMAIN = "test.princeton-groundwater.com";
+    process.env.EMAIL_HOST = "test.princeton-groundwater.com";
   });
 
   describe("sendCourseInvoice", () => {
