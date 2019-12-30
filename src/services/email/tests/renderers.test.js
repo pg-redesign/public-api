@@ -1,6 +1,7 @@
 const AJV = require("ajv");
 
 const templates = require("../templates");
+const jwtPayload = require("../../jwt-payload");
 const schemas = require("../../../schemas").templates;
 const { renderCourseInvoice } = require("../renderers");
 const { courseMocks } = require("../../../db/models/tests/__mocks__/course");
@@ -24,16 +25,21 @@ const courseData = upcomingCourse.course;
 const course = {
   id: 1,
   ...courseData,
+  location: upcomingCourse.location,
+  // DB mocks are used for inserting / seeding
+  // they have dates converted to ISO strings
+  // these tests assume live data that would have Date types
   startDate: new Date(courseData.startDate),
   endDate: new Date(courseData.endDate),
-  location: upcomingCourse.location,
 };
 
 describe("Template Renderers", () => {
   describe("renderCourseInvoice", () => {
     let renderTemplateCall;
     beforeAll(async () => {
-      await renderCourseInvoice(course, student);
+      // jwtPayload service is not mocked
+      // testing for real behavior in render data
+      await renderCourseInvoice(course, student, { services: { jwtPayload } });
       [renderTemplateCall] = renderTemplate.mock.calls;
     });
 

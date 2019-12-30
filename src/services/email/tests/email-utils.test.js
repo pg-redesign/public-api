@@ -4,7 +4,7 @@ const logger = { error: jest.fn() };
 
 describe("Email Service utils", () => {
   beforeAll(() => {
-    process.env.EMAIL_DOMAIN = "test.princeton-groundwater.com ";
+    process.env.EMAIL_HOST = "test.princeton-groundwater.com ";
   });
 
   test("handleError: logs email type, email address, and original error", () => {
@@ -23,30 +23,17 @@ describe("Email Service utils", () => {
   });
 
   describe("buildCreditPaymentLink", () => {
-    const course = { id: 1 };
-    const student = { id: 2 };
-    const creditPaymentLink = "credit link";
+    const course = {};
+    const student = {};
+    const registrationDataToken = "JWT.registrationDataToken";
+    const jwtPayload = { create: jest.fn(() => registrationDataToken) };
+    const context = { services: { jwtPayload } };
 
-    test("appends course and student ID query string to payment link", () => {
-      const output = buildCreditPaymentLink(course, student, creditPaymentLink);
-      expect(output.includes(`course=${course.id}`)).toBe(true);
-      expect(output.includes(`student=${student.id}`)).toBe(true);
+    test("builds a credit payment URL with a registration data JWT path appended", () => {
+      const output = buildCreditPaymentLink(course, student, context);
+
+      expect(jwtPayload.create).toHaveBeenCalled();
+      expect(output.includes(`/${registrationDataToken}`)).toBe(true);
     });
-
-    describe("throws an Error if", () =>
-      [
-        {
-          test: "missing course ID",
-          args: [{}, student, creditPaymentLink],
-        },
-        {
-          test: "missing student ID",
-          args: [course, {}, creditPaymentLink],
-        },
-      ].forEach(testCase =>
-        test(testCase.test, () =>
-          expect(() => buildCreditPaymentLink(...testCase.args)).toThrow(),
-        ),
-      ));
   });
 });
