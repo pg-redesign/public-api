@@ -26,24 +26,6 @@ describe("Mutation resolvers", () => {
       expect(Course.registerStudent).toHaveBeenCalled();
     });
 
-    describe("args.registrationData.mailingList", () => {
-      afterEach(() => addToMailingList.mockClear());
-
-      test("true: subscribes student to mailing list", async () => {
-        const args = { registrationData: { mailingList: true } };
-
-        await Mutation.registerForCourse(null, args, context);
-        expect(addToMailingList).toHaveBeenCalled();
-      });
-
-      test("false: does not subscribe student to mailing list", async () => {
-        const args = { registrationData: { mailingList: false } };
-
-        await Mutation.registerForCourse(null, args, context);
-        expect(addToMailingList).not.toHaveBeenCalled();
-      });
-    });
-
     describe("args.registrationData.paymentOption", () => {
       afterEach(() => sendCourseInvoice.mockClear());
 
@@ -86,23 +68,44 @@ describe("Mutation resolvers", () => {
       expect(Course.completeStripePayment).toHaveBeenCalled());
   });
 
-  test("subscribeToMailingList: subscribes a user to the mailing list", () => {
+  describe("subscribeToMailingList", () => {
     const args = { mailingListData: {} };
-    const mailChimp = { addToMailingList: jest.fn() };
-    const context = { services: { mailChimp } };
+    const logger = { error: jest.fn() };
+    const Student = { subscribeToMailingList: jest.fn() };
+    const context = { models: { Student }, logger };
 
-    Mutation.subscribeToMailingList(null, args, context);
-    expect(mailChimp.addToMailingList).toHaveBeenCalled();
+    beforeEach(() => jest.resetAllMocks());
+
+    test("success: subscribes a user to the mailing list and returns true", async () => {
+      Student.subscribeToMailingList.mockResolvedValueOnce(true);
+
+      const output = await Mutation.subscribeToMailingList(null, args, context);
+
+      expect(output).toBe(true);
+      expect(Student.subscribeToMailingList).toHaveBeenCalledWith(
+        args.mailingListData,
+      );
+    });
+
+    test("failure: logs the error message and returns false", async () => {
+      Student.subscribeToMailingList.mockRejectedValueOnce(new Error());
+
+      const output = await Mutation.subscribeToMailingList(null, args, context);
+
+      expect(output).toBe(false);
+      expect(logger.error).toHaveBeenCalled();
+    });
   });
 
   describe("authenticateAdmin", () => {
     const logger = { error: jest.fn() };
     const req = { headers: {}, ip: "ip.address" };
-    const awsAuth = { authenticateAdmin: jest.fn(() => Promise.resolve()) };
+    const awsAuth = { authenticateAdmin: jest.fn() };
     const context = { services: { awsAuth }, logger, req };
 
     test("success: returns a signed admin auth token", async () => {
       const args = { code: "auth-code" };
+      awsAuth.authenticateAdmin.mockResolvedValueOnce("token");
 
       await Mutation.authenticateAdmin(null, args, context);
       expect(awsAuth.authenticateAdmin).toHaveBeenCalled();
