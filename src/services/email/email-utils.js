@@ -5,15 +5,21 @@ const handleError = (logger, error, email, emailType) => {
   logger.error(error);
 };
 
-// TODO: implement support in client
-const buildCreditPaymentLink = (course, student) => {
-  if (!course.id) throw new Error("Missing course ID");
-  if (!student.id) throw new Error("Missing student ID");
+const buildCreditPaymentLink = (course, student, context) => {
+  const { services } = context;
 
   const creditPaymentBase = constants.siteLinks.creditPayment;
 
-  // use student email instead of exposing id?
-  return `${creditPaymentBase}?course=${course.id}&student=${student.id}`;
+  const registrationCode = services.jwtPayload.create({
+    audience: "client",
+    subject: "registration",
+    data: {
+      courseId: course.id,
+      studentId: student.id,
+    },
+  });
+
+  return `${creditPaymentBase}/${registrationCode}`;
 };
 
 module.exports = {

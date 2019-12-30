@@ -1,24 +1,27 @@
 sudo: true
-language: node_js
 cache: npm
+language: node_js
 node_js: "10.15.3"
+services: postgresql
+addons:
+  postgresql: "11.3"
 before_install:
   - sudo apt-get --yes remove postgresql\*
   - sudo apt-get install -y postgresql-11 postgresql-client-11
   - sudo cp /etc/postgresql/{9.6,11}/main/pg_hba.conf
   - sudo service postgresql restart 11
-  - npm i
-before_script:
-  - export NODE_ENV=test DB_NAME=test
   - psql -c "CREATE DATABASE $DB_NAME;" -U postgres
   - psql -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB;' -U postgres
-services: postgresql
-addons:
-  postgresql: "11.3"
+install:
+  - npm i
 jobs:
   include:
-    - stage: test
+    - stage: lint
       script:
         - npm run lint
+    - stage: test
+      script:
+        - echo "generating test private key"
+        - openssl genrsa -out "$PAYLOAD_PRIVATE_KEY_PATH" 2048
         - npm run knex:migrate
         - npm run test:travis
