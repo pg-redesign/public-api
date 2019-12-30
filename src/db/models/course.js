@@ -125,7 +125,7 @@ class Course extends BaseModel {
     // check for an existing student in the system with the given email
     const existingStudent = await Student.getBy(
       { email: partialStudent.email },
-      ["id"],
+      ["id", "mailingList"],
     );
 
     const student = existingStudent
@@ -150,13 +150,15 @@ class Course extends BaseModel {
     ]);
 
     // throws if not found (student not registered)
-    const registeredStudent = await course.getRegisteredStudent(studentId, [
-      "paymentDate",
-    ]);
+    const registeredStudent = await course.getRegisteredStudent(studentId);
 
     if (registeredStudent.paymentDate) {
       // student has already paid, exit early
-      return { course, student: registeredStudent };
+      throw new ValidationError({
+        type: "ExistingRelation",
+        message: "Payment already received",
+      });
+      // return { course, student: registeredStudent };
     }
 
     const confirmationId = await services.stripe.createCharge(
@@ -244,7 +246,13 @@ class Course extends BaseModel {
     // update student information (in case any has changed)
     const updatedStudent = await Student.query().updateAndFetchById(
       student.id,
-      studentData,
+      {
+        ...studentData,
+        // if they are already on the list leave true
+        // for returning students who forget to flip mailing list switch on registration
+        // otherwise update from current choice in registration data
+        mailingList: student.mailingList || studentData.mailingList,
+      },
     );
 
     // check if the student has an association with the course through a payment
