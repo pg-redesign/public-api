@@ -28,12 +28,15 @@ describe("Student static methods", () => {
       expect(mailingList).toBe(true);
     });
 
-    it("student does not exist: creates the student and returns true", async () => {
+    it("student does not exist: creates the student with mailingList field and returns true", async () => {
       const output = await Student.subscribeToMailingList(studentData);
       expect(output).toBe(true);
 
-      const student = await Student.getBy({ email: studentData.email }, ["id"]);
-      expect(student).toBeDefined();
+      const student = await Student.getBy({ email: studentData.email }, [
+        "id",
+        "mailingList",
+      ]);
+      expect(student.mailingList).toBe(true);
     });
   });
 });

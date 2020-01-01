@@ -15,6 +15,7 @@ const buildCreditPaymentLink = (course, student, context) => {
     subject: "registration",
     data: {
       courseId: course.id,
+      email: student.email,
       studentId: student.id,
     },
   });

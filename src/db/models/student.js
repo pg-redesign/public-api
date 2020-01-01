@@ -42,7 +42,7 @@ class Student extends BaseModel {
       .where({ email: mailingListData.email });
 
     if (!updatedCount) {
-      await this.query().insert(mailingListData);
+      await this.query().insert({ ...mailingListData, mailingList: true });
     }
 
     return true;

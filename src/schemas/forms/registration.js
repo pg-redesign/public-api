@@ -11,14 +11,7 @@ const studentRequired = [...student.required, ...location.required].filter(
 
 module.exports = {
   type: "object",
-  required: [
-    ...studentRequired,
-    "company",
-    "location",
-    "courseId",
-    "mailingList",
-    "paymentOption",
-  ],
+  required: [...studentRequired, "company", "courseId", "paymentOption"],
   properties: {
     ...studentProperties,
     ...location.properties,
