@@ -16,12 +16,8 @@ install:
   - npm i
 jobs:
   include:
-    - stage: lint
-      script:
-        - npm run lint
     - stage: test
       script:
-        - echo "generating test private key"
-        - openssl genrsa -out "$PAYLOAD_PRIVATE_KEY_PATH" 2048
+        - npm run lint
         - npm run knex:migrate
         - npm run test:travis

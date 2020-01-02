@@ -23,21 +23,11 @@ describe("Email Service utils", () => {
   });
 
   describe("buildCreditPaymentLink", () => {
-    const course = {};
-    const student = {};
-    const registrationDataToken = "JWT.registrationDataToken";
-    const jwtPayload = { create: jest.fn(() => registrationDataToken) };
-    const context = { services: { jwtPayload } };
+    test("builds credit payment URL with appended payment token path", () => {
+      const paymentToken = "JWT.payment.token";
+      const output = buildCreditPaymentLink(paymentToken);
 
-    test("builds credit payment URL with appended JWT path of registration data { courseId, studentId, email }", () => {
-      const output = buildCreditPaymentLink(course, student, context);
-      expect(output.includes(`/${registrationDataToken}`)).toBe(true);
-
-      const [[payload]] = jwtPayload.create.mock.calls;
-
-      ["courseId", "studentId", "email"].every(requiredField =>
-        expect(payload.data).toHaveProperty(requiredField),
-      );
+      expect(output.includes(`/${paymentToken}`)).toBe(true);
     });
   });
 });

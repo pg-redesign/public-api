@@ -10,7 +10,7 @@ const baseTemplateData = {
   contactEmail: constants.accounts.registration.address,
 };
 
-const renderCourseInvoice = (course, student, context) => {
+const renderCourseInvoice = ({ course, student, paymentToken }) => {
   const { courseInvoice } = templates;
   const { name, price, startDate, endDate } = course;
   const { city, state, mapUrl } = course.location;
@@ -31,6 +31,7 @@ const renderCourseInvoice = (course, student, context) => {
 
   const paymentDeadline = new Date(startDate);
   paymentDeadline.setDate(paymentDeadline.getDate() - 14);
+
   return renderTemplate(courseInvoice.fileName, {
     ...baseTemplateData,
     courseData,
@@ -38,7 +39,7 @@ const renderCourseInvoice = (course, student, context) => {
     previewText: `Princeton Groundwater Billing`,
     contactEmail: constants.accounts.billing.address,
     paymentDeadline: paymentDeadline.toDateString().slice(4), // cut off day shorthand
-    creditPaymentLink: buildCreditPaymentLink(course, student, context),
+    creditPaymentLink: buildCreditPaymentLink(paymentToken),
   });
 };
 

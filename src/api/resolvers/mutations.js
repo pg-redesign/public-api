@@ -45,26 +45,28 @@ module.exports = {
       const { code } = args;
       const { services, logger } = context;
 
-      return services.awsAuth.authenticateAdmin(code, context).catch(error => {
-        const { headers, ip } = context.req;
+      return services.cognitoAuth
+        .authenticateAdmin(code, context)
+        .catch(error => {
+          const { headers, ip } = context.req;
 
-        logger.error("Failed admin authentication, request data:", {
-          ip,
-          headers,
-          awsAuthCode: code,
+          logger.error("Failed admin authentication, request data:", {
+            ip,
+            headers,
+            awsAuthCode: code,
+          });
+
+          if (error.response) {
+            const { data, status } = error.response;
+            logger.error("request error:", { status, data });
+          } else {
+            logger.error(error);
+          }
+
+          throw new AuthenticationError(
+            "Authentication failed. Request context has been logged for review.",
+          );
         });
-
-        if (error.response) {
-          const { data, status } = error.response;
-          logger.error("request error:", { status, data });
-        } else {
-          logger.error(error);
-        }
-
-        throw new AuthenticationError(
-          "Authentication failed. Request context has been logged for review.",
-        );
-      });
     },
 
     createCourseLocation: (_, args, context) => {

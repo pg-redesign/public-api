@@ -1,4 +1,4 @@
-const awsAuthService = require("../aws-auth-service");
+const cognitoAuthService = require("./cognitoAuthService");
 
 const awsCognitoMock = {
   post: jest.fn(),
@@ -48,7 +48,7 @@ describe("AWS Auth Service", () => {
         data: tokenDataMock,
       }));
 
-      output = await awsAuthService(awsCognitoMock).getTokenData(
+      output = await cognitoAuthService(awsCognitoMock).getTokenData(
         authCodeMock,
         context,
       );
@@ -90,7 +90,9 @@ describe("AWS Auth Service", () => {
         data: adminInfoMock,
       }));
 
-      output = await awsAuthService(awsCognitoMock).getUserInfo(accessToken);
+      output = await cognitoAuthService(awsCognitoMock).getUserInfo(
+        accessToken,
+      );
     });
     afterAll(() => jest.clearAllMocks());
 
@@ -110,7 +112,7 @@ describe("AWS Auth Service", () => {
   });
 
   describe("authenticateAdmin", () => {
-    const mockedService = awsAuthService(awsCognitoMock);
+    const mockedService = cognitoAuthService(awsCognitoMock);
     mockedService.getUserInfo = jest.fn(() => adminInfoMock);
     mockedService.getTokenData = jest.fn(() => tokenDataMock);
 

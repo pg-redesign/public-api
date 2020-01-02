@@ -1,7 +1,6 @@
 const AJV = require("ajv");
 
 const templates = require("../templates");
-const jwtPayload = require("../../jwt-payload");
 const schemas = require("../../../schemas").templates;
 const { renderCourseInvoice } = require("../renderers");
 const { courseMocks } = require("../../../db/models/tests/__mocks__/course");
@@ -39,7 +38,11 @@ describe("Template Renderers", () => {
     beforeAll(async () => {
       // jwtPayload service is not mocked
       // testing for real behavior in render data
-      await renderCourseInvoice(course, student, { services: { jwtPayload } });
+      await renderCourseInvoice({
+        course,
+        student,
+        paymentToken: "JWT.payment",
+      });
       [renderTemplateCall] = renderTemplate.mock.calls;
     });
 

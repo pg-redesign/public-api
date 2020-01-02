@@ -21,7 +21,8 @@ describe("Email Service", () => {
   });
 
   describe("sendCourseInvoice", () => {
-    const context = { logger };
+    const jwtPayload = { createPaymentToken: jest.fn(() => Promise.resolve()) };
+    const context = { logger, services: { jwtPayload } };
 
     test("failure: catches and logs the error", async () => {
       jest.clearAllMocks();
@@ -36,7 +37,7 @@ describe("Email Service", () => {
     describe("success", () => {
       let sendMailCallArg;
       beforeAll(async () => {
-        jest.clearAllMocks();
+        jest.resetAllMocks();
         emailClient.sendMail.mockImplementationOnce(() => Promise.resolve());
 
         await mockedEmailService.sendCourseInvoice(course, student, context);
