@@ -1,7 +1,6 @@
 const AJV = require("ajv");
 
 const templates = require("../templates");
-const jwtPayload = require("../../jwt-payload");
 const schemas = require("../../../schemas").templates;
 const { renderCourseInvoice } = require("../renderers");
 const { courseMocks } = require("../../../db/models/tests/__mocks__/course");
