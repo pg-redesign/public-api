@@ -100,24 +100,24 @@ describe("Mutation resolvers", () => {
   describe("authenticateAdmin", () => {
     const logger = { error: jest.fn() };
     const req = { headers: {}, ip: "ip.address" };
-    const awsAuth = { authenticateAdmin: jest.fn() };
-    const context = { services: { awsAuth }, logger, req };
+    const cognitoAuth = { authenticateAdmin: jest.fn() };
+    const context = { services: { cognitoAuth }, logger, req };
 
-    test("success: returns a signed admin auth token", async () => {
-      const args = { code: "auth-code" };
-      awsAuth.authenticateAdmin.mockResolvedValueOnce("token");
+    test("success: returns a signed admin cognitoAuth token", async () => {
+      const args = { code: "cognitoAuth-code" };
+      cognitoAuth.authenticateAdmin.mockResolvedValueOnce("token");
 
       await Mutation.authenticateAdmin(null, args, context);
-      expect(awsAuth.authenticateAdmin).toHaveBeenCalled();
+      expect(cognitoAuth.authenticateAdmin).toHaveBeenCalled();
     });
 
     describe("failure during authentication", () => {
-      const code = "aws-auth-code";
+      const code = "aws-cognitoAuth-code";
       const rejectedError = new Error("rejection reasons");
 
       let thrownError;
       beforeAll(async () => {
-        awsAuth.authenticateAdmin.mockImplementationOnce(() =>
+        cognitoAuth.authenticateAdmin.mockImplementationOnce(() =>
           Promise.reject(rejectedError),
         );
 
@@ -149,7 +149,7 @@ describe("Mutation resolvers", () => {
       test("network related error: logs response status and data", async () => {
         jest.clearAllMocks();
         const networkError = { response: { status: 400, data: {} } };
-        awsAuth.authenticateAdmin.mockImplementationOnce(() =>
+        cognitoAuth.authenticateAdmin.mockImplementationOnce(() =>
           Promise.reject(networkError),
         );
 

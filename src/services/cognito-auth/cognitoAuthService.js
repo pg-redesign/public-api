@@ -1,6 +1,6 @@
 const qs = require("querystring");
 
-module.exports = awsCognito => ({
+module.exports = cognitoClient => ({
   async authenticateAdmin(code, context) {
     const { models, services } = context;
 
@@ -23,7 +23,7 @@ module.exports = awsCognito => ({
       redirect_uri: env.AWS_COGNITO_REDIRECT_URI,
     });
 
-    const res = await awsCognito.post("/token", payload, {
+    const res = await cognitoClient.post("/token", payload, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
@@ -44,7 +44,7 @@ module.exports = awsCognito => ({
   },
 
   async getUserInfo(accessToken) {
-    const res = await awsCognito.post("/userInfo", null, {
+    const res = await cognitoClient.post("/userInfo", null, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },

@@ -1,15 +1,15 @@
 const email = require("./email");
 const stripe = require("./stripe");
-const awsAuth = require("./aws-auth");
 const mailChimp = require("./mailChimp");
 const authToken = require("./auth-token");
 const jwtPayload = require("./jwt-payload");
+const cognitoAuth = require("./cognito-auth");
 
 module.exports = {
   email,
   stripe,
-  awsAuth,
   mailChimp,
   authToken,
   jwtPayload,
+  cognitoAuth,
 };
