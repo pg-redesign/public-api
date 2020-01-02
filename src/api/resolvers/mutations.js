@@ -3,25 +3,14 @@ const { AuthenticationError } = require("apollo-server-express");
 module.exports = {
   Mutation: {
     registerForCourse: async (_, args, context) => {
-      const {
-        mailingList,
-        paymentOption,
-        ...registrationData
-      } = args.registrationData;
-
       const { models, schemas, services } = context;
-
-      if (mailingList) {
-        // run in background
-        services.mailChimp.addToMailingList(registrationData, context);
-      }
+      const { paymentOption, ...registrationData } = args.registrationData;
 
       const { course, student } = await models.Course.registerStudent(
         registrationData,
       );
 
-      const { PaymentOptions } = schemas.enums;
-      if (paymentOption === PaymentOptions.invoice) {
+      if (paymentOption === schemas.enums.PaymentOptions.invoice) {
         await services.email.sendCourseInvoice(course, student, context);
       }
 
@@ -30,49 +19,54 @@ module.exports = {
 
     payForCourseWithStripe: async (_, args, context) => {
       const { paymentData } = args;
-      const { models, services } = context;
+      const { models } = context;
 
-      const { course, student } = await models.Course.completeStripePayment(
+      const { student } = await models.Course.completeStripePayment(
         paymentData,
         context,
       );
 
-      await services.email.sendRegistrationComplete(course, student, context);
-
       return student;
     },
 
-    subscribeToMailingList: (_, args, context) => {
-      const { services } = context;
+    subscribeToMailingList: async (_, args, context) => {
       const { mailingListData } = args;
+      const { logger, models } = context;
 
-      return services.mailChimp.addToMailingList(mailingListData, context);
+      return models.Student.subscribeToMailingList(mailingListData).catch(
+        error => {
+          logger.error(error.message);
+          return false;
+        },
+      );
     },
 
     authenticateAdmin: async (_, args, context) => {
       const { code } = args;
       const { services, logger } = context;
 
-      return services.awsAuth.authenticateAdmin(code, context).catch((error) => {
-        const { headers, ip } = context.req;
+      return services.cognitoAuth
+        .authenticateAdmin(code, context)
+        .catch(error => {
+          const { headers, ip } = context.req;
 
-        logger.error("Failed admin authentication, request data:", {
-          ip,
-          headers,
-          awsAuthCode: code,
+          logger.error("Failed admin authentication, request data:", {
+            ip,
+            headers,
+            awsAuthCode: code,
+          });
+
+          if (error.response) {
+            const { data, status } = error.response;
+            logger.error("request error:", { status, data });
+          } else {
+            logger.error(error);
+          }
+
+          throw new AuthenticationError(
+            "Authentication failed. Request context has been logged for review.",
+          );
         });
-
-        if (error.response) {
-          const { data, status } = error.response;
-          logger.error("request error:", { status, data });
-        } else {
-          logger.error(error);
-        }
-
-        throw new AuthenticationError(
-          "Authentication failed. Request context has been logged for review.",
-        );
-      });
     },
 
     createCourseLocation: (_, args, context) => {

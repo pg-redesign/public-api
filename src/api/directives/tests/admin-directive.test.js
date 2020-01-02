@@ -7,8 +7,10 @@ const env = {
 
 describe("@admin directive", () => {
   describe("isAdmin utility", () => {
-    test("valid admin sub ID: returns true", () => expect(isAdmin(validSubId, env)).toBe(true));
-    test("invalid admin sub ID: returns false", () => expect(isAdmin("nonsense-sub-id", env)).toBe(false));
+    test("valid admin sub ID: returns true", () =>
+      expect(isAdmin(validSubId, env)).toBe(true));
+    test("invalid admin sub ID: returns false", () =>
+      expect(isAdmin("nonsense-sub-id", env)).toBe(false));
   });
 
   describe("requireAdminReplacer -> requireAdminResolver", () => {

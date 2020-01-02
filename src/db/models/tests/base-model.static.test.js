@@ -7,9 +7,10 @@ const query = {
   select: jest.fn(() => query),
 };
 
-const returnsAPromise = () => it("returns a Promise", () => {
-  expect(BaseModel.create()).toBeInstanceOf(Promise);
-});
+const returnsAPromise = () =>
+  it("returns a Promise", () => {
+    expect(BaseModel.create()).toBeInstanceOf(Promise);
+  });
 
 describe("BaseModel static methods", () => {
   beforeAll(() => {

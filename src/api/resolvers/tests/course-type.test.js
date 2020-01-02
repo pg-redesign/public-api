@@ -59,23 +59,13 @@ describe("Course Type resolvers", () => {
 
     test("default: returns formatted full course name", () => {
       expect(Course.name(course, {}, context)).toBe(
-        utils.constants.fullCourseNames.POLLUTION,
+        utils.courseConstants.fullCourseNames.POLLUTION,
       );
     });
 
     test("args.short = true: returns shorthand internal name", () => {
       expect(Course.name(course, { short: true }, context)).toBe(course.name);
     });
-  });
-
-  test("Course.description: returns description for the course type (name)", () => {
-    const shortName = schemas.enums.CourseShortNames.pollution;
-    const course = { name: shortName };
-    const context = { utils };
-
-    expect(Course.description(course, null, context)).toEqual(
-      utils.constants.courseDescriptions[shortName],
-    );
   });
 
   describe("Course.location", () => {

@@ -1,4 +1,4 @@
-const { months } = require("./constants");
+const { months } = require("./course-constants");
 
 // IIFE to leave namespace clear of sub util names
 const courseDateRange = (() => {

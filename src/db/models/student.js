@@ -34,6 +34,27 @@ class Student extends BaseModel {
       },
     };
   }
+
+  // -- STATIC METHODS -- //
+  static async subscribeToMailingList(mailingListData) {
+    const updatedCount = await this.query()
+      .patch({ mailingList: true })
+      .where({ email: mailingListData.email });
+
+    if (!updatedCount) {
+      await this.query().insert({ ...mailingListData, mailingList: true });
+    }
+
+    return true;
+  }
+
+  // -- PROTO METHODS -- //
+  async getCoursePayment(courseId, columns = []) {
+    return this.$relatedQuery("payments")
+      .first()
+      .columns(columns)
+      .where({ courseId });
+  }
 }
 
 module.exports = Student;

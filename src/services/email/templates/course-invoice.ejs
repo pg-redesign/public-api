@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('fragments/head'); %>
+  <body>
+    <%- include('fragments/email-preview', { previewText: previewText }); %>
+
+    <p>Hello <%= studentFirstName %>,</p>
+
+    <p>
+      Thank you for registering for <%= courseData.name %>. You are receiving
+      this email because you requested alternative payment options during your
+      registration. We currently offer online credit card, check or ACH bank
+      transfer payment methods.
+    </p>
+
+    <p>
+      If you would like to discuss special payment instructions or requests with
+      our staff you can reach us by
+      <a href="mailto:<%= contactEmail %>"> email</a> or by phone at
+      <a href="tel:<%= contactPhone %>"><%= contactPhone %></a>
+    </p>
+
+    <p>
+      <b>Your course registration status is currently pending</b> as we have not
+      yet received your payment. If you believe this is incorrect please send us
+      an <a href="mailto:<%= contactEmail %>"> email</a> and we will contact you
+      about resolving this issue. Otherwise, you may complete your course
+      registration by paying through one of the options below.
+    </p>
+
+    <hr />
+
+    <h2>Course Details</h2>
+
+    <table>
+      <tr>
+        <th>Price</th>
+        <td>$<%= courseData.price %> [USD]</td>
+      </tr>
+      <tr>
+        <th>Dates</th>
+        <td><%= courseData.dates %></td>
+      </tr>
+      <tr>
+        <th>Location</th>
+        <td>
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            href="<%= courseData.location.mapUrl %>"
+          >
+            <%= courseData.location.name %>
+          </a>
+        </td>
+      </tr>
+    </table>
+
+    <hr />
+
+    <h2>Payment Options</h2>
+
+    <div>
+      <h3>Online</h3>
+      <p>
+        Use our secure credit card payment page:
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="<%= creditPaymentLink %>"
+        >
+          https://princeton-groundwater.com/payment/credit
+        </a>
+      </p>
+      <p>
+        Your credit card payment will be processed by
+        <a href="https://stripe.com" target="_blank" rel="noopener noreferrer"
+          >Stripe</a
+        >, a trusted and PCI compliant online payment service. Your card
+        information will be used for this single transaction and will neither be
+        sent to nor stored on our servers.
+      </p>
+    </div>
+
+    <div>
+      <h3>Check by Mail</h3>
+      <p>
+        Note that your check must be received and cleared
+        <strong>by <%= paymentDeadline %></strong>, 2 weeks before the start of
+        the course.
+      </p>
+
+      <h4 class="subject-title">Payable To</h4>
+      <div class="highlighted-subject">
+        <div class="subject-details">
+          Princeton Groundwater, Inc.
+        </div>
+      </div>
+
+      <h4 class="subject-title">Mailing Address</h4>
+      <div class="highlighted-subject">
+        <div class="subject-details">
+          <p>Princeton Groundwater, Inc.</p>
+          <p>P.O. Box 273776</p>
+          <p>Tampa, FL 33688-3776</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Bank Transfer (ACH)</h3>
+      <p>
+        You can transfer your payment using an ACH wire transfer. Note that your
+        transfer must be received and cleared
+        <strong>by <%= paymentDeadline %></strong>, 2 weeks before the start of
+        the course.
+      </p>
+
+      <h4 class="subject-title">Bank Address</h4>
+      <div class="highlighted-subject">
+        <div class="subject-details">
+          <p>J.P. Morgan Chase Bank, N.A.</p>
+          <p>12703 North Dale Mabry Highway</p>
+          <p>Tampa, Florida</p>
+        </div>
+      </div>
+
+      <h4 class="subject-title">Account Details</h4>
+      <div class="highlighted-subject">
+        <div class="subject-details">
+          <p>Account number: 951634930</p>
+          <p>ABA routing number: 267084131</p>
+        </div>
+      </div>
+    </div>
+
+    <%- include('fragments/footer', { contactEmail: contactEmail, contactPhone:
+    contactPhone }); %>
+  </body>
+</html>

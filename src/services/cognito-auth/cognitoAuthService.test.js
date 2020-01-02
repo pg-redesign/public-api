@@ -1,4 +1,4 @@
-const awsAuthService = require("../aws-auth-service");
+const cognitoAuthService = require("./cognitoAuthService");
 
 const awsCognitoMock = {
   post: jest.fn(),
@@ -48,7 +48,7 @@ describe("AWS Auth Service", () => {
         data: tokenDataMock,
       }));
 
-      output = await awsAuthService(awsCognitoMock).getTokenData(
+      output = await cognitoAuthService(awsCognitoMock).getTokenData(
         authCodeMock,
         context,
       );
@@ -77,7 +77,8 @@ describe("AWS Auth Service", () => {
       expect(mockRequestPayload).toBe(expectedPayload);
     });
 
-    test("returns the token data object", () => expect(output).toEqual(tokenDataMock));
+    test("returns the token data object", () =>
+      expect(output).toEqual(tokenDataMock));
   });
 
   describe("getUserInfo", () => {
@@ -89,7 +90,9 @@ describe("AWS Auth Service", () => {
         data: adminInfoMock,
       }));
 
-      output = await awsAuthService(awsCognitoMock).getUserInfo(accessToken);
+      output = await cognitoAuthService(awsCognitoMock).getUserInfo(
+        accessToken,
+      );
     });
     afterAll(() => jest.clearAllMocks());
 
@@ -104,11 +107,12 @@ describe("AWS Auth Service", () => {
       });
     });
 
-    test("returns the admin info object", () => expect(output).toEqual(adminInfoMock));
+    test("returns the admin info object", () =>
+      expect(output).toEqual(adminInfoMock));
   });
 
   describe("authenticateAdmin", () => {
-    const mockedService = awsAuthService(awsCognitoMock);
+    const mockedService = cognitoAuthService(awsCognitoMock);
     mockedService.getUserInfo = jest.fn(() => adminInfoMock);
     mockedService.getTokenData = jest.fn(() => tokenDataMock);
 
@@ -119,6 +123,7 @@ describe("AWS Auth Service", () => {
       expect(mockedService.getUserInfo).toHaveBeenCalled();
     });
 
-    test("returns an API signed admin token object", () => expect(context.services.authToken.signAdminToken).toHaveBeenCalled());
+    test("returns an API signed admin token object", () =>
+      expect(context.services.authToken.signAdminToken).toHaveBeenCalled());
   });
 });

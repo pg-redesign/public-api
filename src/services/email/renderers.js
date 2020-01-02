@@ -1,42 +1,48 @@
-const constants = require("../../utils/constants");
-const { renderPugTemplate, buildCreditPaymentLink } = require("./email-utils");
+const constants = require("./constants");
+const templates = require("./templates");
+const { enums } = require("../../schemas");
+const { courseConstants, format } = require("../../utils");
+const { buildCreditPaymentLink } = require("./email-utils");
+const renderTemplate = require("./templates/render-template");
 
 const baseTemplateData = {
-  contactPhone: constants.emailService.phoneContact,
-  contactEmail: constants.emailService.accounts.registration,
+  contactPhone: constants.phoneContact,
+  contactEmail: constants.accounts.registration.address,
 };
 
-const renderCourseInvoice = (course, student) => {
-  const templateFilename = "course-invoice.pug";
-  const courseName = constants.fullCourseNames[course.name];
+const renderCourseInvoice = ({ course, student, paymentToken }) => {
+  const { courseInvoice } = templates;
+  const { name, price, startDate, endDate } = course;
+  const { city, state, mapUrl } = course.location;
 
-  const templateData = {
-    courseName,
-    ...baseTemplateData,
-    studentFirstName: student.firstName,
-    contactEmail: constants.emailService.accounts.billing,
-    creditPaymentLink: buildCreditPaymentLink(course, student),
-    previewText: `Billing Invoice: Princeton Groundwater ${courseName}`,
+  const courseData = {
+    price,
+    name: courseConstants.fullCourseNames[name],
+    dates: format.courseDateRange(
+      startDate,
+      endDate,
+      enums.LanguageTypes.english,
+    ),
+    location: {
+      mapUrl,
+      name: `${city}, ${state}`,
+    },
   };
 
-  return renderPugTemplate(templateFilename, templateData);
-};
+  const paymentDeadline = new Date(startDate);
+  paymentDeadline.setDate(paymentDeadline.getDate() - 14);
 
-// TODO: complete implementation
-const renderRegistrationComplete = (course, student) => {
-  const templateFilename = "course-registration-complete.pug";
-  const courseName = constants.fullCourseNames[course.name];
-
-  const templateData = {
-    courseName,
+  return renderTemplate(courseInvoice.fileName, {
     ...baseTemplateData,
+    courseData,
     studentFirstName: student.firstName,
-  };
-
-  return renderPugTemplate(templateFilename, templateData);
+    previewText: `Princeton Groundwater Billing`,
+    contactEmail: constants.accounts.billing.address,
+    paymentDeadline: paymentDeadline.toDateString().slice(4), // cut off day shorthand
+    creditPaymentLink: buildCreditPaymentLink(paymentToken),
+  });
 };
 
 module.exports = {
   renderCourseInvoice,
-  renderRegistrationComplete,
 };

@@ -26,24 +26,6 @@ describe("Mutation resolvers", () => {
       expect(Course.registerStudent).toHaveBeenCalled();
     });
 
-    describe("args.registrationData.mailingList", () => {
-      afterEach(() => addToMailingList.mockClear());
-
-      test("true: subscribes student to mailing list", async () => {
-        const args = { registrationData: { mailingList: true } };
-
-        await Mutation.registerForCourse(null, args, context);
-        expect(addToMailingList).toHaveBeenCalled();
-      });
-
-      test("false: does not subscribe student to mailing list", async () => {
-        const args = { registrationData: { mailingList: false } };
-
-        await Mutation.registerForCourse(null, args, context);
-        expect(addToMailingList).not.toHaveBeenCalled();
-      });
-    });
-
     describe("args.registrationData.paymentOption", () => {
       afterEach(() => sendCourseInvoice.mockClear());
 
@@ -73,51 +55,71 @@ describe("Mutation resolvers", () => {
 
   describe("payForCourseWithStripe", () => {
     const args = { paymentData: {} };
-    const sendRegistrationComplete = jest.fn();
     const Course = {
       completeStripePayment: jest.fn(() => Promise.resolve({})),
     };
     const context = {
       models: { Course },
-      services: { email: { sendRegistrationComplete } },
     };
 
     beforeAll(() => Mutation.payForCourseWithStripe(null, args, context));
 
-    test("issues Stripe charge and returns the updated student", () => expect(Course.completeStripePayment).toHaveBeenCalled());
-
-    test("sends registration complete email", () => expect(sendRegistrationComplete).toHaveBeenCalled());
+    test("issues Stripe charge and returns the updated student", () =>
+      expect(Course.completeStripePayment).toHaveBeenCalled());
   });
 
-  test("subscribeToMailingList: subscribes a user to the mailing list", () => {
+  describe("subscribeToMailingList", () => {
     const args = { mailingListData: {} };
-    const mailChimp = { addToMailingList: jest.fn() };
-    const context = { services: { mailChimp } };
+    const logger = { error: jest.fn() };
+    const Student = { subscribeToMailingList: jest.fn() };
+    const context = { models: { Student }, logger };
 
-    Mutation.subscribeToMailingList(null, args, context);
-    expect(mailChimp.addToMailingList).toHaveBeenCalled();
+    beforeEach(() => jest.resetAllMocks());
+
+    test("success: subscribes a user to the mailing list and returns true", async () => {
+      Student.subscribeToMailingList.mockResolvedValueOnce(true);
+
+      const output = await Mutation.subscribeToMailingList(null, args, context);
+
+      expect(output).toBe(true);
+      expect(Student.subscribeToMailingList).toHaveBeenCalledWith(
+        args.mailingListData,
+      );
+    });
+
+    test("failure: logs the error message and returns false", async () => {
+      Student.subscribeToMailingList.mockRejectedValueOnce(new Error());
+
+      const output = await Mutation.subscribeToMailingList(null, args, context);
+
+      expect(output).toBe(false);
+      expect(logger.error).toHaveBeenCalled();
+    });
   });
 
   describe("authenticateAdmin", () => {
     const logger = { error: jest.fn() };
     const req = { headers: {}, ip: "ip.address" };
-    const awsAuth = { authenticateAdmin: jest.fn(() => Promise.resolve()) };
-    const context = { services: { awsAuth }, logger, req };
+    const cognitoAuth = { authenticateAdmin: jest.fn() };
+    const context = { services: { cognitoAuth }, logger, req };
 
-    test("success: returns a signed admin auth token", async () => {
-      const args = { code: "auth-code" };
+    test("success: returns a signed admin cognitoAuth token", async () => {
+      const args = { code: "cognitoAuth-code" };
+      cognitoAuth.authenticateAdmin.mockResolvedValueOnce("token");
 
       await Mutation.authenticateAdmin(null, args, context);
-      expect(awsAuth.authenticateAdmin).toHaveBeenCalled();
+      expect(cognitoAuth.authenticateAdmin).toHaveBeenCalled();
     });
 
     describe("failure during authentication", () => {
-      const code = "aws-auth-code";
+      const code = "aws-cognitoAuth-code";
       const rejectedError = new Error("rejection reasons");
 
       let thrownError;
       beforeAll(async () => {
-        awsAuth.authenticateAdmin.mockImplementationOnce(() => Promise.reject(rejectedError));
+        cognitoAuth.authenticateAdmin.mockImplementationOnce(() =>
+          Promise.reject(rejectedError),
+        );
 
         try {
           await Mutation.authenticateAdmin(null, { code }, context);
@@ -147,7 +149,9 @@ describe("Mutation resolvers", () => {
       test("network related error: logs response status and data", async () => {
         jest.clearAllMocks();
         const networkError = { response: { status: 400, data: {} } };
-        awsAuth.authenticateAdmin.mockImplementationOnce(() => Promise.reject(networkError));
+        cognitoAuth.authenticateAdmin.mockImplementationOnce(() =>
+          Promise.reject(networkError),
+        );
 
         try {
           await Mutation.authenticateAdmin(null, { code }, context);

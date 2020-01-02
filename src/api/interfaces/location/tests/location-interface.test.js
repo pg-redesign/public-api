@@ -30,9 +30,13 @@ describe("Location Interface", () => {
           message: "on StudentLocation implementing type",
           implementingType: "StudentLocation",
         },
-      ].forEach(testCase => test(testCase.message, () => expect(
-        resolvers[testCase.implementingType].concatenated(mockLocation),
-      ).toBe("city, state, country")));
+      ].forEach(testCase =>
+        test(testCase.message, () =>
+          expect(
+            resolvers[testCase.implementingType].concatenated(mockLocation),
+          ).toBe("city, state, country"),
+        ),
+      );
     });
   });
 

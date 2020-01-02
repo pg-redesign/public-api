@@ -10,7 +10,7 @@ module.exports = {
       maxLength: 64,
       /* prettier-ignore */
       /* eslint-disable no-useless-escape */
-      pattern: "^(https:\/\/goo\.gl\/maps\/)[A-Za-z0-9]+$",
+      pattern: "^(https:\/\/goo\.gl\/maps\/)[A-Za-z0-9]+$"
     },
   },
 };

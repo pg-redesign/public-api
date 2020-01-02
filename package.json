@@ -2,8 +2,8 @@
   "version": "1.0.0",
   "author": "vampiire",
   "license": "UNLICENSED",
-  "name": "pg-public-api",
-  "description": "pg redesign public GraphQL API",
+  "name": "pg-api",
+  "description": "pg redesign GraphQL API",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pg-redesign/public-api.git"
@@ -12,21 +12,22 @@
     "url": "https://github.com/pg-redesign/public-api/issues"
   },
   "environment": {
-    "API_DOMAIN": "hosted domain for signing auth tokens",
     "PORT": "API server listening port",
-    "CLIENT_URL": "development branch hosted client URL for CORS whitelist",
-    "ADMIN_CLIENT_URL": "development branch hosted admin client URL for CORS whitelist",
+    "EMAIL_HOST": "automated email host",
+    "API_HOST": "API host for JWT token.iss value",
     "DB_NAME": "database name",
     "DB_USER": "database user name",
     "DB_PASSWORD": "database user password",
     "DB_HOST": "database host name / IP address",
-    "AWS_ACCESS_KEY_ID": "AWS SES mailer",
-    "AWS_SECRET_ACCESS_KEY": "AWS SES mailer",
-    "AWS_COGNITO_DOMAIN": "AWS cognito authentication domain in <registered domain name>.auth.<region> form",
+    "AUTH_TOKEN_SIGNING_SECRET": "signing secret for auth tokens",
+    "PAYLOAD_PRIVATE_KEY_NAME": "JWT payload private signing key name",
+    "AWS_REGION": "[dev/test] AWS restricted user account services region",
+    "AWS_ACCESS_KEY_ID": "[dev/test] restricted user account credentials",
+    "AWS_SECRET_ACCESS_KEY": "[dev/test] restricted user account credentials",
+    "AWS_COGNITO_HOST": "AWS cognito authentication host in <registered domain name>.auth.<region> form",
     "AWS_COGNITO_CLIENT_ID": "registered cognito application ID",
     "AWS_COGNITO_REDIRECT_URI": "redirect location on successful cognito auth",
-    "ADMIN_SUBS": "AWS cognito registered admin sub IDs in CSV format",
-    "AUTH_TOKEN_SIGNING_SECRET": "signing secret for auth tokens",
+    "ADMIN_SUBS": "AWS cognito registered admin sub IDs in strict CSV <sub1>,<subN> format",
     "STRIPE_API_KEY": "Stripe payment processing",
     "MAILCHIMP_API_KEY": "MailChimp mailing list control",
     "MAILCHIMP_NEWSLETTER_ID": "MailChimp newsletter mailing list",
@@ -36,16 +37,17 @@
   "main": "src",
   "scripts": {
     "start": "node src",
-    "dev": "npm run env:dev -- nodemon",
-    "test": "jest --runInBand --no-cache",
-    "lint": "eslint .",
-    "test:local": "npm run env:test -- jest --runInBand",
-    "test:travis": "npm run test -- --coverage && cat ./coverage/lcov.info | coveralls",
-    "knex:migrate": "knex migrate:latest",
-    "knex:seed": "knex seed:run",
-    "knex:seed:admins": "knex seed:run --specific make-admins.js",
     "env:dev": "env $(< .env)",
-    "env:test": "env $(< .test.env)"
+    "env:test": "env $(< .test.env)",
+    "dev": "npm run env:dev -- nodemon",
+    "knex:seed": "knex seed:run",
+    "knex:migrate": "knex migrate:latest",
+    "knex:seed:admins": "knex seed:run --specific make-admins.js",
+    "lint": "eslint .",
+    "prettify": "prettier --write 'src/**/*.js'",
+    "test": "jest --runInBand --no-cache",
+    "test:local": "npm run env:test -- jest --runInBand",
+    "test:travis": "npm run test -- --coverage && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
     "@okgrow/graphql-scalars": "^0.4.5",
@@ -57,17 +59,17 @@
     "apollo-server-express": "^2.6.7",
     "aws-sdk": "^2.475.0",
     "axios": "^0.19.0",
+    "ejs": "^2.6.2",
     "express": "^4.17.1",
     "express-winston": "^3.2.0",
     "graphql": "^14.3.1",
     "graphql-import": "^0.7.1",
     "graphql-type-json": "^0.3.0",
     "jsonwebtoken": "^8.5.1",
-    "knex": "^0.19.1",
+    "knex": "^0.19.5",
     "nodemailer": "^6.2.1",
-    "objection": "^1.6.9",
+    "objection": "^2.x.x",
     "pg": "^7.11.0",
-    "pug": "^2.0.3",
     "stripe": "^7.1.0"
   },
   "devDependencies": {
@@ -79,8 +81,10 @@
     "eslint-config-prettier": "^4.3.0",
     "eslint-plugin-import": "^2.17.2",
     "eslint-plugin-jest": "^22.6.4",
+    "eslint-plugin-prettier": "^3.1.0",
     "jest": "^24.8.0",
     "nodemon": "^1.19.0",
+    "prettier": "^1.18.2",
     "sonarqube-scanner": "^2.4.1"
   },
   "eslintConfig": {
@@ -90,12 +94,13 @@
       "jest/globals": true
     },
     "extends": [
-      "prettier",
       "airbnb-base",
-      "plugin:jest/recommended"
+      "plugin:jest/recommended",
+      "prettier"
     ],
     "plugins": [
-      "jest"
+      "jest",
+      "prettier"
     ],
     "globals": {
       "Atomics": "readonly",
@@ -105,17 +110,17 @@
       "ecmaVersion": 2018
     },
     "rules": {
-      "quotes": [
-        "error",
-        "double"
-      ],
-      "max-len": [
-        0,
-        100
-      ]
+      "prettier/prettier": "error"
     }
   },
   "nodemonConfig": {
     "ext": "graphql, js"
+  },
+  "prettier": {
+    "tabWidth": 2,
+    "printWidth": 80,
+    "singleQuote": false,
+    "proseWrap": "never",
+    "trailingComma": "all"
   }
 }

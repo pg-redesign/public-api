@@ -7,6 +7,7 @@ const studentMock = require("./__mocks__/student");
 const { connection } = require("../../connection");
 const CourseLocation = require("../course-location");
 const {
+  getNextCourse,
   createLocationsAndCourses,
   cleanupLocationsAndCourses,
 } = require("./__mocks__/course");
@@ -102,13 +103,16 @@ describe("Course static methods", () => {
       results = await Course.getUpcoming();
     });
 
-    test("returns up to 2 courses", () => expect(results.length).toBeLessThanOrEqual(2));
+    test("returns up to 2 courses", () =>
+      expect(results.length).toBeLessThanOrEqual(2));
 
-    test(`courses are sorted by DEFAULT_SORT: [${Course.DEFAULT_SORT.toString()}]`, () => expect(results).toEqual(results, Course.DEFAULT_SORT));
+    test(`courses are sorted by DEFAULT_SORT: [${Course.DEFAULT_SORT.toString()}]`, () =>
+      expect(results).toEqual(results, Course.DEFAULT_SORT));
 
-    test("filters courses older than the current date", () => expect(results.every(course => course.startDate >= new Date())).toBe(
-      true,
-    ));
+    test("filters courses older than the current date", () =>
+      expect(results.every(course => course.startDate >= new Date())).toBe(
+        true,
+      ));
   });
 
   describe("validateCourseId", () => {
@@ -117,7 +121,9 @@ describe("Course static methods", () => {
     beforeAll(async () => {
       const date = new Date();
       [pastCourse, upcomingCourse] = await Promise.all(
-        ["<", ">"].map(equalityClause => Course.query().findOne("start_date", equalityClause, date)),
+        ["<", ">"].map(equalityClause =>
+          Course.query().findOne("startDate", equalityClause, date),
+        ),
       );
     });
 
@@ -141,6 +147,24 @@ describe("Course static methods", () => {
         expect(error instanceof ValidationError).toBe(true);
       }
     });
+
+    test("allows specific columns to be selected", async () => {
+      const course = await Course.validateCourseId(upcomingCourse.id, [
+        "id",
+        "price",
+      ]);
+
+      expect(course.id).toBe(upcomingCourse.id);
+      expect(course.price).toBe(upcomingCourse.price);
+    });
+
+    test("allows selected relations to be eagerly loaded", async () => {
+      const course = await Course.validateCourseId(upcomingCourse.id, [], {
+        location: true,
+      });
+
+      expect(course.location).toBeDefined();
+    });
   });
 
   describe("registerStudent", () => {
@@ -155,7 +179,7 @@ describe("Course static methods", () => {
     let course;
     let registrationData;
     beforeAll(async () => {
-      course = await Course.query().findOne("start_date", ">", new Date());
+      course = await getNextCourse();
 
       registrationData = {
         courseId: course.id,
@@ -244,7 +268,7 @@ describe("Course static methods", () => {
       completeStudentRegistration,
     } = Course.prototype;
     beforeAll(async () => {
-      course = await Course.query().findOne("start_date", ">", new Date());
+      course = await getNextCourse();
 
       paymentData = {
         courseId: course.id,
@@ -301,20 +325,17 @@ describe("Course static methods", () => {
     });
 
     describe("failure", () => {
-      test("student has already paid: returns the course and student without creating a new charge", async () => {
+      test("student has already paid: throws ValidationError and does not submit Stripe charge", async () => {
         Course.prototype.getRegisteredStudent.mockImplementationOnce(() => ({
           ...student,
           paymentDate: "some date",
         }));
-        const notCalled = [
-          stripeService.createCharge,
-          Course.prototype.completeStudentRegistration,
-        ];
 
-        const result = await Course.completeStripePayment(paymentData, context);
-        notCalled.forEach(action => expect(action).not.toHaveBeenCalled());
-        expect(result.course.id).toBe(course.id);
-        expect(result.student.id).toBe(student.id);
+        expect(
+          Course.completeStripePayment(paymentData, context),
+        ).rejects.toThrow(ValidationError);
+
+        expect(stripeService.createCharge).not.toHaveBeenCalled();
       });
     });
   });

@@ -1,12 +1,12 @@
 const jwt = require("jsonwebtoken");
 
 const signAdminToken = (adminSubId, context) => {
-  const { AUTH_TOKEN_SIGNING_SECRET, API_DOMAIN } = context.env;
+  const { AUTH_TOKEN_SIGNING_SECRET, API_HOST } = context.env;
 
   const payload = { sub: adminSubId };
   const options = {
     expiresIn: 3600,
-    issuer: API_DOMAIN,
+    issuer: API_HOST,
     algorithm: "HS256",
   };
 
@@ -16,11 +16,11 @@ const signAdminToken = (adminSubId, context) => {
 };
 
 const verifyToken = (token, context) => {
-  const { AUTH_TOKEN_SIGNING_SECRET, API_DOMAIN } = context.env;
+  const { AUTH_TOKEN_SIGNING_SECRET, API_HOST } = context.env;
 
   try {
     return jwt.verify(token, AUTH_TOKEN_SIGNING_SECRET, {
-      iss: API_DOMAIN,
+      iss: API_HOST,
       algorithms: ["HS256"],
     });
   } catch (error) {

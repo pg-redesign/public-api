@@ -1,7 +1,7 @@
 const Stripe = require("stripe");
-const constants = require("../../utils/constants");
+const { fullCourseNames } = require("../../utils").courseConstants;
 
-module.exports = stripe => ({
+module.exports = stripeClient => ({
   /**
    * Creates a Stripe payment charge for the student
    * @param {{ id: number, price: number, name: string }} course
@@ -11,12 +11,12 @@ module.exports = stripe => ({
   createCharge: async (course, paymentData) => {
     const { receiptEmail, studentId, tokenId } = paymentData;
 
-    const charge = await stripe.charges.create({
+    const charge = await stripeClient.charges.create({
       currency: "usd",
       source: tokenId,
       amount: course.price * 100, // in USD cents
       receipt_email: receiptEmail,
-      description: constants.stripeService.paymentDescription(course),
+      description: `${fullCourseNames[course.name]} registration`,
       metadata: {
         studentId,
         courseId: course.id,

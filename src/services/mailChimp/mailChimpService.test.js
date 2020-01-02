@@ -26,7 +26,8 @@ describe("mailChimpService.addToMailingList: adds a user to the MailChimp mailin
       [mockCall] = mailChimpMock.put.mock.calls;
     });
 
-    test("sends PUT request to list members endpoint", () => expect(mailChimpMock.put).toHaveBeenCalled());
+    test("sends PUT request to list members endpoint", () =>
+      expect(mailChimpMock.put).toHaveBeenCalled());
 
     test("appends the hashed user email to the endpoint", () => {
       // this is an awful test but not sure how else to go about it without hashing or mocking the crypto lib
@@ -54,7 +55,9 @@ describe("mailChimpService.addToMailingList: adds a user to the MailChimp mailin
 
   describe("failure", () => {
     test("logs the error and returns false", async () => {
-      mailChimpMock.put.mockImplementationOnce(() => Promise.reject(new Error()));
+      mailChimpMock.put.mockImplementationOnce(() =>
+        Promise.reject(new Error()),
+      );
 
       const result = await mockedService.addToMailingList(
         mailingListData,

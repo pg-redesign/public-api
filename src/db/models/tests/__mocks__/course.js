@@ -35,15 +35,16 @@ const courseMocks = [
   },
 ];
 
-const cleanupLocationsAndCourses = () => CourseLocation.query()
-  .del()
-  .then(() => Course.query().del());
+const cleanupLocationsAndCourses = () =>
+  CourseLocation.query()
+    .del()
+    .then(() => Course.query().del());
 
 const createLocationsAndCourses = async (seeds = courseMocks) => {
   await cleanupLocationsAndCourses();
 
   return Promise.all(
-    seeds.map(async (data) => {
+    seeds.map(async data => {
       const courseLocation = await CourseLocation.query().insert(data.location);
       return Course.query().insert({
         ...data.course,
@@ -53,8 +54,14 @@ const createLocationsAndCourses = async (seeds = courseMocks) => {
   );
 };
 
+const getNextCourse = () =>
+  Course.query()
+    .where("startDate", ">", new Date())
+    .first();
+
 module.exports = {
   courseMocks,
+  getNextCourse,
   createLocationsAndCourses,
   cleanupLocationsAndCourses,
 };

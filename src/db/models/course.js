@@ -4,7 +4,7 @@ const Student = require("./student");
 const schemas = require("../../schemas");
 const BaseModel = require("./base-model");
 
-const DEFAULT_SORT = ["startDate", "desc"];
+const DEFAULT_SORT = ["startDate", "asc"];
 
 class Course extends BaseModel {
   static get tableName() {
@@ -66,25 +66,6 @@ class Course extends BaseModel {
     return super.create(courseData);
   }
 
-  /**
-   * duplicated queries!
-   *
-   * LESSON LEARNED:
-   * objection queries are NOT Promises
-   * - they are "thenable" but not a Promise implementation
-   * - if you have a chain: resolver -> Model/instance method -> QueryBuilder
-   * - what is returned is a Query thenable query stub
-   * - AS (2.0+) will end up executing the method twice
-   * - AS chains a .then() on the end (thinking it is a promise) which then
-   * - queryBuilder + .then() -> executes the query and returns a promise + .then() (on a promise) -> resolves second time
-   * - itself returns a promise and terminates the query
-   *
-   * AS thread:https://github.com/apollographql/apollo-server/issues/2501
-   *
-   * solution:
-   * - make the resolver or method async (to wrap it in a promise)
-   * - terminate the query using .execute() in the method
-   */
   static async getAll(columns = []) {
     return this.query()
       .select(columns)
@@ -99,8 +80,9 @@ class Course extends BaseModel {
       .limit(2);
   }
 
-  static async validateCourseId(courseId, columns = []) {
+  static async validateCourseId(courseId, columns = [], relations = {}) {
     const course = await this.query()
+      .withGraphJoined(relations)
       .findById(courseId)
       .select(columns)
       .throwIfNotFound();
@@ -125,11 +107,9 @@ class Course extends BaseModel {
       ...partialStudent
     } = registrationData;
 
-    const course = await this.validateCourseId(courseId, [
-      "id",
-      "price",
-      "startDate",
-    ]);
+    const course = await this.validateCourseId(courseId, [], {
+      location: true,
+    });
 
     // shape location property
     const studentData = {
@@ -145,15 +125,15 @@ class Course extends BaseModel {
     // check for an existing student in the system with the given email
     const existingStudent = await Student.getBy(
       { email: partialStudent.email },
-      ["id"],
+      ["id", "mailingList"],
     );
 
     const student = existingStudent
       ? await course.registerExistingStudent(
-        existingStudent,
-        studentData,
-        paymentData,
-      )
+          existingStudent,
+          studentData,
+          paymentData,
+        )
       : await course.registerNewStudent(studentData, paymentData);
 
     return { course, student };
@@ -170,13 +150,15 @@ class Course extends BaseModel {
     ]);
 
     // throws if not found (student not registered)
-    const registeredStudent = await course.getRegisteredStudent(studentId, [
-      "paymentDate",
-    ]);
+    const registeredStudent = await course.getRegisteredStudent(studentId);
 
     if (registeredStudent.paymentDate) {
       // student has already paid, exit early
-      return { course, student: registeredStudent };
+      throw new ValidationError({
+        type: "ExistingRelation",
+        message: "Payment already received",
+      });
+      // return { course, student: registeredStudent };
     }
 
     const confirmationId = await services.stripe.createCharge(
@@ -261,24 +243,36 @@ class Course extends BaseModel {
   }
 
   async registerExistingStudent(student, studentData, paymentData) {
-    if (await this.hasStudent(student.id)) {
-      throw new ValidationError({
-        type: "ExistingRelation",
-        message: "Student already registered",
-      });
-    }
-
-    // update student info
+    // update student information (in case any has changed)
     const updatedStudent = await Student.query().updateAndFetchById(
       student.id,
-      studentData,
+      {
+        ...studentData,
+        // if they are already on the list leave true
+        // for returning students who forget to flip mailing list switch on registration
+        // otherwise update from current choice in registration data
+        mailingList: student.mailingList || studentData.mailingList,
+      },
     );
 
-    // create payment association
-    await this.$relatedQuery("payments").insert({
-      studentId: student.id,
-      ...paymentData,
-    });
+    // check if the student has an association with the course through a payment
+    const payment = await updatedStudent.getCoursePayment(this.id, [
+      "paymentDate",
+    ]);
+
+    if (!payment) {
+      // student is not associated with course yet
+      await this.$relatedQuery("payments").insert({
+        studentId: student.id,
+        ...paymentData,
+      });
+    } else if (payment.paymentDate) {
+      // student is associated and payment is already complete
+      throw new ValidationError({
+        type: "ExistingRelation",
+        message: "Student already paid",
+      });
+    }
 
     return updatedStudent;
   }

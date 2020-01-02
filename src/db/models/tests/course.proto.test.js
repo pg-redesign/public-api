@@ -9,6 +9,7 @@ const { connection } = require("../../connection");
 const studentMock = require("./__mocks__/student");
 const {
   courseMocks,
+  getNextCourse,
   createLocationsAndCourses,
   cleanupLocationsAndCourses,
 } = require("./__mocks__/course");
@@ -27,7 +28,7 @@ describe("Course prototype methods", () => {
     let course;
     let registeredStudent;
     beforeAll(async () => {
-      course = await Course.query().findOne("start_date", ">", new Date());
+      course = await getNextCourse();
 
       const paymentData = {
         amount: course.price,
@@ -47,7 +48,7 @@ describe("Course prototype methods", () => {
     });
 
     test("creates a payment association between the student and the course", async () => {
-      await course.$loadRelated({ payments: true, students: true });
+      await course.$fetchGraph({ payments: true, students: true });
       expect(course.payments.length).toBe(1);
       expect(course.payments[0].studentId).toBe(registeredStudent.id);
     });
@@ -57,9 +58,7 @@ describe("Course prototype methods", () => {
     let course;
     let paymentData;
     beforeAll(async () => {
-      course = await Course.query()
-        .where("start_date", ">", new Date())
-        .first();
+      course = await getNextCourse();
 
       paymentData = {
         amount: course.price,
@@ -69,7 +68,8 @@ describe("Course prototype methods", () => {
 
     afterAll(() => Student.query().del());
 
-    test("student is not registered for course: returns false", async () => expect(course.hasStudent(1)).resolves.toBe(false));
+    test("student is not registered for course: returns false", async () =>
+      expect(course.hasStudent(1)).resolves.toBe(false));
 
     test("student is registered for course: returns true", async () => {
       const student = await course.registerNewStudent(studentData, paymentData);
@@ -83,9 +83,7 @@ describe("Course prototype methods", () => {
     let paymentData;
     let existingStudent;
     beforeAll(async () => {
-      course = await Course.query()
-        .where("start_date", ">", new Date())
-        .first();
+      course = await getNextCourse();
 
       existingStudent = await Student.query().insert(studentData);
 
@@ -116,12 +114,28 @@ describe("Course prototype methods", () => {
     });
 
     test("creates a payment association between the existing student and the course", async () => {
-      await course.$loadRelated({ payments: true, students: true });
+      await course.$fetchGraph({ payments: true, students: true });
       expect(course.payments.length).toBe(1);
       expect(course.payments[0].studentId).toBe(existingStudent.id);
     });
 
-    test("student already registered: throws ValidationError", async () => {
+    test("student already associated by has not paid: returns the updated student", async () => {
+      expect(course.payments[0].paymentDate).toBeNull();
+
+      const updatedStudent = await course.registerExistingStudent(
+        existingStudent,
+        studentData,
+        paymentData,
+      );
+      expect(updatedStudent.id).toBe(existingStudent.id);
+    });
+
+    test("student already associated and has paid: throws ValidationError", async () => {
+      await course
+        .$relatedQuery("payments")
+        .patch({ paymentDate: new Date().toISOString() })
+        .where({ studentId: existingStudent.id });
+
       try {
         await course.registerExistingStudent(
           existingStudent,
@@ -138,9 +152,7 @@ describe("Course prototype methods", () => {
     let course;
     let registeredStudent;
     beforeAll(async () => {
-      course = await Course.query()
-        .where("start_date", ">", new Date())
-        .first();
+      course = await getNextCourse();
 
       const { student } = await Course.registerStudent({
         courseId: course.id,
@@ -157,9 +169,10 @@ describe("Course prototype methods", () => {
       expect(result.id).toBe(registeredStudent.id);
     });
 
-    test("student not registered: throws NotFoundError", () => expect(course.getRegisteredStudent(0)).rejects.toBeInstanceOf(
-      NotFoundError,
-    ));
+    test("student not registered: throws NotFoundError", () =>
+      expect(course.getRegisteredStudent(0)).rejects.toBeInstanceOf(
+        NotFoundError,
+      ));
 
     test("columns arg: only returns chosen columns", async () => {
       const result = await course.getRegisteredStudent(registeredStudent.id, [
@@ -176,9 +189,7 @@ describe("Course prototype methods", () => {
     let chosenPaymentType;
     let registeredStudent;
     beforeAll(async () => {
-      const course = await Course.query()
-        .where("start_date", ">", new Date())
-        .first();
+      const course = await getNextCourse();
 
       const { student } = await Course.registerStudent({
         courseId: course.id,
@@ -196,7 +207,8 @@ describe("Course prototype methods", () => {
     });
     afterAll(() => Student.query().del());
 
-    test("returns the updated student", () => expect(result.id).toBe(registeredStudent.id));
+    test("returns the updated student", () =>
+      expect(result.id).toBe(registeredStudent.id));
 
     test("sets the student's payment date, payment type, and confirmation ID", () => {
       const { confirmationId, paymentDate, paymentType } = result;
@@ -254,7 +266,7 @@ describe("Course prototype methods", () => {
       ];
 
       students = await Promise.all(
-        studentsData.map(async (data) => {
+        studentsData.map(async data => {
           const { student } = await Course.registerStudent({
             ...data,
             courseId: course.id,
@@ -276,11 +288,12 @@ describe("Course prototype methods", () => {
 
     afterAll(() => Student.query().del());
 
-    it("returns a list of the registered Students", () => expect(course.getStudents()).resolves.toHaveLength(students.length));
+    it("returns a list of the registered Students", () =>
+      expect(course.getStudents()).resolves.toHaveLength(students.length));
 
     it("allows specific Student columns to be selected", async () => {
       const output = await course.getStudents({}, ["students.id", "firstName"]);
-      output.forEach((student) => {
+      output.forEach(student => {
         expect(student).toHaveProperty("id");
         expect(student).toHaveProperty("firstName");
         expect(student).not.toHaveProperty("email");
@@ -353,7 +366,7 @@ describe("Course prototype methods", () => {
       ];
 
       students = await Promise.all(
-        studentsData.map(async (data) => {
+        studentsData.map(async data => {
           const { student } = await Course.registerStudent({
             ...data,
             courseId: course.id,
@@ -375,14 +388,15 @@ describe("Course prototype methods", () => {
 
     afterAll(() => Student.query().del());
 
-    it("returns a list of the Course Payments", () => expect(course.getPayments()).resolves.toHaveLength(students.length));
+    it("returns a list of the Course Payments", () =>
+      expect(course.getPayments()).resolves.toHaveLength(students.length));
 
     it("allows specific Payment columns to be selected", async () => {
       const output = await course.getPayments({}, [
         "payments.id",
         "invoiceDate",
       ]);
-      output.forEach((student) => {
+      output.forEach(student => {
         expect(student).toHaveProperty("id");
         expect(student).toHaveProperty("invoiceDate");
         expect(student).not.toHaveProperty("amount");

@@ -1,29 +1,62 @@
-const {
-  renderCourseInvoice,
-  // renderRegistrationComplete,
-} = require("../renderers");
+const AJV = require("ajv");
 
-const emailUtils = require("../email-utils");
-const constants = require("../../../utils/constants");
+const templates = require("../templates");
+const schemas = require("../../../schemas").templates;
+const { renderCourseInvoice } = require("../renderers");
+const { courseMocks } = require("../../../db/models/tests/__mocks__/course");
+const { studentData } = require("../../../db/models/tests/__mocks__/student");
 
-jest.mock("../email-utils.js");
+// mocked
+const renderTemplate = require("../templates/render-template");
+
+jest.mock("../templates/render-template");
+
+const dataValidator = new AJV();
+const [upcomingCourse] = courseMocks;
+
+const student = {
+  id: 1,
+  ...studentData,
+};
+
+const courseData = upcomingCourse.course;
+
+const course = {
+  id: 1,
+  ...courseData,
+  location: upcomingCourse.location,
+  // DB mocks are used for inserting / seeding
+  // they have dates converted to ISO strings
+  // these tests assume live data that would have Date types
+  startDate: new Date(courseData.startDate),
+  endDate: new Date(courseData.endDate),
+};
 
 describe("Template Renderers", () => {
   describe("renderCourseInvoice", () => {
-    let filenameArg;
-    let templateDataArg;
-    beforeAll(() => {
-      renderCourseInvoice({}, {});
-      const [mockCall] = emailUtils.renderPugTemplate.mock.calls;
-      [filenameArg, templateDataArg] = mockCall;
+    let renderTemplateCall;
+    beforeAll(async () => {
+      // jwtPayload service is not mocked
+      // testing for real behavior in render data
+      await renderCourseInvoice({
+        course,
+        student,
+        paymentToken: "JWT.payment",
+      });
+      [renderTemplateCall] = renderTemplate.mock.calls;
     });
 
-    test("sets course invoice template data", () => expect(Object.keys(templateDataArg).length).toBeTruthy());
+    test("renders the course invoice template with all required data", () => {
+      const courseInvoiceTemplate = templates.courseInvoice;
+      const [templateFileName, templateData] = renderTemplateCall;
 
-    test("overrides default contact email to billing account", () => expect(templateDataArg.contactEmail).toBe(
-      constants.emailService.accounts.billing,
-    ));
+      const hasRequiredData = dataValidator.validate(
+        schemas.courseInvoice,
+        templateData,
+      );
 
-    test("renders the course invoice template", () => expect(filenameArg).toBe("course-invoice.pug"));
+      expect(hasRequiredData).toBe(true);
+      expect(templateFileName).toBe(courseInvoiceTemplate.fileName);
+    });
   });
 });
