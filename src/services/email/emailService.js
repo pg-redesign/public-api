@@ -15,8 +15,8 @@ module.exports = emailClient => ({
       .sendMail({
         to: student.email,
         from: constants.accounts.billing,
-        html: await renderCourseInvoice(paymentToken),
         subject: "Princeton Groundwater billing invoice",
+        html: await renderCourseInvoice({ course, student, paymentToken }),
       })
       .catch(error =>
         handleError(logger, error, student.email, "course invoice"),
