@@ -39,7 +39,11 @@ describe("Template Renderers", () => {
     beforeAll(async () => {
       // jwtPayload service is not mocked
       // testing for real behavior in render data
-      await renderCourseInvoice(course, student, { services: { jwtPayload } });
+      await renderCourseInvoice({
+        course,
+        student,
+        paymentToken: "JWT.payment",
+      });
       [renderTemplateCall] = renderTemplate.mock.calls;
     });
 
