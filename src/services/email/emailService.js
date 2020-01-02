@@ -4,13 +4,18 @@ const { renderCourseInvoice } = require("./renderers");
 
 module.exports = emailClient => ({
   sendCourseInvoice: async (course, student, context) => {
-    const { logger } = context;
+    const { logger, services } = context;
+
+    const paymentToken = await services.jwtPayload.createPaymentToken(
+      course,
+      student,
+    );
 
     return emailClient
       .sendMail({
         to: student.email,
         from: constants.accounts.billing,
-        html: await renderCourseInvoice(course, student, context),
+        html: await renderCourseInvoice(paymentToken),
         subject: "Princeton Groundwater billing invoice",
       })
       .catch(error =>
