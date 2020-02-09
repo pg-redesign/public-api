@@ -32,7 +32,10 @@
     "MAILCHIMP_API_KEY": "MailChimp mailing list control",
     "MAILCHIMP_NEWSLETTER_ID": "MailChimp newsletter mailing list",
     "ERROR_LOGS_DIR": "relative / absolute path for error log files to be written",
-    "COMBINED_LOGS_DIR": "relative / absolute path for combined log files to be written"
+    "COMBINED_LOGS_DIR": "relative / absolute path for combined log files to be written",
+    "GOOGLE_COURSES_DOC_ID": "Google Spreadsheet document ID for the Courses sheet doc",
+    "GOOGLE_SHEETS_SERVICE_EMAIL": "service account email for interacting with Google Sheets",
+    "GOOGLE_SHEETS_SERVICE_PRIVATE_KEY": "service account private key for interacting with Google Sheets"
   },
   "main": "src",
   "scripts": {
@@ -62,6 +65,7 @@
     "ejs": "^2.6.2",
     "express": "^4.17.1",
     "express-winston": "^3.2.0",
+    "google-spreadsheet": "^3.0.5",
     "graphql": "^14.3.1",
     "graphql-import": "^0.7.1",
     "graphql-type-json": "^0.3.0",
