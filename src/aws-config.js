@@ -10,6 +10,6 @@ const configure = () =>
 module.exports = async () => {
   await configure();
   AWS.config.update({
-    region: process.env.AWS_REGION,
+    region: process.env.AWS_DEFAULT_REGION,
   });
 };

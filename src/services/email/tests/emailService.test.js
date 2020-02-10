@@ -16,10 +16,6 @@ describe("Email Service", () => {
   const emailClient = { sendMail: jest.fn() };
   const mockedEmailService = emailService(emailClient);
 
-  beforeAll(() => {
-    process.env.EMAIL_HOST = "test.princeton-groundwater.com";
-  });
-
   describe("sendCourseInvoice", () => {
     const jwtPayload = { createPaymentToken: jest.fn(() => Promise.resolve()) };
     const context = { logger, services: { jwtPayload } };
