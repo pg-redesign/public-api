@@ -2,7 +2,9 @@ const { enums } = require("../../../schemas");
 const {
   buildCourseSheetTabName,
   buildCourseSheetTabColor,
+  mergeStudentWithLocation,
 } = require("../spreadsheet-utils");
+const { studentData } = require("../../../db/models/tests/__mocks__/student");
 
 const course = {
   name: enums.CourseShortNames.pollution,
@@ -39,5 +41,14 @@ describe("Spreadsheet Service Utils", () => {
         expect(tabColor).toHaveProperty(colorProperty),
       );
     });
+  });
+
+  test("mergeStudentWithLocation(): merges student and student.location properties", () => {
+    const mergedStudent = mergeStudentWithLocation(studentData);
+    Object.keys(studentData.location).forEach(locationProperty =>
+      expect(mergedStudent[locationProperty]).toBe(
+        studentData.location[locationProperty],
+      ),
+    );
   });
 });

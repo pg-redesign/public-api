@@ -18,7 +18,18 @@ const buildCourseSheetTabColor = (course, enums) => {
   return GoogleSheetTabColors[course.name];
 };
 
+/**
+ * merges student and student.location properties
+ * @param {Student} student
+ */
+const mergeStudentWithLocation = student => {
+  const { location, ...otherProperties } = student;
+
+  return { ...otherProperties, ...location };
+};
+
 module.exports = {
   buildCourseSheetTabName,
   buildCourseSheetTabColor,
+  mergeStudentWithLocation,
 };
