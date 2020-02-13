@@ -13,7 +13,7 @@ describe("mailChimpService.addToMailingList: adds a user to the MailChimp mailin
     lastName: "last name",
   };
   const logger = { error: jest.fn() };
-  const context = { logger };
+  const context = { logger, env: process.env };
 
   describe("success", () => {
     let result;
