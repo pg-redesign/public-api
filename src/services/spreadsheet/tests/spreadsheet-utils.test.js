@@ -3,12 +3,18 @@ const {
   buildCourseSheetTabName,
   buildCourseSheetTabColor,
   mergeStudentWithLocation,
+  buildStudentHeaders,
 } = require("../spreadsheet-utils");
 const { studentData } = require("../../../db/models/tests/__mocks__/student");
 
 const course = {
   name: enums.CourseShortNames.pollution,
   startDate: "Sun, 31 Oct 2021 00:00:00 GMT",
+};
+
+const student = {
+  id: 1,
+  ...studentData,
 };
 
 describe("Spreadsheet Service Utils", () => {
@@ -45,10 +51,19 @@ describe("Spreadsheet Service Utils", () => {
 
   test("mergeStudentWithLocation(): merges student and student.location properties", () => {
     const mergedStudent = mergeStudentWithLocation(studentData);
+
     Object.keys(studentData.location).forEach(locationProperty =>
       expect(mergedStudent[locationProperty]).toBe(
         studentData.location[locationProperty],
       ),
     );
+  });
+
+  test("buildStudentHeaders(): builds row headers array from merged student properties with ID first", () => {
+    const mergedStudent = mergeStudentWithLocation(student);
+    const studentHeaders = buildStudentHeaders(student);
+
+    expect(studentHeaders.length).toBe(Object.keys(mergedStudent).length);
+    expect(studentHeaders[0]).toBe("id");
   });
 });

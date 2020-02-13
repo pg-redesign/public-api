@@ -28,8 +28,19 @@ const mergeStudentWithLocation = student => {
   return { ...otherProperties, ...location };
 };
 
+/**
+ * Course Sheet header columns with student ID first
+ * @param {Student} student
+ */
+const buildStudentHeaders = student => {
+  const { id, ...otherProperties } = mergeStudentWithLocation(student);
+
+  return ["id"].concat(Object.keys(otherProperties));
+};
+
 module.exports = {
   buildCourseSheetTabName,
   buildCourseSheetTabColor,
   mergeStudentWithLocation,
+  buildStudentHeaders,
 };
