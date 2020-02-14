@@ -1,20 +1,15 @@
-const { enums } = require("../../../schemas");
+const { enums, types } = require("../../../schemas");
 const {
   buildCourseSheetTabName,
   buildCourseSheetTabColor,
-  mergeStudentWithLocation,
-  buildStudentHeaders,
+  mergeStudentAndLocationProps,
+  buildHeaderRowFromStudentSchema,
 } = require("../spreadsheet-utils");
 const { studentData } = require("../../../db/models/tests/__mocks__/student");
 
 const course = {
   name: enums.CourseShortNames.pollution,
   startDate: "Sun, 31 Oct 2021 00:00:00 GMT",
-};
-
-const student = {
-  id: 1,
-  ...studentData,
 };
 
 describe("Spreadsheet Service Utils", () => {
@@ -49,8 +44,8 @@ describe("Spreadsheet Service Utils", () => {
     });
   });
 
-  test("mergeStudentWithLocation(): merges student and student.location properties", () => {
-    const mergedStudent = mergeStudentWithLocation(studentData);
+  test("mergeStudentAndLocationProps(): merges student and student.location properties", () => {
+    const mergedStudent = mergeStudentAndLocationProps(studentData);
 
     Object.keys(studentData.location).forEach(locationProperty =>
       expect(mergedStudent[locationProperty]).toBe(
@@ -59,22 +54,29 @@ describe("Spreadsheet Service Utils", () => {
     );
   });
 
-  describe("buildStudentHeaders()", () => {
-    const mergedStudent = mergeStudentWithLocation(student);
+  describe("buildHeaderRowFromStudentSchema()", () => {
+    // will break if schema changes to enforce consistency
+    const expectedHeaders = [
+      "id",
+      "email",
+      "city",
+      "state",
+      "country",
+      "mailingList",
+      "firstName",
+      "lastName",
+      "company",
+    ];
 
-    const assertHeadersWithIdFirst = headers => {
-      expect(headers.length).toBe(Object.keys(mergedStudent).length);
-      expect(headers[0]).toBe("id");
-    };
-
-    test("with merged student row data: returns row headers array with Student ID first", () => {
-      const studentHeaders = buildStudentHeaders(student);
-      assertHeadersWithIdFirst(studentHeaders);
+    it("returns a list of all Student schema properties with location flattened", () => {
+      const studentHeaders = buildHeaderRowFromStudentSchema(types.student);
+      expect(studentHeaders.length).toBe(expectedHeaders.length);
     });
 
-    test("with unmerged student: returns row headers array with Student ID first", () => {
-      const studentHeaders = buildStudentHeaders(mergedStudent);
-      assertHeadersWithIdFirst(studentHeaders);
+    test("first two elements are ID and email", () => {
+      const studentHeaders = buildHeaderRowFromStudentSchema(types.student);
+      expect(studentHeaders[0]).toBe("id");
+      expect(studentHeaders[1]).toBe("email");
     });
   });
 });

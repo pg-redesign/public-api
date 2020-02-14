@@ -22,27 +22,30 @@ const buildCourseSheetTabColor = (course, enums) => {
  * merges student and student.location properties
  * @param {Student} student
  */
-const mergeStudentWithLocation = student => {
+const mergeStudentAndLocationProps = student => {
   const { location, ...otherProps } = student;
 
   return { ...otherProps, ...location };
 };
 
 /**
- * Course Sheet header columns with student ID first
- * @param {{}} student
+ * builds Course Sheet header column values with Student ID first
+ * @param {{}} studentSchema
  */
-const buildStudentHeaders = studentData => {
-  const { id, ...otherProps } = studentData.location
-    ? mergeStudentWithLocation(studentData) // unmerged student has location prop
-    : studentData; // otherwise location prop is already flattened
+const buildHeaderRowFromStudentSchema = studentSchema => {
+  const { id, email, location, ...otherProps } = studentSchema.properties;
 
-  return ["id"].concat(Object.keys(otherProps));
+  return [
+    "id",
+    "email",
+    ...Object.keys(otherProps),
+    ...Object.keys(location.properties),
+  ];
 };
 
 module.exports = {
   buildCourseSheetTabName,
   buildCourseSheetTabColor,
-  mergeStudentWithLocation,
-  buildStudentHeaders,
+  mergeStudentAndLocationProps,
+  buildHeaderRowFromStudentSchema,
 };
