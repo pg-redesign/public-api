@@ -59,11 +59,22 @@ describe("Spreadsheet Service Utils", () => {
     );
   });
 
-  test("buildStudentHeaders(): builds row headers array from merged student properties with ID first", () => {
+  describe("buildStudentHeaders()", () => {
     const mergedStudent = mergeStudentWithLocation(student);
-    const studentHeaders = buildStudentHeaders(student);
 
-    expect(studentHeaders.length).toBe(Object.keys(mergedStudent).length);
-    expect(studentHeaders[0]).toBe("id");
+    const assertHeadersWithIdFirst = headers => {
+      expect(headers.length).toBe(Object.keys(mergedStudent).length);
+      expect(headers[0]).toBe("id");
+    };
+
+    test("with merged student row data: returns row headers array with Student ID first", () => {
+      const studentHeaders = buildStudentHeaders(student);
+      assertHeadersWithIdFirst(studentHeaders);
+    });
+
+    test("with unmerged student: returns row headers array with Student ID first", () => {
+      const studentHeaders = buildStudentHeaders(mergedStudent);
+      assertHeadersWithIdFirst(studentHeaders);
+    });
   });
 });
