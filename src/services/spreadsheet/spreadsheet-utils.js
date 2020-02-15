@@ -9,7 +9,7 @@ const buildCourseSheetTabName = course => {
   // fix month to 2 digits
   const formattedDate = `${month < 10 ? `0${month}` : month}/${year}`;
 
-  return `${name}: ${formattedDate}`;
+  return `${name} ${formattedDate}`;
 };
 
 const buildCourseSheetTabColor = (course, enums) => {
