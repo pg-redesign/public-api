@@ -10,6 +10,7 @@ module.exports = {
         registrationData,
       );
 
+      // TODO: check for ID before adding row to prevent duplicates
       await services.spreadsheet
         .addStudentRow(course, student, context)
         .catch(logger.error);
@@ -85,7 +86,6 @@ module.exports = {
       const { services, models } = context;
 
       const course = await models.Course.create(courseData);
-      console.log({ course });
       const sheetId = await services.spreadsheet.createCourseSheet(
         course,
         context,
