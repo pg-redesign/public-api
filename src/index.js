@@ -2,7 +2,6 @@ const express = require("express");
 const { ApolloServer } = require("apollo-server-express");
 
 const apiConfig = require("./api");
-const configureAWS = require("./aws-config");
 const { logger, requestLogger } = require("./loggers");
 
 const { NODE_ENV, PORT } = process.env;
@@ -29,18 +28,14 @@ graphqlServer.applyMiddleware({
   },
 });
 
-configureAWS()
-  .catch(logger.error)
-  .then(() =>
-    app.listen(PORT, error => {
-      if (error) {
-        return logger.error(error);
-      }
+app.listen(PORT, error => {
+  if (error) {
+    return logger.error(error);
+  }
 
-      const startupLog = inDevelopment
-        ? `API up on http://localhost:${PORT}/graphql`
-        : `API listening on port: ${PORT}`;
+  const startupLog = inDevelopment
+    ? `API up on http://localhost:${PORT}/graphql`
+    : `API listening on port: ${PORT}`;
 
-      return logger.graphql(startupLog);
-    }),
-  );
+  return logger.graphql(startupLog);
+});

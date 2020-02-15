@@ -9,6 +9,7 @@ module.exports = emailClient => ({
     const paymentToken = await services.jwtPayload.createPaymentToken(
       course,
       student,
+      context,
     );
 
     return emailClient

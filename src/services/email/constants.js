@@ -1,4 +1,4 @@
-const emailDomain = process.env.EMAIL_HOST;
+const emailDomain = process.env.EMAIL_DOMAIN;
 
 module.exports = {
   // in href="tel:" compatible format

@@ -1,28 +1,32 @@
 const jwt = require("jsonwebtoken");
-const getSigningKey = require("./get-signing-key");
 
 // cache key to limit AWS requests
 let payloadPrivateKey = null;
 
-module.exports = secretsClient => {
-  const create = async config => {
-    const { data, ...configOptions } = config;
+const create = async (config, context) => {
+  const { data, ...configOptions } = config;
+  const { env, services } = context;
+  const { API_DOMAIN, PAYLOAD_PRIVATE_KEY_ASM_ID } = env;
 
-    if (!payloadPrivateKey) {
-      payloadPrivateKey = await getSigningKey(secretsClient);
-    }
+  if (!payloadPrivateKey) {
+    // TODO: store as private key string only? no jsonKey label
+    // have to update client pipeline access for building public key
+    const secret = await services.secrets.getSecret(PAYLOAD_PRIVATE_KEY_ASM_ID);
+    payloadPrivateKey = secret.PAYLOAD_PRIVATE_KEY;
+  }
 
-    const options = {
-      ...configOptions,
-      algorithm: "RS256",
-      issuer: process.env.API_HOST,
-    };
-
-    return jwt.sign({ data }, payloadPrivateKey, options);
+  const options = {
+    ...configOptions,
+    issuer: API_DOMAIN,
+    algorithm: "RS256",
   };
 
-  const createPaymentToken = (course, student) =>
-    create({
+  return jwt.sign({ data }, payloadPrivateKey, options);
+};
+
+const createPaymentToken = (course, student, context) =>
+  create(
+    {
       audience: "client",
       subject: "registration",
       data: {
@@ -30,10 +34,11 @@ module.exports = secretsClient => {
         studentId: student.id,
         email: student.email,
       },
-    });
+    },
+    context,
+  );
 
-  return {
-    create,
-    createPaymentToken,
-  };
+module.exports = {
+  create,
+  createPaymentToken,
 };

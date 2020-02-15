@@ -4,7 +4,7 @@ const { signAdminToken, verifyToken } = require("./index");
 jest.mock("jsonwebtoken");
 
 const context = {
-  env: { AUTH_TOKEN_SIGNING_SECRET: "test", API_HOST: "localhost" },
+  env: { AUTH_TOKEN_SIGNING_SECRET: "test", API_DOMAIN: "localhost" },
 };
 
 const token = "some.long.token";
@@ -28,7 +28,7 @@ describe("Auth Token Service", () => {
       expect(jwt.verify).toHaveBeenCalledWith(
         token,
         context.env.AUTH_TOKEN_SIGNING_SECRET,
-        { iss: context.env.API_HOST, algorithms: ["HS256"] },
+        { iss: context.env.API_DOMAIN, algorithms: ["HS256"] },
       );
       expect(output).toBe(decodedToken);
     });
