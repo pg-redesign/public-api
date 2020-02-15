@@ -290,6 +290,14 @@ class Course extends BaseModel {
       .where({ studentId })
       .first();
   }
+
+  update(props) {
+    return Course.query()
+      .patch(props)
+      .where({ id: this.id })
+      .returning("*")
+      .then(updatedList => updatedList[0]);
+  }
 }
 
 Course.DEFAULT_SORT = DEFAULT_SORT;
