@@ -17,6 +17,7 @@ const logger = buildLogger({
     debug: "cyan",
   },
   combinedFileLevel: "graphql",
+  enableConsole: true,
 });
 
 const requestLogger = expressLogger({
