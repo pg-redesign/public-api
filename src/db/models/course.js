@@ -139,10 +139,7 @@ class Course extends BaseModel {
     return { course, student };
   }
 
-  static async completeStripePayment(paymentData, context) {
-    const { services } = context;
-    const { courseId, studentId } = paymentData;
-
+  static async validatePrePaymentRegistration(courseId, studentId) {
     const course = await this.validateCourseId(courseId, [
       "id",
       "name",
@@ -150,27 +147,15 @@ class Course extends BaseModel {
     ]);
 
     // throws if not found (student not registered)
-    const registeredStudent = await course.getRegisteredStudent(studentId);
+    const student = await course.getRegisteredStudent(studentId);
 
-    if (registeredStudent.paymentDate) {
+    if (student.paymentDate) {
       // student has already paid, exit early
       throw new ValidationError({
         type: "ExistingRelation",
         message: "Payment already received",
       });
-      // return { course, student: registeredStudent };
     }
-
-    const confirmationId = await services.stripe.createCharge(
-      course,
-      paymentData,
-    );
-
-    const student = await course.completeStudentRegistration(
-      studentId,
-      confirmationId,
-      schemas.enums.PaymentTypes.credit,
-    );
 
     return { course, student };
   }

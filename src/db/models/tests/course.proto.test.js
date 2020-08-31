@@ -449,7 +449,7 @@ describe("Course prototype methods", () => {
     });
   });
 
-  describe.only("update", () => {
+  describe("update", () => {
     const props = {
       sheetId: "the sheet id",
     };
