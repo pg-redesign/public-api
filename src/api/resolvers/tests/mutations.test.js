@@ -80,17 +80,39 @@ describe("Mutation resolvers", () => {
 
   describe("payForCourseWithStripe", () => {
     const args = { paymentData: {} };
+
+    const stripe = {
+      createCharge: jest.fn(),
+    };
+
+    const student = { id: 1 };
+    const course = {
+      completeStudentRegistration: jest.fn(() => student),
+    };
     const Course = {
-      completeStripePayment: jest.fn(() => Promise.resolve({})),
+      validatePrePaymentRegistration: jest.fn(() =>
+        Promise.resolve({ course, student }),
+      ),
     };
+
     const context = {
+      schemas,
       models: { Course },
+      services: { stripe },
     };
 
-    beforeAll(() => Mutation.payForCourseWithStripe(null, args, context));
+    let result;
+    beforeAll(async () => {
+      result = await Mutation.payForCourseWithStripe(null, args, context);
+    });
 
-    test("issues Stripe charge and returns the updated student", () =>
-      expect(Course.completeStripePayment).toHaveBeenCalled());
+    it("validates the registration", () =>
+      expect(Course.validatePrePaymentRegistration).toHaveBeenCalled());
+
+    it("issues the Stripe charge", () =>
+      expect(stripe.createCharge).toHaveBeenCalled());
+
+    it("returns the updated student", () => expect(result.id).toBe(student.id));
   });
 
   describe("subscribeToMailingList", () => {
@@ -206,43 +228,42 @@ describe("Mutation resolvers", () => {
   });
 
   describe("createCourse", () => {
-    const logger = { error: jest.fn() };
+    const course = { update: jest.fn() };
+    const Course = { create: jest.fn() };
 
     const sheetId = "course sheet ID";
-    const createCourseSheet = jest.fn(() => Promise.resolve(sheetId));
-
-    const course = { update: jest.fn(() => Promise.resolve()) };
-    const Course = { create: jest.fn(() => Promise.resolve(course)) };
+    const spreadsheet = { createCourseSheet: jest.fn() };
 
     const args = { courseData: {} };
     const context = {
-      logger,
       models: { Course },
-      services: { spreadsheet: { createCourseSheet } },
+      services: { spreadsheet },
     };
 
-    test("creates and returns a new Course", async () => {
-      await Mutation.createCourse(null, args, context);
-      expect(Course.create).toHaveBeenCalled();
+    let result;
+    beforeAll(async () => {
+      Course.create.mockImplementation(() => Promise.resolve(course));
+      spreadsheet.createCourseSheet.mockImplementation(() =>
+        Promise.resolve(sheetId),
+      );
+
+      result = await Mutation.createCourse(null, args, context);
     });
 
-    describe("Spreadsheet Service integration", () => {
-      beforeAll(() => Mutation.createCourse(null, args, context));
+    it("creates and returns a new Course", async () => {
+      expect(Course.create).toHaveBeenCalled();
+      expect(result).toBe(course);
+    });
 
+    describe("spreadsheet service integration", () => {
       it("creates a Course Sheet in the Courses Spreadsheet doc", () =>
-        expect(createCourseSheet).toHaveBeenCalledWith(course, context));
+        expect(spreadsheet.createCourseSheet).toHaveBeenCalledWith(
+          course,
+          context,
+        ));
 
       it("sets the sheetId of the Course", () =>
         expect(course.update).toHaveBeenCalledWith({ sheetId }));
-
-      // better to leave unhandled?
-      // it("handles and logs any errors thrown while adding the Course Sheet", async () => {
-      //   const error = new Error();
-      //   createCourseSheet.mockRejectedValueOnce(error);
-
-      //   await Mutation.createCourse(null, args, spreadsheetContext);
-      //   expect(logger.error).toHaveBeenCalled();
-      // });
     });
   });
 });
