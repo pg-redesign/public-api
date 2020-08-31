@@ -2,7 +2,7 @@ const buildLogger = require("@vampiire/node-logger");
 const expressLogger = require("express-winston").logger;
 
 const inDevelopment = process.env.NODE_ENV !== "production";
-
+// TODO: setup cloudwatch streaming
 const logger = buildLogger({
   levels: {
     error: 0,
