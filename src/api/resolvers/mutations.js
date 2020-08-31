@@ -24,11 +24,26 @@ module.exports = {
 
     payForCourseWithStripe: async (_, args, context) => {
       const { paymentData } = args;
-      const { models } = context;
+      const { models, schemas, services } = context;
 
-      const { student } = await models.Course.completeStripePayment(
+      const { courseId, studentId } = paymentData;
+
+      // checks if course and student exist, and student has not already paid
+      // throws if any conditions fail
+      const { course } = await models.Course.validatePrePaymentRegistration(
+        courseId,
+        studentId,
+      );
+
+      const confirmationId = await services.stripe.createCharge(
+        course,
         paymentData,
-        context,
+      );
+
+      const student = await course.completeStudentRegistration(
+        studentId,
+        confirmationId,
+        schemas.enums.PaymentTypes.credit,
       );
 
       return student;
@@ -86,6 +101,7 @@ module.exports = {
       const { services, models } = context;
 
       const course = await models.Course.create(courseData);
+
       const sheetId = await services.spreadsheet.createCourseSheet(
         course,
         context,
