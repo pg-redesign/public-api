@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const { ApolloServer } = require("apollo-server-express");
 
@@ -10,10 +11,10 @@ const app = express();
 const graphqlServer = new ApolloServer(apiConfig);
 const inDevelopment = NODE_ENV !== "production";
 
-app.use([requestLogger]);
-
-// healthcheck endpoint
+// healthcheck endpoint: before loggers to prevent flooding logs
 app.get("/health", (_, res) => res.sendStatus(200));
+
+app.use([requestLogger]);
 
 graphqlServer.applyMiddleware({
   app,
