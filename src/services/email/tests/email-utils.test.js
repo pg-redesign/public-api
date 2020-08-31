@@ -3,10 +3,6 @@ const { handleError, buildCreditPaymentLink } = require("../email-utils");
 const logger = { error: jest.fn() };
 
 describe("Email Service utils", () => {
-  beforeAll(() => {
-    process.env.EMAIL_HOST = "test.princeton-groundwater.com ";
-  });
-
   test("handleError: logs email type, email address, and original error", () => {
     const mockArgs = {
       error: {},

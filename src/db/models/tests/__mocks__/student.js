@@ -3,6 +3,7 @@ const Student = require("../../student");
 const studentInfo = {
   firstName: "Vamp",
   lastName: "Hallow",
+  mailingList: false,
   email: "vamp@hallow.com",
   company: "Vampiire Codes",
 };

@@ -1,8 +1,8 @@
+require("dotenv").config();
 const express = require("express");
 const { ApolloServer } = require("apollo-server-express");
 
 const apiConfig = require("./api");
-const configureAWS = require("./aws-config");
 const { logger, requestLogger } = require("./loggers");
 
 const { NODE_ENV, PORT } = process.env;
@@ -11,10 +11,10 @@ const app = express();
 const graphqlServer = new ApolloServer(apiConfig);
 const inDevelopment = NODE_ENV !== "production";
 
-app.use([requestLogger]);
-
-// healthcheck endpoint
+// healthcheck endpoint: before loggers to prevent flooding logs
 app.get("/health", (_, res) => res.sendStatus(200));
+
+app.use([requestLogger]);
 
 graphqlServer.applyMiddleware({
   app,
@@ -29,18 +29,14 @@ graphqlServer.applyMiddleware({
   },
 });
 
-configureAWS()
-  .catch(logger.error)
-  .then(() =>
-    app.listen(PORT, error => {
-      if (error) {
-        return logger.error(error);
-      }
+app.listen(PORT, error => {
+  if (error) {
+    return logger.error(error);
+  }
 
-      const startupLog = inDevelopment
-        ? `API up on http://localhost:${PORT}/graphql`
-        : `API listening on port: ${PORT}`;
+  const startupLog = inDevelopment
+    ? `API up on http://localhost:${PORT}/graphql`
+    : `API listening on port: ${PORT}`;
 
-      return logger.graphql(startupLog);
-    }),
-  );
+  return logger.graphql(startupLog);
+});

@@ -1,5 +1,6 @@
 const locationBase = require("./location-base");
 
+// !! UPDATE DB MOCKS IF CHANGED !!
 module.exports = {
   type: "object",
   required: ["firstName", "lastName", "email"],
