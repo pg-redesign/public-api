@@ -1,3 +1,4 @@
+require("dotenv").config();
 const { knexSnakeCaseMappers } = require("objection");
 
 const seeds = { directory: "./src/db/seeds" };
