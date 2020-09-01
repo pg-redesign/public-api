@@ -16,3 +16,7 @@ jobs:
       - run: npm run knex:migrate
       - run: npm test:ci
       - coveralls/upload
+workflows:
+  testing:
+    jobs:
+      - test
