@@ -10,7 +10,7 @@ jobs:
       - checkout
       - run: npm ci
       - run: npm run knex:migrate
-      - run: npm test:ci
+      - run: npm run test:ci
       - coveralls/upload
 workflows:
   testing:
