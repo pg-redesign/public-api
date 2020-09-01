@@ -3,7 +3,7 @@ const {
   buildCourseSheetTabName,
   buildCourseSheetTabColor,
   mergeStudentAndLocationProps,
-  buildHeaderRowFromStudentSchema,
+  buildHeaderRow,
 } = require("./spreadsheet-utils");
 
 /**
@@ -17,7 +17,7 @@ const createCourseSheet = async (course, context) => {
   const courseSheet = await coursesDoc.addSheet({
     title: buildCourseSheetTabName(course),
     tabColor: buildCourseSheetTabColor(course, enums),
-    headers: buildHeaderRowFromStudentSchema(types.student),
+    headers: buildHeaderRow(types),
   });
 
   return courseSheet.sheetId;

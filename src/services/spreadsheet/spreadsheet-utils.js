@@ -29,16 +29,18 @@ const mergeStudentAndLocationProps = student => {
 };
 
 /**
- * builds Course Sheet header column values with Student ID first
- * @param {{}} studentSchema
+ * builds Course Sheet header column values
+ * @param {{}} schemaTypes
  */
-const buildHeaderRowFromStudentSchema = studentSchema => {
-  const { id, email, location, ...otherProps } = studentSchema.properties;
+const buildHeaderRow = schemaTypes => {
+  const { student, payment } = schemaTypes;
+  const { id, email, location, ...studentProps } = student.properties;
 
   return [
     "id",
     "email",
-    ...Object.keys(otherProps),
+    ...Object.keys(studentProps),
+    ...Object.keys(payment.properties),
     ...Object.keys(location.properties),
   ];
 };
@@ -47,5 +49,5 @@ module.exports = {
   buildCourseSheetTabName,
   buildCourseSheetTabColor,
   mergeStudentAndLocationProps,
-  buildHeaderRowFromStudentSchema,
+  buildHeaderRow,
 };

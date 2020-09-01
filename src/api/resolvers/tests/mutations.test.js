@@ -5,49 +5,74 @@ const { Mutation } = require("../mutations");
 
 describe("Mutation resolvers", () => {
   describe("registerForCourse", () => {
+    const logger = { error: jest.fn() };
+
+    const addStudentRow = jest.fn(() => Promise.resolve());
     const addToMailingList = jest.fn(() => Promise.resolve());
     const sendCourseInvoice = jest.fn(() => Promise.resolve());
-    const Course = { registerStudent: jest.fn(() => Promise.resolve({})) };
 
+    const course = {};
+    const student = {};
+    const Course = {
+      registerStudent: jest.fn(() => Promise.resolve({ course, student })),
+    };
+
+    const args = { registrationData: {} };
     const context = {
+      logger,
       schemas,
       models: { Course },
-      logger: { error: jest.fn() },
       services: {
         email: { sendCourseInvoice },
+        spreadsheet: { addStudentRow },
         mailChimp: { addToMailingList },
       },
     };
 
     test("returns the registered student", async () => {
-      const args = { registrationData: {} };
-
       await Mutation.registerForCourse(null, args, context);
       expect(Course.registerStudent).toHaveBeenCalled();
+    });
+
+    describe("Spreadsheet Service integration", () => {
+      afterEach(() => jest.clearAllMocks());
+
+      it("adds the student data to the Course Sheet", async () => {
+        await Mutation.registerForCourse(null, args, context);
+        expect(addStudentRow).toHaveBeenCalledWith(course, student, context);
+      });
+
+      it("handles and logs any errors thrown while adding student row", async () => {
+        const error = new Error();
+        addStudentRow.mockRejectedValueOnce(error);
+
+        await Mutation.registerForCourse(null, args, context);
+        expect(logger.error).toHaveBeenCalled();
+      });
     });
 
     describe("args.registrationData.paymentOption", () => {
       afterEach(() => sendCourseInvoice.mockClear());
 
       test("INVOICE: sends the student a course invoice email", async () => {
-        const args = {
+        const invoiceArgs = {
           registrationData: {
             paymentOption: schemas.enums.PaymentOptions.invoice,
           },
         };
 
-        await Mutation.registerForCourse(null, args, context);
+        await Mutation.registerForCourse(null, invoiceArgs, context);
         expect(sendCourseInvoice).toHaveBeenCalled();
       });
 
       test("CREDIT: does not send the student a course invoice email", async () => {
-        const args = {
+        const creditArgs = {
           registrationData: {
             paymentOption: schemas.enums.PaymentOptions.credit,
           },
         };
 
-        await Mutation.registerForCourse(null, args, context);
+        await Mutation.registerForCourse(null, creditArgs, context);
         expect(sendCourseInvoice).not.toHaveBeenCalled();
       });
     });
@@ -55,17 +80,39 @@ describe("Mutation resolvers", () => {
 
   describe("payForCourseWithStripe", () => {
     const args = { paymentData: {} };
+
+    const stripe = {
+      createCharge: jest.fn(),
+    };
+
+    const student = { id: 1 };
+    const course = {
+      completeStudentRegistration: jest.fn(() => student),
+    };
     const Course = {
-      completeStripePayment: jest.fn(() => Promise.resolve({})),
+      validatePrePaymentRegistration: jest.fn(() =>
+        Promise.resolve({ course, student }),
+      ),
     };
+
     const context = {
+      schemas,
       models: { Course },
+      services: { stripe },
     };
 
-    beforeAll(() => Mutation.payForCourseWithStripe(null, args, context));
+    let result;
+    beforeAll(async () => {
+      result = await Mutation.payForCourseWithStripe(null, args, context);
+    });
 
-    test("issues Stripe charge and returns the updated student", () =>
-      expect(Course.completeStripePayment).toHaveBeenCalled());
+    it("validates the registration", () =>
+      expect(Course.validatePrePaymentRegistration).toHaveBeenCalled());
+
+    it("issues the Stripe charge", () =>
+      expect(stripe.createCharge).toHaveBeenCalled());
+
+    it("returns the updated student", () => expect(result.id).toBe(student.id));
   });
 
   describe("subscribeToMailingList", () => {
@@ -181,12 +228,42 @@ describe("Mutation resolvers", () => {
   });
 
   describe("createCourse", () => {
+    const course = { update: jest.fn() };
     const Course = { create: jest.fn() };
-    const context = { models: { Course } };
 
-    test("creates and returns a new Course", async () => {
-      await Mutation.createCourse(null, { courseData: {} }, context);
+    const sheetId = "course sheet ID";
+    const spreadsheet = { createCourseSheet: jest.fn() };
+
+    const args = { courseData: {} };
+    const context = {
+      models: { Course },
+      services: { spreadsheet },
+    };
+
+    let result;
+    beforeAll(async () => {
+      Course.create.mockImplementation(() => Promise.resolve(course));
+      spreadsheet.createCourseSheet.mockImplementation(() =>
+        Promise.resolve(sheetId),
+      );
+
+      result = await Mutation.createCourse(null, args, context);
+    });
+
+    it("creates and returns a new Course", async () => {
       expect(Course.create).toHaveBeenCalled();
+      expect(result).toBe(course);
+    });
+
+    describe("spreadsheet service integration", () => {
+      it("creates a Course Sheet in the Courses Spreadsheet doc", () =>
+        expect(spreadsheet.createCourseSheet).toHaveBeenCalledWith(
+          course,
+          context,
+        ));
+
+      it("sets the sheetId of the Course", () =>
+        expect(course.update).toHaveBeenCalledWith({ sheetId }));
     });
   });
 });

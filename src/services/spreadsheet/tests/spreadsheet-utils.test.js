@@ -3,7 +3,7 @@ const {
   buildCourseSheetTabName,
   buildCourseSheetTabColor,
   mergeStudentAndLocationProps,
-  buildHeaderRowFromStudentSchema,
+  buildHeaderRow,
 } = require("../spreadsheet-utils");
 const { studentData } = require("../../../db/models/tests/__mocks__/student");
 
@@ -54,27 +54,33 @@ describe("Spreadsheet Service Utils", () => {
     );
   });
 
-  describe("buildHeaderRowFromStudentSchema()", () => {
+  describe("buildHeaderRow()", () => {
     // will break if schema changes to enforce consistency
     const expectedHeaders = [
       "id",
       "email",
+      "firstName",
+      "lastName",
+      "paymentType",
+      "invoiceDate",
+      "paymentDate",
+      "amount",
+      "confirmationId",
       "city",
       "state",
       "country",
-      "mailingList",
-      "firstName",
-      "lastName",
       "company",
+      "mailingList",
     ];
 
-    it("returns a list of all Student schema properties with location flattened", () => {
-      const studentHeaders = buildHeaderRowFromStudentSchema(types.student);
+    it("returns a flattened list of Student and Payment properties", () => {
+      const studentHeaders = buildHeaderRow(types);
       expect(studentHeaders.length).toBe(expectedHeaders.length);
+      expect(studentHeaders).toEqual(expect.arrayContaining(expectedHeaders));
     });
 
     test("first two elements are ID and email", () => {
-      const studentHeaders = buildHeaderRowFromStudentSchema(types.student);
+      const studentHeaders = buildHeaderRow(types);
       expect(studentHeaders[0]).toBe("id");
       expect(studentHeaders[1]).toBe("email");
     });

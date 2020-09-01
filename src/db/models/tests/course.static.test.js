@@ -251,9 +251,98 @@ describe("Course static methods", () => {
     });
   });
 
-  describe("completeStripePayment", () => {
-    const stripeService = { createCharge: jest.fn() };
-    const context = { services: { stripe: stripeService } };
+  // describe("completeStripePayment", () => {
+  //   const stripeService = { createCharge: jest.fn() };
+  //   const context = { services: { stripe: stripeService } };
+
+  //   const student = {
+  //     id: 1,
+  //     ...studentMock.studentData,
+  //   };
+
+  //   let course;
+  //   let paymentData;
+  //   const {
+  //     validateCourseId,
+  //     getRegisteredStudent,
+  //     completeStudentRegistration,
+  //   } = Course.prototype;
+  //   beforeAll(async () => {
+  //     course = await getNextCourse();
+
+  //     paymentData = {
+  //       courseId: course.id,
+  //       studentId: student.id,
+  //     };
+
+  //     // mock methods
+  //     Course.validateCourseId = jest.fn(() => course);
+  //     Course.prototype.getRegisteredStudent = jest.fn();
+  //     Course.prototype.completeStudentRegistration = jest.fn();
+  //   });
+
+  //   afterAll(() => {
+  //     // reset mocked methods
+  //     Course.validateCourseId = validateCourseId;
+  //     Course.prototype.getRegisteredStudent = getRegisteredStudent;
+  //     Course.prototype.completeStudentRegistration = completeStudentRegistration;
+  //   });
+
+  //   describe("success", () => {
+  //     let result;
+  //     beforeAll(async () => {
+  //       Course.prototype.getRegisteredStudent.mockImplementationOnce(
+  //         () => student,
+  //       );
+  //       Course.prototype.completeStudentRegistration.mockImplementationOnce(
+  //         () => student,
+  //       );
+
+  //       result = await Course.completeStripePayment(paymentData, context);
+  //     });
+  //     afterAll(() => jest.clearAllMocks());
+
+  //     test("validates the course ID", () => {
+  //       expect(Course.validateCourseId).toHaveBeenCalled();
+  //     });
+
+  //     test("confirms student existence and registration", () => {
+  //       expect(Course.prototype.getRegisteredStudent).toHaveBeenCalled();
+  //     });
+
+  //     test("calls stripe service to create a charge", () => {
+  //       expect(stripeService.createCharge).toHaveBeenCalled();
+  //     });
+
+  //     test("updates the payment status of the student", () => {
+  //       expect(Course.prototype.completeStudentRegistration).toHaveBeenCalled();
+  //     });
+
+  //     test("returns the course and paid student", () => {
+  //       expect(result.course.id).toBe(course.id);
+  //       expect(result.student.id).toBe(student.id);
+  //     });
+  //   });
+
+  //   describe("failure", () => {
+  //     test("student has already paid: throws ValidationError and does not submit Stripe charge", async () => {
+  //       Course.prototype.getRegisteredStudent.mockImplementationOnce(() => ({
+  //         ...student,
+  //         paymentDate: "some date",
+  //       }));
+
+  //       expect(
+  //         Course.completeStripePayment(paymentData, context),
+  //       ).rejects.toThrow(ValidationError);
+
+  //       expect(stripeService.createCharge).not.toHaveBeenCalled();
+  //     });
+  //   });
+  // });
+
+  describe("validatePrePaymentRegistration", () => {
+    // to replace original methods after mocking
+    const { getRegisteredStudent } = Course.prototype;
 
     const student = {
       id: 1,
@@ -261,31 +350,16 @@ describe("Course static methods", () => {
     };
 
     let course;
-    let paymentData;
-    const {
-      validateCourseId,
-      getRegisteredStudent,
-      completeStudentRegistration,
-    } = Course.prototype;
     beforeAll(async () => {
-      course = await getNextCourse();
-
-      paymentData = {
-        courseId: course.id,
-        studentId: student.id,
-      };
-
-      // mock methods
-      Course.validateCourseId = jest.fn(() => course);
+      // mock method
       Course.prototype.getRegisteredStudent = jest.fn();
-      Course.prototype.completeStudentRegistration = jest.fn();
+
+      course = await getNextCourse();
     });
 
     afterAll(() => {
-      // reset mocked methods
-      Course.validateCourseId = validateCourseId;
+      // reset mocked method
       Course.prototype.getRegisteredStudent = getRegisteredStudent;
-      Course.prototype.completeStudentRegistration = completeStudentRegistration;
     });
 
     describe("success", () => {
@@ -294,48 +368,39 @@ describe("Course static methods", () => {
         Course.prototype.getRegisteredStudent.mockImplementationOnce(
           () => student,
         );
-        Course.prototype.completeStudentRegistration.mockImplementationOnce(
-          () => student,
-        );
 
-        result = await Course.completeStripePayment(paymentData, context);
+        result = await Course.validatePrePaymentRegistration(
+          course.id,
+          student.id,
+        );
       });
       afterAll(() => jest.clearAllMocks());
-
-      test("validates the course ID", () => {
-        expect(Course.validateCourseId).toHaveBeenCalled();
-      });
 
       test("confirms student existence and registration", () => {
         expect(Course.prototype.getRegisteredStudent).toHaveBeenCalled();
       });
 
-      test("calls stripe service to create a charge", () => {
-        expect(stripeService.createCharge).toHaveBeenCalled();
-      });
-
-      test("updates the payment status of the student", () => {
-        expect(Course.prototype.completeStudentRegistration).toHaveBeenCalled();
-      });
-
-      test("returns the course and paid student", () => {
+      test("returns the validated course and student", () => {
         expect(result.course.id).toBe(course.id);
         expect(result.student.id).toBe(student.id);
       });
     });
 
     describe("failure", () => {
-      test("student has already paid: throws ValidationError and does not submit Stripe charge", async () => {
+      test("invalid course ID: throws NotFoundError", () =>
+        expect(
+          Course.validatePrePaymentRegistration(course.id + 100, student.id),
+        ).rejects.toThrow(NotFoundError));
+
+      test("student has already paid: throws ValidationError", async () => {
         Course.prototype.getRegisteredStudent.mockImplementationOnce(() => ({
           ...student,
           paymentDate: "some date",
         }));
 
-        expect(
-          Course.completeStripePayment(paymentData, context),
+        return expect(
+          Course.validatePrePaymentRegistration(course.id, student.id),
         ).rejects.toThrow(ValidationError);
-
-        expect(stripeService.createCharge).not.toHaveBeenCalled();
       });
     });
   });
