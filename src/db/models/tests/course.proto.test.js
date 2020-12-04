@@ -448,4 +448,34 @@ describe("Course prototype methods", () => {
       });
     });
   });
+
+  describe("update", () => {
+    const props = {
+      sheetId: "the sheet id",
+    };
+
+    let course;
+    let updatedCourse;
+    beforeAll(async () => {
+      await cleanupLocationsAndCourses();
+
+      const [courseMock] = courseMocks;
+      const courseLocation = await CourseLocation.create(courseMock.location);
+
+      course = await courseLocation
+        .$relatedQuery("courses")
+        .insert(courseMock.course);
+
+      updatedCourse = await course.update(props);
+    });
+
+    it("returns the updated Course object", () =>
+      expect(updatedCourse.id).toBe(course.id));
+
+    it("updates the properties defined in the props arg", () =>
+      expect(updatedCourse.sheetId).toBe(props.sheetId));
+
+    it("enforces schema restrictions on updates", () =>
+      expect(course.update({ title: "non-enum value" })).rejects.toThrow());
+  });
 });
