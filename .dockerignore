@@ -1,0 +1,6 @@
+.circleci/
+node_modules/
+README.md
+.env
+.git*
+Dockerfile
