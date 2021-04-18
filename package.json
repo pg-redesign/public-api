@@ -38,7 +38,10 @@
   },
   "main": "src",
   "scripts": {
+    "setup": "npm run knex:migrate",
+    "setup:dev": "npm run setup && npm run knex:seed",
     "start": "node src",
+    "prestart:dev": "npm run setup:dev",
     "start:dev": "nodemon",
     "lint": "eslint .",
     "test": "jest --runInBand --no-cache",
