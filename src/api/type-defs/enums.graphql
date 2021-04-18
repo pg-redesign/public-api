@@ -26,6 +26,7 @@ enum FormTypes {
   MAILING_LIST
   REGISTRATION
   STRIPE_PAYMENT
+  CREATE_COURSE
 }
 
 """
