@@ -13,6 +13,7 @@ const FormTypes = {
   mailingList: "MAILING_LIST",
   registration: "REGISTRATION",
   stripePayment: "STRIPE_PAYMENT",
+  createCourse: "CREATE_COURSE",
 };
 
 const LanguageTypes = {
