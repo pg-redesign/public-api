@@ -1,5 +1,9 @@
 const { months } = require("./course-constants");
 
+// TODO: what happens when:
+// course split (like 7/12-7/16 + 7/19-7/22)
+// course extends across months (10/31/21-11/7/21)
+
 // IIFE to leave namespace clear of sub util names
 const courseDateRange = (() => {
   /**
