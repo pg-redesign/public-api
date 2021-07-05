@@ -44,12 +44,6 @@ type Course {
   Course registration Payments
   """
   payments(paymentFilters: PaymentFilters!): [Payment!]! @admin
-
-  """
-  Admin only
-  Course Spreadsheet ID
-  """
-  sheetId: String! @admin
 }
 
 """

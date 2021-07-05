@@ -3,17 +3,12 @@ const { AuthenticationError } = require("apollo-server-express");
 module.exports = {
   Mutation: {
     registerForCourse: async (_, args, context) => {
-      const { models, schemas, services, logger } = context;
+      const { models, schemas, services } = context;
       const { paymentOption, ...registrationData } = args.registrationData;
 
       const { course, student } = await models.Course.registerStudent(
         registrationData,
       );
-
-      // TODO: check for ID before adding row to prevent duplicates
-      await services.spreadsheet
-        .addStudentRow(course, student, context)
-        .catch(logger.error);
 
       if (paymentOption === schemas.enums.PaymentOptions.invoice) {
         await services.email.sendCourseInvoice(course, student, context);
@@ -98,15 +93,9 @@ module.exports = {
 
     createCourse: async (_, args, context) => {
       const { courseData } = args;
-      const { services, models } = context;
+      const { models } = context;
 
       const course = await models.Course.create(courseData);
-
-      const sheetId = await services.spreadsheet.createCourseSheet(
-        course,
-        context,
-      );
-      await course.update({ sheetId });
 
       return course;
     },

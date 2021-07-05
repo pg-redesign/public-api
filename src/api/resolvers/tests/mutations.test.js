@@ -24,7 +24,6 @@ describe("Mutation resolvers", () => {
       models: { Course },
       services: {
         email: { sendCourseInvoice },
-        spreadsheet: { addStudentRow },
         mailChimp: { addToMailingList },
       },
     };
@@ -32,23 +31,6 @@ describe("Mutation resolvers", () => {
     test("returns the registered student", async () => {
       await Mutation.registerForCourse(null, args, context);
       expect(Course.registerStudent).toHaveBeenCalled();
-    });
-
-    describe("Spreadsheet Service integration", () => {
-      afterEach(() => jest.clearAllMocks());
-
-      it("adds the student data to the Course Sheet", async () => {
-        await Mutation.registerForCourse(null, args, context);
-        expect(addStudentRow).toHaveBeenCalledWith(course, student, context);
-      });
-
-      it("handles and logs any errors thrown while adding student row", async () => {
-        const error = new Error();
-        addStudentRow.mockRejectedValueOnce(error);
-
-        await Mutation.registerForCourse(null, args, context);
-        expect(logger.error).toHaveBeenCalled();
-      });
     });
 
     describe("args.registrationData.paymentOption", () => {
@@ -231,21 +213,14 @@ describe("Mutation resolvers", () => {
     const course = { update: jest.fn() };
     const Course = { create: jest.fn() };
 
-    const sheetId = "course sheet ID";
-    const spreadsheet = { createCourseSheet: jest.fn() };
-
     const args = { courseData: {} };
     const context = {
       models: { Course },
-      services: { spreadsheet },
     };
 
     let result;
     beforeAll(async () => {
       Course.create.mockImplementation(() => Promise.resolve(course));
-      spreadsheet.createCourseSheet.mockImplementation(() =>
-        Promise.resolve(sheetId),
-      );
 
       result = await Mutation.createCourse(null, args, context);
     });
@@ -253,17 +228,6 @@ describe("Mutation resolvers", () => {
     it("creates and returns a new Course", async () => {
       expect(Course.create).toHaveBeenCalled();
       expect(result).toBe(course);
-    });
-
-    describe("spreadsheet service integration", () => {
-      it("creates a Course Sheet in the Courses Spreadsheet doc", () =>
-        expect(spreadsheet.createCourseSheet).toHaveBeenCalledWith(
-          course,
-          context,
-        ));
-
-      it("sets the sheetId of the Course", () =>
-        expect(course.update).toHaveBeenCalledWith({ sheetId }));
     });
   });
 });
