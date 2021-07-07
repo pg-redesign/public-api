@@ -29,8 +29,6 @@
     "DB_USER": "database user name",
     "DB_PASSWORD": "database user password",
     "DB_HOST": "database host name / IP address",
-    "MAILCHIMP_API_KEY": "MailChimp mailing list control",
-    "MAILCHIMP_NEWSLETTER_ID": "MailChimp newsletter mailing list",
     "PAYLOAD_PRIVATE_KEY_ASM_ID": "ASM ID for JWT payload private signing key",
     "STRIPE_PRIVATE_KEY": "private (API) key for Stripe payment processing"
   },

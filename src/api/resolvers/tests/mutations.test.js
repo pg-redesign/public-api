@@ -24,7 +24,6 @@ describe("Mutation resolvers", () => {
       models: { Course },
       services: {
         email: { sendCourseInvoice },
-        mailChimp: { addToMailingList },
       },
     };
 
