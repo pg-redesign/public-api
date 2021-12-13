@@ -43,3 +43,15 @@ enum CourseShortNames {
   POLLUTION
   REMEDIATION
 }
+
+"""
+Distinguishes course delivery method
+"""
+enum CourseTypes {
+  "Live streamed remotely"
+  LIVE_ONLINE
+  "In-person and online"
+  HYBRID
+  "Course.location field gives details"
+  IN_PERSON
+}

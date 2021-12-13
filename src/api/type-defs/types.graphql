@@ -8,6 +8,12 @@ type Course {
   name(short: Boolean = false): String!
 
   """
+  Describes the delivery style of the Course
+  - IN_PERSON and HYBRID Courses include a location field
+  """
+  type: CourseTypes!
+
+  """
   Registration price
 
   - may vary by date of access if early registration discount is active
@@ -18,7 +24,7 @@ type Course {
   Location details
   - location.mapUrl: GoogleMaps URL of hotel / conference center
   """
-  location: CourseLocation!
+  location: CourseLocation
 
   """
   Course date range in ENGLISH format "Month DD-DD, YYYY"

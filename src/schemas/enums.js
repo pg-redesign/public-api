@@ -25,6 +25,12 @@ const CourseShortNames = {
   remediation: "REMEDIATION",
 };
 
+const CourseTypes = {
+  hybrid: "HYBRID",
+  inPerson: "IN_PERSON",
+  liveOnline: "LIVE_ONLINE",
+};
+
 const GoogleSheetTabColors = {
   [CourseShortNames.pollution]: {
     red: 0,
@@ -42,6 +48,7 @@ const GoogleSheetTabColors = {
 
 module.exports = {
   FormTypes,
+  CourseTypes,
   PaymentTypes,
   LanguageTypes,
   PaymentOptions,
