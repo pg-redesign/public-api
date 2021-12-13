@@ -1,5 +1,5 @@
 const { Course, CourseLocation } = require("../..");
-const { CourseShortNames } = require("../../../../schemas/enums");
+const { CourseShortNames, CourseTypes } = require("../../../../schemas/enums");
 
 const pastYear = new Date().getFullYear() - 1;
 const futureYear = new Date().getFullYear() + 1;
@@ -8,6 +8,7 @@ const courseMocks = [
   {
     course: {
       name: CourseShortNames.pollution,
+      type: CourseTypes.inPerson,
       price: 1695,
       startDate: new Date(`October 24, ${futureYear}`).toISOString(),
       endDate: new Date(`October 31, ${futureYear}`).toISOString(),
@@ -22,6 +23,7 @@ const courseMocks = [
   {
     course: {
       name: CourseShortNames.remediation,
+      type: CourseTypes.inPerson,
       price: 300,
       startDate: new Date(`October 24, ${pastYear}`).toISOString(),
       endDate: new Date(`October 31, ${pastYear}`).toISOString(),
@@ -33,7 +35,18 @@ const courseMocks = [
       mapUrl: "https://goo.gl/maps/c0d3",
     },
   },
+  {
+    course: {
+      name: CourseShortNames.remediation,
+      type: CourseTypes.liveOnline,
+      price: 1695,
+      startDate: new Date(`May 24, ${futureYear}`).toISOString(),
+      endDate: new Date(`May 31, ${futureYear}`).toISOString(),
+    },
+  },
 ];
+
+const TOTAL_COURSE_MOCKS = courseMocks.length;
 
 const cleanupLocationsAndCourses = () =>
   CourseLocation.query()
@@ -45,11 +58,16 @@ const createLocationsAndCourses = async (seeds = courseMocks) => {
 
   return Promise.all(
     seeds.map(async data => {
-      const courseLocation = await CourseLocation.query().insert(data.location);
-      return Course.query().insert({
-        ...data.course,
-        courseLocationId: courseLocation.id,
-      });
+      const courseData = { ...data.course };
+
+      if (data.location) {
+        const courseLocation = await CourseLocation.query().insert(
+          data.location,
+        );
+        courseData.courseLocationId = courseLocation.id;
+      }
+
+      return Course.query().insert(courseData);
     }),
   );
 };
@@ -62,6 +80,7 @@ const getNextCourse = () =>
 module.exports = {
   courseMocks,
   getNextCourse,
+  TOTAL_COURSE_MOCKS,
   createLocationsAndCourses,
   cleanupLocationsAndCourses,
 };

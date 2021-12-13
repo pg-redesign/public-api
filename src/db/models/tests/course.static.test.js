@@ -10,7 +10,9 @@ const {
   getNextCourse,
   createLocationsAndCourses,
   cleanupLocationsAndCourses,
+  TOTAL_COURSE_MOCKS,
 } = require("./__mocks__/course");
+const { CourseTypes } = require("../../../schemas/enums");
 
 const schemaValidator = new AJV();
 schemaValidator.addSchema(schemas.types.student, "studentSchema");
@@ -52,6 +54,7 @@ describe("Course static methods", () => {
       const thisYear = new Date().getFullYear();
       rawCourseData = {
         price: 1695,
+        type: CourseTypes.inPerson,
         courseLocationId: courseLocation.id,
         name: schemas.enums.CourseShortNames.remediation,
         startDate: "10/24/".concat(thisYear + 1),
@@ -89,7 +92,7 @@ describe("Course static methods", () => {
     });
 
     test("returns all courses", async () => {
-      expect(results.length).toBe(2);
+      expect(results.length).toBe(TOTAL_COURSE_MOCKS);
     });
 
     test(`courses are sorted by DEFAULT_SORT: [${Course.DEFAULT_SORT.toString()}]`, () => {
