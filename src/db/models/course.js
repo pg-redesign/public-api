@@ -57,6 +57,19 @@ class Course extends BaseModel {
 
   // -- STATIC METHODS -- //
   static create(rawData) {
+    const { type, courseLocationId } = rawData;
+    const { inPerson, hybrid } = schemas.enums.CourseTypes;
+
+    if ([inPerson, hybrid].includes(type) && !courseLocationId) {
+      throw new ValidationError({
+        type: "ModelValidation",
+        data: {
+          courseLocationId:
+            "In-person and hybrid courses require a Location to be specified",
+        },
+      });
+    }
+
     const courseData = {
       ...rawData,
       endDate: new Date(rawData.endDate).toISOString(),

@@ -45,43 +45,86 @@ describe("Course static methods", () => {
       mapUrl: "https://goo.gl/maps/c0d3",
     };
 
-    let course;
-    let rawCourseData;
-    let courseLocation;
-    beforeAll(async () => {
-      courseLocation = await CourseLocation.create(locationData);
+    const thisYear = new Date().getFullYear();
 
-      const thisYear = new Date().getFullYear();
-      rawCourseData = {
-        price: 1695,
-        type: CourseTypes.inPerson,
-        courseLocationId: courseLocation.id,
-        name: schemas.enums.CourseShortNames.remediation,
-        startDate: "10/24/".concat(thisYear + 1),
-        endDate: "10/31/".concat(thisYear + 1),
-      };
+    const baseCourseData = {
+      price: 1695,
+      name: schemas.enums.CourseShortNames.remediation,
+      startDate: "10/24/".concat(thisYear + 1),
+      endDate: "10/31/".concat(thisYear + 1),
+    };
 
-      course = await Course.create(rawCourseData);
+    describe("general behavior", () => {
+      let course;
+      let rawCourseData;
+      let courseLocation;
+      beforeAll(async () => {
+        courseLocation = await CourseLocation.create(locationData);
+
+        rawCourseData = {
+          type: CourseTypes.inPerson,
+          courseLocationId: courseLocation.id,
+          ...baseCourseData,
+        };
+
+        course = await Course.create(rawCourseData);
+      });
+
+      afterAll(async () => {
+        await courseLocation.$query().del();
+        return course.$query().del();
+      });
+
+      it("converts the start and end dates into ISO string format", () => {
+        const [expectedStart, expectedEnd] = [
+          rawCourseData.startDate,
+          rawCourseData.endDate,
+        ].map(rawDate => new Date(rawDate).toISOString());
+
+        expect(course.startDate).toEqual(expectedStart);
+        expect(course.endDate).toEqual(expectedEnd);
+      });
+
+      it("creates and returns a new Course", () => {
+        expect(course).toBeDefined();
+        expect(course.courseLocationId).toBe(courseLocation.id);
+      });
     });
 
-    afterAll(async () => {
-      await courseLocation.$query().del();
-      return course.$query().del();
-    });
+    describe("course type validation", () => {
+      it("LIVE_ONLINE: does not require a location to be specified", async () => {
+        const liveOnlineNoLocation = {
+          ...baseCourseData,
+          type: CourseTypes.liveOnline,
+        };
 
-    it("converts the start and end dates into ISO string format", () => {
-      const [expectedStart, expectedEnd] = [
-        rawCourseData.startDate,
-        rawCourseData.endDate,
-      ].map(rawDate => new Date(rawDate).toISOString());
+        const liveOnlineCourse = await Course.create(liveOnlineNoLocation);
+        expect(liveOnlineCourse).toBeDefined();
 
-      expect(course.startDate).toEqual(expectedStart);
-      expect(course.endDate).toEqual(expectedEnd);
-    });
+        return liveOnlineCourse.$query().del();
+      });
 
-    it("creates and returns a new Course", () => {
-      expect(course).toBeDefined();
-      expect(course.courseLocationId).toBe(courseLocation.id);
+      it("IN_PERSON: throws a ValidationError if a location is not specified", () => {
+        const inPersonNoLocation = {
+          ...baseCourseData,
+          type: CourseTypes.inPerson,
+        };
+
+        return expect(() => Course.create(inPersonNoLocation)).toThrow(
+          ValidationError,
+        );
+      });
+
+      it("HYBRID: throws a ValidationError if a location is not specified", async () => {
+        const hybridNoLocation = {
+          ...baseCourseData,
+          type: CourseTypes.hybrid,
+        };
+
+        return expect(() => Course.create(hybridNoLocation)).toThrow(
+          ValidationError,
+        );
+      });
     });
   });
 

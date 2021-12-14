@@ -53,7 +53,10 @@ input MailingListData {
 Data for creating a new Course
 """
 input CourseData {
-  courseLocationId: ID!
+  """
+Required for IN_PERSON and HYBRID Course types
+  """
+  courseLocationId: ID
   name: CourseShortNames!
   """
   startDate and endDate in either:
