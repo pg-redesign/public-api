@@ -66,6 +66,11 @@ input CourseData {
   price of the Course in whole dollars
   """
   price: Int!
+  """
+  A custom date string for courses split over multiple weeks
+  ex: Feb 14-17 and Feb 21-24, 2022
+  """
+  customDateString: String
 }
 
 """

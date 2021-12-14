@@ -27,7 +27,9 @@ type Course {
   location: CourseLocation
 
   """
-  Course date range in ENGLISH format "Month DD-DD, YYYY"
+  Course date range defaults in ENGLISH format "Month DD-DD, YYYY"
+  - if custom date string is present it is returned
+  options:
   - PORTUGUESE format: "DD a DD de month de YYYY"
   - start: only start date as UTC Date string
   - end: only end date as UTC Date string

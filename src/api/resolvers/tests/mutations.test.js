@@ -7,7 +7,6 @@ describe("Mutation resolvers", () => {
   describe("registerForCourse", () => {
     const logger = { error: jest.fn() };
 
-    const addStudentRow = jest.fn(() => Promise.resolve());
     const addToMailingList = jest.fn(() => Promise.resolve());
     const sendCourseInvoice = jest.fn(() => Promise.resolve());
 

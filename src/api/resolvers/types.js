@@ -7,10 +7,14 @@ const Course = {
 
   date: (course, args, { utils: { format } }) => {
     const { start, end, language } = args;
-    const { startDate, endDate } = course;
+    const { startDate, endDate, customDateString } = course;
 
     // full date range in language format if neither start nor end are passed
     if ([start, end].every(arg => arg === undefined)) {
+      // give precedence to a custom date string if present
+      // used in online courses with split date ranges for half-days
+      if (customDateString) return customDateString;
+
       return format.courseDateRange(startDate, endDate, language);
     }
 

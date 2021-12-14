@@ -39,6 +39,8 @@ const courseMocks = [
     course: {
       name: CourseShortNames.remediation,
       type: CourseTypes.liveOnline,
+      // ^[A-Z][a-z]{2,4} d{1,2}-d{1,2} and [A-Z][a-z]{2,4} d{1,2}-d{1,2}, d{4}$
+      customDateString: "Feb 14-18 and Feb 21-24, 2022",
       price: 1695,
       startDate: new Date(`May 24, ${futureYear}`).toISOString(),
       endDate: new Date(`May 31, ${futureYear}`).toISOString(),

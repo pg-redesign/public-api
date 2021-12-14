@@ -14,7 +14,16 @@ describe("Course Type resolvers", () => {
       utils: { format: { courseDateRange } },
     };
 
-    test("default: returns english date range format", () => {
+    test("no args: returns customDateString if present", () => {
+      const customDateString = "May 14-17 and May 21-24, 2022";
+      const customDateCourse = { ...course, customDateString };
+
+      expect(Course.date(customDateCourse, {}, context)).toEqual(
+        customDateString,
+      );
+    });
+
+    test("no args: returns english date range format if no customDateString is present", () => {
       Course.date(course, args, context);
       expect(courseDateRange).toHaveBeenCalledWith(
         course.startDate,
